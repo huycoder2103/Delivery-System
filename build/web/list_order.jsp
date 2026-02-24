@@ -35,7 +35,7 @@
             </form>
 
             <%-- Thêm thanh tìm kiếm theo Số điện thoại --%>
-            <div class="search-box-phone">
+            <div class="search-box">
                 <form action="MainController" method="POST" class="filter-bar">
                     <input type="text" name="searchPhone" class="inp-search" 
                            placeholder="Nhập SĐT người gửi hoặc nhận..." 

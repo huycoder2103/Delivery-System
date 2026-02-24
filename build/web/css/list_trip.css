@@ -3,53 +3,21 @@
     Author     : HuyNHSE190240
 */
 
-/* Khung chứa */
-
-.list-container {
-    background: white;
-    margin: 15px;
-    padding: 15px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+body {
+    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    align-items: center;
-}
-
-form { margin: 0; }
-
-/* Styles cho nút bấm */
-/* Styles cho nút bấm */
-.btn-filter, .btn-cyan, .btn-action, .btn-back {
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.btn-filter:hover, .btn-cyan:hover, .btn-action:hover, .btn-back:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-.btn-filter { background: #00a65a; color: white; padding: 8px 20px; }
-.btn-cyan { background: #00c0ef; color: white; padding: 8px 15px; }
-.btn-back { background: #444; color: white; padding: 10px 25px; }
 
 /* Handling buttons */
-.btn-action {
+/*.btn-action {
     padding: 4px 8px;
     color: white;
     font-size: 0.75rem;
     margin: 2px;
 }
 .btn-blue { background: #3c8dbc; }
-.btn-cyan { background: #00c0ef; }
+.btn-cyan { background: #00c0ef; }*/
 
 /* Table Layout */
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -57,3 +25,30 @@ th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
 th { background: #f9f9f9; }
 
 .route-info { color: #3c8dbc; font-weight: bold; text-align: left; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+tr:hover {
+    background-color: #f9f9f9; /* Hiệu ứng highlight khi di chuột vào dòng */
+}

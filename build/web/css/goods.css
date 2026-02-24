@@ -3,15 +3,17 @@
     Author     : HuyNHSE190240
 */
 
-/* Container ép bố cục 2 cột */
 
+body {
+    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 .container-goods {
     display: grid;
-    /* Ép chính xác 2 cột, mỗi cột chiếm 50% (trừ đi gap) */
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 30px;
-    padding: 20px;
-    max-width: 900px; /* Thu hẹp chiều rộng lại để 4 ô nhìn cân đối hơn */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
@@ -33,7 +35,11 @@
 .card-tile:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    filter: brightness(1.1);
+    cursor: pointer;
 }
+
+
 
 /* Nút submit tàng hình */
 .tile-submit {

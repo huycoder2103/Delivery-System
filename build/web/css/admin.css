@@ -6,7 +6,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     Created on : Feb 24, 2026, 5:51:41 PM
     Author     : HuyNHSE190240
 */
-
+body {
+    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 .admin-container {
     max-width: 1100px;
     margin: 30px auto;

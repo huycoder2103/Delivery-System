@@ -5,33 +5,22 @@
 
 
 
-/* Khung chứa và Layout */
-.list-container {
-    background: white;
-    margin: 15px;
-    padding: 15px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    align-items: center;
+body {
+    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 form { margin: 0; } /* Reset margin cho logic input submit */
 
 /* Input & Select */
-.filter-bar input, .filter-bar select {
+/*.filter-bar input, .filter-bar select {
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-/* Button Styles - Toolbar (Xem, Thêm) */
-/* Styles cho nút bấm */
+
 .btn-filter, .btn-cyan, .btn-action, .btn-back {
     cursor: pointer;
     border: none;
@@ -47,7 +36,7 @@ form { margin: 0; } /* Reset margin cho logic input submit */
 
 .btn-filter { background: #00a65a; color: white; padding: 8px 20px; }
 .btn-cyan { background: #00c0ef; color: white; padding: 8px 15px; }
-.btn-back { background: #444; color: white; padding: 10px 25px; }
+.btn-back { background: #444; color: white; padding: 10px 25px; }*/
 
 /* Button Styles - Table Action (List hàng, Nhận xe) */
 .btn-action {
@@ -82,4 +71,31 @@ td { text-align: center; }
     border: none; 
     border-radius: 4px; 
     cursor: pointer;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+tr:hover {
+    background-color: #f9f9f9; /* Hiệu ứng highlight khi di chuột vào dòng */
 }

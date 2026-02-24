@@ -88,11 +88,6 @@
             </div>
         </div>
 
-        <script>
-            function toggleDropdown() {
-                var d = document.getElementById("userDropdown");
-                d.style.display = (d.style.display === "block") ? "none" : "block";
-            }
-        </script>
+        
     </body>
 </html>

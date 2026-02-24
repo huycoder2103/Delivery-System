@@ -2,20 +2,108 @@
     Created on : Feb 15, 2026, 8:29:45 PM
     Author     : HuyNHSE190240
 */
-
 /* Bố cục chính */
-.main-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+body {
+    background-color: #f4f7f6; 
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+
+/* Container tổng cho phần danh sách */
+.list-container {
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* Thanh công cụ (Lọc & Tìm kiếm) */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-wrap: wrap; /* Tự xuống dòng trên điện thoại */
+}
+
+/* Định dạng các ô nhập liệu và select */
+.filter-bar select, 
+.filter-bar input[type="date"], 
+.filter-bar .inp-search {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+}
+
+.filter-bar .inp-search {
+     /* Để thanh tìm kiếm dài ra */
+    min-width: 200px;
+}
+.filter-bar input, .filter-bar select {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+.btn-filter, .btn-cyan, .btn-action, .btn-back {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-filter:hover, .btn-cyan:hover, .btn-action:hover, .btn-back:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-filter { background: #00a65a; color: white; padding: 8px 20px; }
+.btn-cyan { background: #3498DB; color: white; padding: 8px 15px; }
+.btn-back { background: #444; color: white; padding: 10px 25px; }
+.filter-bar .inp-search:focus {
+    border-color: #3498db; /* Đổi màu viền khi nhấn vào cho chuyên nghiệp */
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
 
 /* Tên trang */
-.page-title { text-align: center; margin-bottom: 50px; }
-.page-title h1 { font-size: 2.5rem; color: #2c3e50; font-weight: 900; }
-.underline { width: 80px; height: 5px; background: #3498db; margin: 10px auto; border-radius: 10px; }
+.page-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+.page-title h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    font-weight: 900;
+}
+.underline {
+    width: 80px;
+    height: 5px;
+    background: #3498db;
+    margin: 10px auto;
+    border-radius: 10px;
+}
 
 /* Grid 3 Thẻ */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Ép 3 cột */
+    grid-template-columns: repeat(3, 1fr); 
     gap: 30px;
+}
+.card-item:hover {
+    filter: brightness(1.1);
+    cursor: pointer;
 }
 
 .card-item {
@@ -31,35 +119,112 @@
     overflow: hidden;
 }
 
-.card-item:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
-
-.card-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    opacity: 0; z-index: 10; cursor: pointer;
+.card-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    
 }
 
-.card-content { padding: 30px; }
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.number { font-size: 3rem; font-weight: 900; opacity: 0.2; }
-.icon { font-size: 3rem; }
-.card-content h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
-.card-content p { font-size: 0.9rem; opacity: 0.9; }
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 10;
+    cursor: pointer;
+}
 
-.card-link { background: rgba(0,0,0,0.15); padding: 15px; text-align: center; font-weight: bold; font-size: 0.85rem; }
+.card-content {
+    padding: 30px;
+}
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+.number {
+    font-size: 3rem;
+    font-weight: 900;
+    opacity: 0.2;
+}
+.icon {
+    font-size: 3rem;
+}
+.card-content h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+.card-content p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.card-link {
+    background: rgba(0,0,0,0.15);
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
 
 /* Màu sắc */
-.bg-green  { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-.bg-blue   { background: linear-gradient(135deg, #2980b9, #3498db); }
-.bg-yellow { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+.bg-green  {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+.bg-blue   {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+}
+.bg-yellow {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+}
 
 /* Bản tin */
-.news-section { margin-top: 60px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
-.news-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
-.news-entry { padding: 15px; border-left: 5px solid #3498db; background: #fafafa; margin-bottom: 10px; }
-.news-entry h4 { color: #2c3e50; margin-bottom: 5px; }
-.no-data { text-align: center; color: #999; padding: 20px; }
+.news-section {
+    margin-top: 60px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+.news-header {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    border-bottom: 2px solid #f4f7f6;
+    padding-bottom: 10px;
+}
+.news-entry {
+    padding: 15px;
+    border-left: 5px solid #3498db;
+    background: #fafafa;
+    margin-bottom: 10px;
+}
+.news-entry small {
+    display: block;
+    margin-top: 10px;
+    color: #7f8c8d;
+    font-style: italic;
+    border-top: 1px solid #eee;
+    padding-top: 5px;
+}
+.news-entry h4 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+.no-data {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
 
 /* Responsive */
 @media (max-width: 900px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -6,6 +6,12 @@
 
 
 /* arrival_trip_create.css */
+
+body {
+    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 .arrival-container {
     background: white;
     margin: 20px;
