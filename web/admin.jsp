@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
+    <%@include file="includes/navbar.jsp" %>
     <%
         // Kiểm tra phân quyền
         String role = (String) session.getAttribute("ROLE");
@@ -23,17 +24,9 @@
             request.getRequestDispatcher("login.jsp").forward(request, response);
             return;
         }
-
-        String fullName = (String) session.getAttribute("FULLNAME");
-        if (fullName == null) fullName = "Admin";
     %>
 
-    <div class="navbar">
-        <div class="company-name">HỆ THỐNG GIAO HÀNG</div>
-        <div class="user-menu">
-            <span class="user-name">👤 <%= fullName %> (Admin)</span>
-        </div>
-    </div>
+    
 
     <div class="admin-container">
         <div class="admin-header">
