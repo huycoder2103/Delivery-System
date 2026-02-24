@@ -1,0 +1,93 @@
+/* 
+    Created on : Feb 15, 2026, 8:29:45 PM
+    Author     : HuyNHSE190240
+*/
+
+/* Reset cơ bản */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background-color: #f4f7f6; color: #333; }
+
+/* Navbar - Tên công ty ở trên cùng */
+.navbar {
+    background-color: #2c3e50;
+    color: white;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.company-name { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; }
+
+/* User Menu */
+.user-menu { position: relative; cursor: pointer; }
+.dropdown-content {
+    display: none; position: absolute; right: 0; top: 40px;
+    background: white; min-width: 220px; border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 100;
+}
+.user-header { padding: 15px; border-bottom: 1px solid #eee; color: #333; text-align: center; }
+.user-footer { padding: 10px; }
+.btn-logout { background: #e74c3c; color: white; border: none; width: 100%; padding: 8px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+
+/* Bố cục chính */
+.main-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+/* Tên trang */
+.page-title { text-align: center; margin-bottom: 50px; }
+.page-title h1 { font-size: 2.5rem; color: #2c3e50; font-weight: 900; }
+.underline { width: 80px; height: 5px; background: #3498db; margin: 10px auto; border-radius: 10px; }
+
+/* Grid 3 Thẻ */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Ép 3 cột */
+    gap: 30px;
+}
+
+.card-item {
+    position: relative;
+    border-radius: 15px;
+    color: white;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-item:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+.card-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; z-index: 10; cursor: pointer;
+}
+
+.card-content { padding: 30px; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.number { font-size: 3rem; font-weight: 900; opacity: 0.2; }
+.icon { font-size: 3rem; }
+.card-content h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
+.card-content p { font-size: 0.9rem; opacity: 0.9; }
+
+.card-link { background: rgba(0,0,0,0.15); padding: 15px; text-align: center; font-weight: bold; font-size: 0.85rem; }
+
+/* Màu sắc */
+.bg-green  { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.bg-blue   { background: linear-gradient(135deg, #2980b9, #3498db); }
+.bg-yellow { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+
+/* Bản tin */
+.news-section { margin-top: 60px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
+.news-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
+.news-entry { padding: 15px; border-left: 5px solid #3498db; background: #fafafa; margin-bottom: 10px; }
+.news-entry h4 { color: #2c3e50; margin-bottom: 5px; }
+.no-data { text-align: center; color: #999; padding: 20px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+}
