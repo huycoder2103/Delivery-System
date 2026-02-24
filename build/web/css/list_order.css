@@ -3,15 +3,7 @@
     Author     : HuyNHSE190240
 */
 
-body {
-    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-
-
-/* Bảng Handling */
 .btn-action {
     display: block;
     width: 100%;

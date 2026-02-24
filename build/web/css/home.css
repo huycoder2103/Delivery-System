@@ -8,7 +8,7 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
+form { margin: 0; }
 
 
 /* Container tổng cho phần danh sách */
@@ -33,17 +33,31 @@ body {
 .filter-bar select, 
 .filter-bar input[type="date"], 
 .filter-bar .inp-search {
+    
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
     outline: none;
 }
-
+/* Thanh tìm kiếm co giãn */
 .filter-bar .inp-search {
-     /* Để thanh tìm kiếm dài ra */
-    min-width: 200px;
+    min-width: 150px; /* Độ dài cơ bản khi chưa nhập gì */
+    width: 150px;     /* Độ dài khởi tạo */
+    max-width: 500px; /* Độ dài tối đa để không làm vỡ giao diện */
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    transition: width 0.2s ease, border-color 0.3s; /* Hiệu ứng mượt khi dài ra */
 }
+
+.filter-bar .inp-search:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
 .filter-bar input, .filter-bar select {
     padding: 6px 12px;
     border: 1px solid #ccc;
@@ -72,7 +86,6 @@ body {
 }
 
 .main-container {
-    max-width: 1200px;
     margin: 40px auto;
     padding: 0 20px;
 }

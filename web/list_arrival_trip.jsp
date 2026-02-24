@@ -33,7 +33,7 @@
             <div class="search-box">
                 <form action="MainController" method="POST" class="filter-bar">
                     <input type="text" name="searchArrivalTruck" class="inp-search" 
-                           placeholder="Nhập biển số xe đến..." 
+                           placeholder="Nhập biển số xe cần tìm" 
                            value="<%= request.getParameter("searchArrivalTruck") != null ? request.getParameter("searchArrivalTruck") : ""%>">
 
                     <input type="submit" name="SearchArrivalByTruck" value="Tìm xe đến" class="btn-filter">
@@ -82,12 +82,5 @@
                 </tbody>
             </table>
         </div>
-        <script>
-            function toggleDropdown() {
-                var d = document.getElementById("userDropdown");
-                d.style.display = (d.style.display === "block") ? "none" : "block";
-            }
-        </script>
-
     </body>
 </html>

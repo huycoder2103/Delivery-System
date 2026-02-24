@@ -33,7 +33,7 @@
             <div class="search-box">
                 <form action="MainController" method="POST" class="filter-bar">
                     <input type="text" name="searchTruck" class="inp-search" 
-                           placeholder="Nhập biển số xe cần tìm..." 
+                           placeholder="Nhập biển số xe cần tìm" 
                            value="<%= request.getParameter("searchTruck") != null ? request.getParameter("searchTruck") : ""%>">
 
                     <input type="submit" name="SearchTripByTruck" value="Tìm xe đi" class="btn-filter">
