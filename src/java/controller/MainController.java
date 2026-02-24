@@ -57,6 +57,9 @@ public class MainController extends HttpServlet {
                 url = HOME_CONTROLLER;
             } // --- 3. NHÓM NGHIỆP VỤ HÀNG HÓA (FORWARD SANG GOODSCONTROLLER) ---
             else if (request.getParameter("CreateOrder") != null
+                    || request.getParameter("SearchOrderByPhone") != null
+                    || request.getParameter("SearchTripByTruck") != null
+                    || request.getParameter("SearchArrivalByTruck") != null
                     || request.getParameter("ViewOrderList") != null
                     || request.getParameter("ViewTripList") != null
                     || request.getParameter("ViewArrivalTripList") != null
@@ -79,6 +82,12 @@ public class MainController extends HttpServlet {
                 url = "SaveTripController";
             } else if (request.getParameter("SaveArrivalTrip") != null) {
                 url = "SaveArrivalController";
+            }// Trong MainController.java
+            else if (request.getParameter("AdminPanel") != null) {
+                url = "admin.jsp";
+            } else if (request.getParameter("SaveUser") != null) {
+                // Tạm thời điều hướng về trang admin sau khi "lưu"
+                url = "admin.jsp";
             }
 
         } catch (Exception e) {

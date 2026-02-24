@@ -34,14 +34,12 @@ public class LoginController extends HttpServlet {
             String userID = request.getParameter("userID");
             String password = request.getParameter("password");
 
+            // Trong LoginController.java, đoạn xử lý đăng nhập thành công
             if ("admin".equals(userID) && "1".equals(password)) {
-
-                // Tạo session và lưu thông tin người dùng
                 HttpSession session = request.getSession();
-                session.setAttribute("FULLNAME", "Nguyễn Hoàng Huy"); // Sửa lại cho đẹp nhé
+                session.setAttribute("FULLNAME", "Nguyễn Hoàng Huy");
+                session.setAttribute("ROLE", "AD"); // AD đại diện cho Admin
                 session.setAttribute("EMAIL", "huy@delivery.com");
-                session.setAttribute("MANV", "NV001");
-
                 url = SUCCESS;
             } else {
                 request.setAttribute("ERROR_MESSAGE", "Tài khoản hoặc mật khẩu không chính xác!");

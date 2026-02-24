@@ -49,22 +49,19 @@ public class GoodsController extends HttpServlet {
                 url = CREATE_ORDER_PAGE;
             } else if (request.getParameter("ViewOrderReport") != null) {
                 url = REPORT_PAGE;
-            } 
-            // --- 2. NHÓM CHUYẾN XE ĐI (DEPARTURE TRIPS) ---
+            } // --- 2. NHÓM CHUYẾN XE ĐI (DEPARTURE TRIPS) ---
             else if (request.getParameter("ViewTripList") != null) {
                 // TODO: Gọi TripDAO lấy danh sách chuyến xe đi
                 url = TRIP_LIST_PAGE;
             } else if (request.getParameter("AddTrip") != null) {
                 url = TRIP_CREATE_PAGE;
-            } 
-            // --- 3. NHÓM CHUYẾN XE ĐẾN (ARRIVAL TRIPS) ---
+            } // --- 3. NHÓM CHUYẾN XE ĐẾN (ARRIVAL TRIPS) ---
             else if (request.getParameter("ViewArrivalTripList") != null) {
                 // TODO: Gọi TripDAO lấy danh sách chuyến xe đến
                 url = ARRIVAL_TRIP_PAGE;
             } else if (request.getParameter("AddArrivalTrip") != null) {
                 url = ARRIVAL_TRIP_CREATE_PAGE;
-            } 
-            // --- 4. NHÓM XỬ LÝ TRONG BẢNG (HANDLING ACTIONS) ---
+            } // --- 4. NHÓM XỬ LÝ TRONG BẢNG (HANDLING ACTIONS) ---
             else if (request.getParameter("ListHang") != null) {
                 String tripID = request.getParameter("tripID");
                 // TODO: Lấy danh sách hàng hóa thuộc tripID này
@@ -80,6 +77,22 @@ public class GoodsController extends HttpServlet {
             } else if (request.getParameter("EditOrder") != null) {
                 // TODO: Load dữ liệu đơn hàng cũ và vào trang sửa
                 url = "edit_order.jsp";
+            } else if (request.getParameter("ViewOrderList") != null || request.getParameter("FilterOrder") != null) {
+                url = ORDER_LIST_PAGE;
+            } else if (request.getParameter("SearchOrderByPhone") != null) {
+                String phone = request.getParameter("searchPhone");
+                // TODO: Sau này gọi DAO: dao.searchOrdersByPhone(phone);
+                // request.setAttribute("ORDER_LIST", list);
+                url = ORDER_LIST_PAGE;
+            } else if (request.getParameter("SearchTripByTruck") != null) {
+                String truckPlate = request.getParameter("searchTruck");
+                // TODO: dao.searchTripsByTruck(truckPlate);
+                url = TRIP_LIST_PAGE;
+            } // Xử lý tìm kiếm xe đến
+            else if (request.getParameter("SearchArrivalByTruck") != null) {
+                String truckPlate = request.getParameter("searchArrivalTruck");
+                // TODO: dao.searchArrivalTripsByTruck(truckPlate);
+                url = ARRIVAL_TRIP_PAGE;
             }
 
         } catch (Exception e) {
