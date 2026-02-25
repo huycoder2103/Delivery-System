@@ -24,7 +24,7 @@ public class HomeController extends HttpServlet {
     private static final String HOME_PAGE = "home.jsp";
     private static final String GOODS_PAGE = "goods.jsp";
     private static final String ADMIN_PAGE = "admin.jsp";
-    private static final String REPORTS_PAGE = "reports.jsp";
+    private static final String REPORTS_PAGE = "report.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -44,8 +44,6 @@ public class HomeController extends HttpServlet {
             } else if (request.getParameter("GoHome") != null) {
                 url = HOME_PAGE;
             }
-
-            // Huy có thể thêm logic load dữ liệu (Tin tức, báo cáo nhanh) tại đây trước khi forward
         } catch (Exception e) {
             log("Error at HomeController: " + e.toString());
         } finally {

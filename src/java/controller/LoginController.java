@@ -33,22 +33,28 @@ public class LoginController extends HttpServlet {
         try {
             String userID = request.getParameter("userID");
             String password = request.getParameter("password");
+            HttpSession session = request.getSession();
 
-            // Trong LoginController.java, đoạn xử lý đăng nhập thành công
+            // 1. KIỂM TRA TÀI KHOẢN ADMIN
             if ("admin".equals(userID) && "1".equals(password)) {
-                HttpSession session = request.getSession();
-                session.setAttribute("FULLNAME", "Nguyễn Hoàng Huy");
+                session.setAttribute("FULLNAME", "Nguyễn Hoàng Huy (Admin)");
                 session.setAttribute("ROLE", "AD"); // AD đại diện cho Admin
                 session.setAttribute("EMAIL", "huy@delivery.com");
                 url = SUCCESS;
-            } else {
+            } // 2. KIỂM TRA TÀI KHOẢN NHÂN VIÊN (MỚI THÊM)
+            else if ("us".equals(userID) && "1".equals(password)) {
+                session.setAttribute("FULLNAME", "Nhân Viên Chính Thức");
+                session.setAttribute("ROLE", "US"); // US đại diện cho User/Nhân viên
+                session.setAttribute("EMAIL", "staff@delivery.com");
+                url = SUCCESS;
+            } // 3. SAI TÀI KHOẢN HOẶC MẬT KHẨU
+            else {
                 request.setAttribute("ERROR_MESSAGE", "Tài khoản hoặc mật khẩu không chính xác!");
                 url = ERROR;
             }
         } catch (Exception e) {
             log("Error at LoginController: " + e.toString());
         } finally {
-            // Dùng forward để mang theo ERROR_MESSAGE về lại trang login
             request.getRequestDispatcher(url).forward(request, response);
         }
     }

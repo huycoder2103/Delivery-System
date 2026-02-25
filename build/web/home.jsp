@@ -17,6 +17,13 @@
     </head>
     <body>
         <%@include file="includes/navbar.jsp" %>
+        <%            String msg = (String) request.getAttribute("ERROR_MESSAGE");
+            if (msg != null) {
+        %>
+        <div style="color: white; background-color: red; padding: 10px; text-align: center; font-weight: bold;">
+            <%= msg%>
+        </div>
+        <% } %>
 
         <div class="main-container">
             <div class="page-title">
@@ -71,8 +78,7 @@
             <div class="news-section">
                 <div class="news-header">📢 BẢN TIN HỆ THỐNG</div>
                 <div class="news-container">
-                    <%
-                        List<String[]> newsList = (List<String[]>) request.getAttribute("NEWS_LIST");
+                    <%                        List<String[]> newsList = (List<String[]>) request.getAttribute("NEWS_LIST");
                         if (newsList != null && !newsList.isEmpty()) {
                             for (String[] news : newsList) {
                     %>
@@ -81,13 +87,14 @@
                         <p><%= news[1]%></p>
                         <small>Người đăng: <%= news[2]%> - <%= news[3]%></small>
                     </div>
-                    <% } } else { %>
+                    <% }
+                    } else { %>
                     <p class="no-data">Hiện chưa có thông báo mới từ ban quản lý.</p>
-                    <% } %>
+                    <% }%>
                 </div>
             </div>
         </div>
 
-        
+
     </body>
 </html>

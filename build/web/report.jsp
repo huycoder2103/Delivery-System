@@ -4,8 +4,10 @@
     Author     : HuyNHSE190240
 --%>
 
+<%@page import="java.util.List"%>
+<%-- Giả sử bạn có class UserDTO hoặc StaffDTO để chứa dữ liệu nhân viên --%>
+<%@page import="dto.UserDTO"%> 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.Map"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,60 +19,91 @@
     <body>
         <%@include file="includes/navbar.jsp" %>
 
+        <%
+            String role = (String) session.getAttribute("ROLE");
+            if (role == null) role = ""; 
+
+            // Lấy dữ liệu đã được Controller đẩy vào request
+            // Sử dụng toán tử 3 ngôi để tránh hiển thị "null" nếu chưa có dữ liệu
+            Object totalOrders = request.getAttribute("TOTAL_ORDERS");
+            Object cancelledOrders = request.getAttribute("CANCELLED_ORDERS");
+            Object totalCash = request.getAttribute("TOTAL_CASH");
+        %>
+
         <div class="list-container">
             <div class="page-title">
-                <h1>TỔNG KẾT CA LÀM VIỆC</h1>
+                <h1><%= role.equals("AD") ? "BÁO CÁO TỔNG QUÁT (ADMIN)" : "TỔNG KẾT CA LÀM VIỆC" %></h1>
                 <div class="underline"></div>
             </div>
 
             <div class="report-grid">
                 <div class="report-card">
-                    <h3>📊 Hiệu suất đơn hàng</h3>
+                    <h3>📊 Hiệu suất hàng hóa</h3>
                     <div class="stat-row">
-                        <span>Tổng số đơn nhận:</span>
-                        <span class="stat-value">${TOTAL_ORDERS}</span>
+                        <span><%= role.equals("AD") ? "Tổng đơn hệ thống:" : "Đơn đã nhận:" %></span>
+                        <span class="stat-value"><%= (totalOrders != null) ? totalOrders : 0 %></span>
                     </div>
                     <div class="stat-row">
-                        <span>Số đơn đã chuyển:</span>
-                        <span class="stat-value text-green">${SHIPPED_ORDERS}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Số đơn đã hủy:</span>
-                        <span class="stat-value text-red">${CANCELLED_ORDERS}</span>
+                        <span class="text-red">Số đơn đã hủy:</span>
+                        <span class="stat-value text-red"><%= (cancelledOrders != null) ? cancelledOrders : 0 %></span>
                     </div>
                 </div>
 
                 <div class="report-card">
-                    <h3>💰 Tài chính ca làm</h3>
+                    <h3>💰 Tài chính</h3>
                     <div class="stat-row">
-                        <span>Tổng tiền cước nhận:</span>
-                        <span class="stat-value">${TOTAL_CASH} VNĐ</span>
+                        <span>Tổng tiền thực nhận:</span>
+                        <span class="stat-value text-green">
+                            <%= (totalCash != null) ? totalCash : 0 %> VNĐ
+                        </span>
                     </div>
-                    <div class="stat-row">
-                        <span>Tiền đã nộp về kho:</span>
-                        <span class="stat-value">${SUBMITTED_CASH} VNĐ</span>
-                    </div>
-                    <div class="stat-row total-revenue">
-                        <strong>DOANH THU THỰC TẾ:</strong>
-                        <strong>${ACTUAL_REVENUE} VNĐ</strong>
-                    </div>
+                    <p class="note-text">*(Dữ liệu thực tế từ hệ thống đơn hàng)*</p>
                 </div>
             </div>
 
-            <div class="report-card" style="margin-top: 20px;">
-                <h3>🔑 Chức năng Giao ca</h3>
-                <form action="MainController" method="POST">
-                    <input type="hidden" name="totalOrders" value="${TOTAL_ORDERS}">
-                    <input type="hidden" name="actualRevenue" value="${ACTUAL_REVENUE}">
-
-                    <label>Ghi chú bàn giao cho ca sau:</label>
-                    <textarea name="shiftNote" class="shift-note-area" placeholder="Ví dụ: Tình trạng tiền lẻ, các đơn hàng cần lưu ý..."></textarea>
-
-                    <div class="btn-container">
-                        <input type="submit" name="SubmitShiftReport" value="Xác nhận & Chốt ca" class="btn-cyan">
-                    </div>
-                </form>
-            </div>
+            <% if (role.equals("AD")) { %>
+                <div class="report-card" style="margin-top: 20px;">
+                    <h3>👥 Chi tiết hiệu suất nhân viên</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã NV</th><th>Họ Tên</th><th>Số đơn</th><th>Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%
+                                List<UserDTO> staffList = (List<UserDTO>) request.getAttribute("STAFF_LIST");
+                                if (staffList != null && !staffList.isEmpty()) {
+                                    for (UserDTO staff : staffList) {
+                            %>
+                                <tr>
+                                    <td><%= staff.getUserID() %></td>
+                                    <td><%= staff.getFullName() %></td>
+                                    <td><%= staff.getOrderCount() %></td>
+                                    <td><%= staff.getRevenue() %> VNĐ</td>
+                                </tr>
+                            <% 
+                                    }
+                                } else { 
+                            %>
+                                <tr><td colspan="4" style="text-align:center;">Chưa có dữ liệu nhân viên</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="report-card" style="margin-top: 20px;">
+                    <h3>🔑 Chức năng Giao ca</h3>
+                    <form action="MainController" method="POST">
+                        <input type="hidden" name="totalOrders" value="<%= totalOrders %>">
+                        <label>Ghi chú bàn giao cho ca sau:</label>
+                        <textarea name="shiftNote" class="shift-note-area" placeholder="Nhập ghi chú thực tế..."></textarea>
+                        <div class="btn-container">
+                            <input type="submit" name="SubmitShiftReport" value="Xác nhận & Chốt ca" class="btn-cyan">
+                        </div>
+                    </form>
+                </div>
+            <% } %>
         </div>
     </body>
 </html>

@@ -2,65 +2,115 @@
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
 */
-/* 
-    Created on : Feb 24, 2026, 11:54:54 PM
+/* Document   : report.css
+    Created on : Feb 24, 2026
     Author     : HuyNHSE190240
 */
+
+/* Bố cục lưới cho các thẻ báo cáo */
 .report-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* Chia 2 cột đều nhau */
     gap: 20px;
     margin-top: 20px;
 }
 
+/* Thiết kế thẻ báo cáo trắng */
 .report-card {
     background: #fff;
-    padding: 20px;
+    padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Đổ bóng nhẹ cho chuyên nghiệp */
 }
 
 .report-card h3 {
     margin-top: 0;
-    color: #34495e;
+    color: #2c3e50;
     border-bottom: 2px solid #3498db;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
 }
 
+/* Hàng hiển thị thông số */
 .stat-row {
     display: flex;
     justify-content: space-between;
-    padding: 12px 0;
+    padding: 15px 0;
     border-bottom: 1px dashed #eee;
+    font-size: 1rem;
+}
+
+.stat-row:last-of-type {
+    border-bottom: none;
 }
 
 .stat-value {
     font-weight: bold;
-    color: #2c3e50;
+    font-size: 1.1rem;
+    color: #333;
 }
 
-.text-green { color: #27ae60; }
-.text-red { color: #e74c3c; }
+/* Màu sắc trạng thái */
+.text-green { color: #27ae60 !important; } /* Màu xanh cho tiền thực nhận */
+.text-red { color: #e74c3c !important; }   /* Màu đỏ cho đơn hủy */
 
-.total-revenue {
-    border: none !important;
-    font-size: 1.2rem;
-    color: #d35400;
-    margin-top: 10px;
+/* Style cho bảng danh sách nhân viên (Dành cho Admin) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
 }
 
+table th {
+    background-color: #34495e;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 500;
+}
+
+table td {
+    padding: 12px;
+    border: 1px solid #edf2f7;
+    color: #4a5568;
+}
+
+table tr:nth-child(even) {
+    background-color: #f8fafc; /* Màu nền xen kẽ cho dễ nhìn */
+}
+
+table tr:hover {
+    background-color: #f1f5f9; /* Hiệu ứng hover khi rê chuột qua hàng */
+}
+
+/* Phần Giao ca cho nhân viên */
 .shift-note-area {
     width: 100%;
     height: 100px;
     margin-top: 10px;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     resize: vertical;
+    font-family: inherit;
+    box-sizing: border-box; /* Đảm bảo padding không làm tràn chiều rộng */
+}
+
+.shift-note-area:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .btn-container {
     margin-top: 20px;
     text-align: right;
+}
+
+@media (max-width: 768px) {
+    .report-grid {
+        grid-template-columns: 1fr; /* Chuyển thành 1 cột trên điện thoại */
+    }
 }

@@ -11,6 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -20,73 +21,69 @@ import javax.servlet.http.HttpServletResponse;
         urlPatterns = {"/MainController"})
 public class MainController extends HttpServlet {
 
-    // --- CÁC ĐÍCH ĐẾN TĨNH (JSP) ---
     private static final String LOGIN_PAGE = "login.jsp";
-    private static final String HOME_PAGE = "home.jsp";
-    private static final String GOODS_PAGE = "goods.jsp";
     private static final String ERROR_PAGE = "error.jsp";
-
-    // --- CÁC BỘ ĐIỀU PHỐI (CONTROLLERS) ---
-    private static final String LOGIN_CONTROLLER = "LoginController";
-    private static final String LOGOUT_CONTROLLER = "LogoutController";
     private static final String HOME_CONTROLLER = "HomeController";
     private static final String GOODS_CONTROLLER = "GoodsController";
+    private static final String LOGIN_CONTROLLER = "LoginController";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        request.setCharacterEncoding("UTF-8"); // Đảm bảo đọc tiếng Việt từ Form
-
+        request.setCharacterEncoding("UTF-8");
         String url = LOGIN_PAGE;
 
         try {
+            // --- 1. XỬ LÝ QUYỀN TRUY CẬP QUẢN TRỊ (ADMIN PANEL) ---
+            if (request.getParameter("AdminPanel") != null) {
+                HttpSession session = request.getSession(false);
+                String role = (session != null) ? (String) session.getAttribute("ROLE") : null;
 
-            // --- 1. NHÓM HỆ THỐNG & TÀI KHOẢN ---
-            if (request.getParameter("Login") != null) {
+                if ("AD".equals(role)) {
+                    url = "admin.jsp"; // Cho phép nếu là Admin
+                } else {
+                    // Nếu là nhân viên (US) hoặc khách, báo lỗi và giữ ở Home
+                    request.setAttribute("ERROR_MESSAGE", "Bạn không có quyền truy cập khu vực Quản trị!");
+                    url = "home.jsp";
+                }
+            } // --- 2. NHÓM ĐIỀU PHỐI VỀ LOGIN CONTROLLER ---
+            else if (request.getParameter("Login") != null) {
                 url = LOGIN_CONTROLLER;
-            } else if (request.getParameter("Logout") != null) {
-                url = LOGIN_PAGE;
-            } else if (request.getParameter("ChangePassword") != null) {
-                url = "ChangePasswordController";
-            } // --- 2. NHÓM ĐIỀU HƯỚNG TRANG CHÍNH (HOME & TIÊU ĐIỂM) ---
-            else if (request.getParameter("GoHome") != null) {
-                url = HOME_PAGE;
-            } else if (request.getParameter("ViewGoods") != null) {
-                url = GOODS_PAGE;
-            } else if (request.getParameter("AdminPanel") != null || request.getParameter("ViewReports") != null) {
+            } // --- 3. NHÓM ĐIỀU PHỐI VỀ HOME CONTROLLER (TRÙNG ĐÍCH ĐẾN) ---
+            else if (request.getParameter("GoHome") != null
+                    || request.getParameter("ViewReports") != null) {
                 url = HOME_CONTROLLER;
-            } // --- 3. NHÓM NGHIỆP VỤ HÀNG HÓA (FORWARD SANG GOODSCONTROLLER) ---
-            else if (request.getParameter("CreateOrder") != null
+            } // --- 4. NHÓM ĐIỀU PHỐI VỀ GOODS CONTROLLER (TẤT CẢ NGHIỆP VỤ HÀNG HÓA) ---
+            else if (request.getParameter("ViewOrderList") != null
+                    || request.getParameter("CreateOrder") != null
                     || request.getParameter("SearchOrderByPhone") != null
                     || request.getParameter("SearchTripByTruck") != null
                     || request.getParameter("SearchArrivalByTruck") != null
-                    || request.getParameter("ViewOrderList") != null
                     || request.getParameter("ViewTripList") != null
                     || request.getParameter("ViewArrivalTripList") != null
                     || request.getParameter("AddArrivalTrip") != null
                     || request.getParameter("AddTrip") != null
-                    || request.getParameter("ViewOrderReport") != null) {
-                url = GOODS_CONTROLLER;
-            } // --- 4. NHÓM XỬ LÝ TRONG BẢNG (LIST HÀNG, NHẬN XE, SỬA...) ---
-            else if (request.getParameter("ListHang") != null
+                    || request.getParameter("ViewOrderReport") != null
+                    || request.getParameter("ListHang") != null
                     || request.getParameter("ReceiveTrip") != null
                     || request.getParameter("ShipOrder") != null
                     || request.getParameter("EditOrder") != null
                     || request.getParameter("TransferGoods") != null
                     || request.getParameter("EditTrip") != null) {
                 url = GOODS_CONTROLLER;
-            } // --- 5. NHÓM LƯU DỮ LIỆU (SAVE ACTIONS) ---
+            } // --- 5. CÁC TRANG JSP TĨNH KHÁC ---
+            else if (request.getParameter("ViewGoods") != null) {
+                url = "goods.jsp";
+            } else if (request.getParameter("Logout") != null) {
+                url = LOGIN_PAGE;
+            } // --- 6. NHÓM LƯU DỮ LIỆU (CÁC CONTROLLER RIÊNG BIỆT) ---
             else if (request.getParameter("SaveOrder") != null) {
                 url = "SaveOrderController";
             } else if (request.getParameter("SaveNewTrip") != null) {
                 url = "SaveTripController";
             } else if (request.getParameter("SaveArrivalTrip") != null) {
                 url = "SaveArrivalController";
-            }// Trong MainController.java
-            else if (request.getParameter("AdminPanel") != null) {
-                url = "admin.jsp";
             } else if (request.getParameter("SaveUser") != null) {
-                // Tạm thời điều hướng về trang admin sau khi "lưu"
                 url = "admin.jsp";
             }
 
