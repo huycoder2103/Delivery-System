@@ -4,9 +4,11 @@
  */
 package controller;
 
+import dao.StationDAO;
+import dto.StationDTO;
+import dao.TruckDAO;
+import dto.TruckDTO;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,21 +16,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author HuyNHSE190240
- */
 @WebServlet(name = "GoodsController", urlPatterns = {"/GoodsController"})
 public class GoodsController extends HttpServlet {
 
-    // --- ĐỊNH NGHĨA CÁC ĐÍCH ĐẾN JSP ---
     private static final String ORDER_LIST_PAGE = "list_order.jsp";
     private static final String CREATE_ORDER_PAGE = "create_order.jsp";
     private static final String TRIP_LIST_PAGE = "list_trip.jsp";
     private static final String TRIP_CREATE_PAGE = "create_trip.jsp";
-    private static final String ARRIVAL_TRIP_PAGE = "list_arrival_trip.jsp";
-    private static final String ARRIVAL_TRIP_CREATE_PAGE = "create_arrival_trip.jsp";
-    private static final String REPORT_PAGE = "order_report.jsp";
     private static final String ERROR_PAGE = "error.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -36,63 +30,29 @@ public class GoodsController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        // Mặc định url
         String url = ORDER_LIST_PAGE;
-
         try {
-            // --- 1. NHÓM ĐƠN HÀNG (ORDERS) ---
-            if (request.getParameter("ViewOrderList") != null || request.getParameter("FilterOrder") != null) {
-                // TODO: List<OrderDTO> list = dao.getAllOrders();
-                // request.setAttribute("ORDER_LIST", list);
-                url = ORDER_LIST_PAGE;
-            } else if (request.getParameter("CreateOrder") != null) {
+            // 1. Xử lý khi nhấn nút "NHẬN HÀNG" (CreateOrder)
+            if (request.getParameter("CreateOrder") != null) {
+                StationDAO dao = new StationDAO();
+                List<StationDTO> list = dao.getAllStations();
+                request.setAttribute("STATION_LIST", list);
                 url = CREATE_ORDER_PAGE;
-            } else if (request.getParameter("ViewOrderReport") != null) {
-                url = REPORT_PAGE;
-            } // --- 2. NHÓM CHUYẾN XE ĐI (DEPARTURE TRIPS) ---
-            else if (request.getParameter("ViewTripList") != null) {
-                // TODO: Gọi TripDAO lấy danh sách chuyến xe đi
-                url = TRIP_LIST_PAGE;
-            } else if (request.getParameter("AddTrip") != null) {
+            } 
+            // 2. Xử lý khi nhấn nút "THÊM CHUYẾN XE" (AddTrip)
+            else if (request.getParameter("AddTrip") != null) {
+                StationDAO sDao = new StationDAO();
+                TruckDAO tDao = new TruckDAO();
+                request.setAttribute("STATION_LIST", sDao.getAllStations());
+                request.setAttribute("TRUCK_LIST", tDao.getAvailableTrucks());
                 url = TRIP_CREATE_PAGE;
-            } // --- 3. NHÓM CHUYẾN XE ĐẾN (ARRIVAL TRIPS) ---
-            else if (request.getParameter("ViewArrivalTripList") != null) {
-                // TODO: Gọi TripDAO lấy danh sách chuyến xe đến
-                url = ARRIVAL_TRIP_PAGE;
-            } else if (request.getParameter("AddArrivalTrip") != null) {
-                url = ARRIVAL_TRIP_CREATE_PAGE;
-            } // --- 4. NHÓM XỬ LÝ TRONG BẢNG (HANDLING ACTIONS) ---
-            else if (request.getParameter("ListHang") != null) {
-                String tripID = request.getParameter("tripID");
-                // TODO: Lấy danh sách hàng hóa thuộc tripID này
-                url = "list_goods_by_trip.jsp"; // Ví dụ trang hiển thị hàng theo xe
-            } else if (request.getParameter("ReceiveTrip") != null) {
-                String tripID = request.getParameter("tripID");
-                // TODO: Thực hiện logic xác nhận nhận xe
-                url = "MainController?ViewArrivalTripList=true"; // Quay lại danh sách đến
-            } else if (request.getParameter("ShipOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                // TODO: Thực hiện logic chuyển trạng thái đơn hàng
-                url = "MainController?ViewOrderList=true"; // Quay lại danh sách đơn hàng
-            } else if (request.getParameter("EditOrder") != null) {
-                // TODO: Load dữ liệu đơn hàng cũ và vào trang sửa
-                url = "edit_order.jsp";
-            } else if (request.getParameter("ViewOrderList") != null || request.getParameter("FilterOrder") != null) {
+            }
+            // 3. Các hành động khác (Xem danh sách, tìm kiếm...)
+            else if (request.getParameter("ViewOrderList") != null) {
                 url = ORDER_LIST_PAGE;
-            } else if (request.getParameter("SearchOrderByPhone") != null) {
-                String phone = request.getParameter("searchPhone");
-                // TODO: Sau này gọi DAO: dao.searchOrdersByPhone(phone);
-                // request.setAttribute("ORDER_LIST", list);
-                url = ORDER_LIST_PAGE;
-            } else if (request.getParameter("SearchTripByTruck") != null) {
-                String truckPlate = request.getParameter("searchTruck");
-                // TODO: dao.searchTripsByTruck(truckPlate);
+            }
+            else if (request.getParameter("ViewTripList") != null) {
                 url = TRIP_LIST_PAGE;
-            } // Xử lý tìm kiếm xe đến
-            else if (request.getParameter("SearchArrivalByTruck") != null) {
-                String truckPlate = request.getParameter("searchArrivalTruck");
-                // TODO: dao.searchArrivalTripsByTruck(truckPlate);
-                url = ARRIVAL_TRIP_PAGE;
             }
 
         } catch (Exception e) {
@@ -103,17 +63,17 @@ public class GoodsController extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+/**
+ * Handles the HTTP <code>GET</code> method.
+ *
+ * @param request servlet request
+ * @param response servlet response
+ * @throws ServletException if a servlet-specific error occurs
+ * @throws IOException if an I/O error occurs
+ */
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
@@ -127,7 +87,7 @@ public class GoodsController extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
@@ -138,7 +98,7 @@ public class GoodsController extends HttpServlet {
      * @return a String containing servlet description
      */
     @Override
-    public String getServletInfo() {
+public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
 
