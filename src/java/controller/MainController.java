@@ -25,7 +25,7 @@ public class MainController extends HttpServlet {
 
     private static final String LOGIN_PAGE = "login.jsp";
     private static final String ERROR_PAGE = "error.jsp";
-    
+
     private final Map<String, String> actionMap = new HashMap<>();
 
     public MainController() {
@@ -58,51 +58,29 @@ public class MainController extends HttpServlet {
         actionMap.put("SaveOrder", "SaveOrderController");
         actionMap.put("SaveNewTrip", "SaveTripController");
         actionMap.put("SaveArrivalTrip", "SaveArrivalController");
-        actionMap.put("SaveUser", "admin.jsp");
+//        actionMap.put("SaveUser", "admin.jsp");
+        actionMap.put("SaveUser", "CreateUserController");
     }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
-        
+
         String url = LOGIN_PAGE; // Mặc định quay về Login nếu không khớp action nào
 
         try {
-            // --- A. XỬ LÝ LƯU NHÂN VIÊN MỚI (VỊ TRÍ THÊM MỚI) ---
-            if (request.getParameter("SaveUser") != null) {
-                try {
-                    String userID = request.getParameter("newUserID");
-                    String fullName = request.getParameter("newFullName");
-                    String password = request.getParameter("newPassword");
-                    String phone = request.getParameter("newPhone");
-                    String email = request.getParameter("newEmail");
-                    UserDAO dao = new UserDAO();
-                    // Tạo đối tượng User với Role mặc định là US (User/Nhân viên)
-                    UserDTO user = new UserDTO(userID, fullName, "US", password, phone, email, true);
-                    boolean check = dao.insertUser(user);
-                    if (check) {
-                        url = "AdminController"; // Lưu thành công -> Quay về danh sách để cập nhật
-                    } else {
-                        request.setAttribute("ERROR_MESSAGE", "Lưu nhân viên thất bại!");
-                        url = "AdminController";
-                    }
-                } catch (Exception e) {
-                    log("Error at SaveUser logic: " + e.toString());
-                }
-            } 
-            // --- B. XỬ LÝ QUYỀN TRUY CẬP QUẢN TRỊ ---
-            else if (request.getParameter("AdminPanel") != null) {
+            if (request.getParameter("AdminPanel") != null) {
                 HttpSession session = request.getSession(false);
                 String role = (session != null) ? (String) session.getAttribute("ROLE") : null;
 
                 if ("AD".equals(role)) {
-                    url = "AdminController"; 
+                    url = "AdminController";
                 } else {
                     request.setAttribute("ERROR_MESSAGE", "Bạn không có quyền truy cập khu vực Quản trị!");
                     url = "home.jsp";
                 }
-            } 
-            // --- C. TỰ ĐỘNG TRA CỨU CÁC HÀNH ĐỘNG KHÁC TỪ MAP ---
+            } //TỰ ĐỘNG TRA CỨU CÁC HÀNH ĐỘNG KHÁC TỪ MAP ---
             else {
                 for (String action : actionMap.keySet()) {
                     if (request.getParameter(action) != null) {

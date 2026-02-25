@@ -7,53 +7,43 @@ package controller;
 import dao.UserDAO;
 import dto.UserDTO;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-@WebServlet(name = "LoginController", urlPatterns = {"/LoginController"})
-public class LoginController extends HttpServlet {
-
-    private static final String ERROR = "login.jsp";
-    private static final String ADMIN_PAGE = "AdminController";
-    private static final String USER_PAGE = "HomeController";
+/**
+ *
+ * @author HuyNHSE190240
+ */
+@WebServlet(name = "CreateUserController", urlPatterns = {"/CreateUserController"})
+public class CreateUserController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        String url = ERROR;
+        String url = "AdminController";
         try {
-            String userID = request.getParameter("userID");
-            String password = request.getParameter("password");
-
+            String userID = request.getParameter("newUserID");
+            String fullName = request.getParameter("newFullName");
+            String password = request.getParameter("newPassword");
+            String phone = request.getParameter("newPhone");
+            String email = request.getParameter("newEmail");
+            
             UserDAO dao = new UserDAO();
-            UserDTO loginUser = dao.checkLogin(userID, password); // Kiểm tra qua DB
-
-            if (loginUser != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("LOGIN_USER", loginUser);
-                session.setAttribute("ROLE", loginUser.getRoleID());
-                session.setAttribute("FULLNAME", loginUser.getFullName());
-
-                // Điều hướng dựa trên vai trò (AD = Admin, US = User)
-                if ("AD".equals(loginUser.getRoleID())) {
-                    url = "AdminController";
-                } else {
-                    url = "HomeController";
-                }
-            } else {
-                request.setAttribute("ERROR", "Sai tài khoản hoặc mật khẩu!");
+            // Mật khẩu nên được mã hóa ở đây trước khi đưa vào DTO
+            UserDTO user = new UserDTO(userID, fullName, "US", password, phone, email, true);
+            boolean check = dao.insertUser(user);
+            if (!check) {
+                request.setAttribute("ERROR_MESSAGE", "Lưu nhân viên thất bại!");
             }
-        } catch (Exception e) {
-            log("Error at LoginController: " + e.toString());
+        } catch (ClassNotFoundException | SQLException e) {
+            log("Error at CreateUserController: " + e.toString());
         } finally {
             request.getRequestDispatcher(url).forward(request, response);
         }
     }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
