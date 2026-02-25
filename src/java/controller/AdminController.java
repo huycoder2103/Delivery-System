@@ -4,9 +4,10 @@
  */
 package controller;
 
+import dao.UserDAO;
+import dto.UserDTO;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,34 +19,32 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author HuyNHSE190240
  */
-@WebServlet(name = "HomeController", urlPatterns = {"/HomeController"})
-public class HomeController extends HttpServlet {
+@WebServlet(name = "AdminController", urlPatterns = {"/AdminController"})
+public class AdminController extends HttpServlet {
 
-    private static final String HOME_PAGE = "home.jsp";
-    private static final String GOODS_PAGE = "goods.jsp";
-    private static final String ADMIN_PAGE = "admin.jsp";
-    private static final String REPORTS_PAGE = "report.jsp";
-
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        request.setCharacterEncoding("UTF-8");
-
-        String url = HOME_PAGE;
-
         try {
-
-            if (request.getParameter("ViewGoods") != null) {
-                url = GOODS_PAGE;
-            } else if (request.getParameter("ViewReports") != null) {
-                url = REPORTS_PAGE;
-            } else if (request.getParameter("GoHome") != null) {
-                url = HOME_PAGE;
-            }
+            // Lấy dữ liệu từ Database thông qua DAO
+            UserDAO dao = new UserDAO();
+            List<UserDTO> list = dao.getAllUsers(); 
+            
+            // Đẩy danh sách vào request để trang JSP có thể lấy ra
+            request.setAttribute("USER_LIST", list); 
         } catch (Exception e) {
-            log("Error at HomeController: " + e.toString());
+            log("Error at AdminController: " + e.toString());
         } finally {
-            request.getRequestDispatcher(url).forward(request, response);
+            // Chuyển hướng sang trang admin.jsp
+            request.getRequestDispatcher("admin.jsp").forward(request, response);
         }
     }
 
