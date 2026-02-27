@@ -22,7 +22,8 @@ public class DBUtils {
             SQLException {
         Connection conn = null;
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        String url = "jdbc:sqlserver://localhost:1433;databaseName=" + DB_NAME;
+        // Sửa lại dòng url trong file DBUtils.java
+String url = "jdbc:sqlserver://localhost:1433;databaseName=" + DB_NAME + ";encrypt=true;trustServerCertificate=true;";
         conn = DriverManager.getConnection(url, USER_NAME, PASSWORD);
         return conn;
     }

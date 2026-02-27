@@ -16,13 +16,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 @WebServlet(name = "GoodsController", urlPatterns = {"/GoodsController"})
 public class GoodsController extends HttpServlet {
 
+    // Định nghĩa các hằng số đường dẫn trang JSP
     private static final String ORDER_LIST_PAGE = "list_order.jsp";
     private static final String CREATE_ORDER_PAGE = "create_order.jsp";
     private static final String TRIP_LIST_PAGE = "list_trip.jsp";
     private static final String TRIP_CREATE_PAGE = "create_trip.jsp";
+    private static final String ARRIVAL_LIST_PAGE = "list_arrival_trip.jsp";
+    private static final String ARRIVAL_CREATE_PAGE = "create_arrival_trip.jsp";
     private static final String ERROR_PAGE = "error.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -32,14 +36,18 @@ public class GoodsController extends HttpServlet {
 
         String url = ORDER_LIST_PAGE;
         try {
-            // 1. Xử lý khi nhấn nút "NHẬN HÀNG" (CreateOrder)
+            // 1. Xử lý hành động liên quan đến ĐƠN HÀNG (Orders)
             if (request.getParameter("CreateOrder") != null) {
                 StationDAO dao = new StationDAO();
                 List<StationDTO> list = dao.getAllStations();
                 request.setAttribute("STATION_LIST", list);
                 url = CREATE_ORDER_PAGE;
             } 
-            // 2. Xử lý khi nhấn nút "THÊM CHUYẾN XE" (AddTrip)
+            else if (request.getParameter("ViewOrderList") != null) {
+                url = ORDER_LIST_PAGE;
+            }
+            
+            // 2. Xử lý hành động liên quan đến CHUYẾN XE ĐI (Departure Trips)
             else if (request.getParameter("AddTrip") != null) {
                 StationDAO sDao = new StationDAO();
                 TruckDAO tDao = new TruckDAO();
@@ -47,16 +55,31 @@ public class GoodsController extends HttpServlet {
                 request.setAttribute("TRUCK_LIST", tDao.getAvailableTrucks());
                 url = TRIP_CREATE_PAGE;
             }
-            // 3. Các hành động khác (Xem danh sách, tìm kiếm...)
-            else if (request.getParameter("ViewOrderList") != null) {
-                url = ORDER_LIST_PAGE;
-            }
             else if (request.getParameter("ViewTripList") != null) {
                 url = TRIP_LIST_PAGE;
             }
 
+            // 3. Xử lý hành động liên quan đến CHUYẾN XE ĐẾN (Arrival Trips)
+            else if (request.getParameter("ViewArrivalTripList") != null) {
+                url = ARRIVAL_LIST_PAGE;
+            }
+            else if (request.getParameter("AddArrivalTrip") != null) {
+                url = ARRIVAL_CREATE_PAGE;
+            }
+            
+            // 4. Các hành động bổ trợ khác (Search, Edit, Ship...)
+            // Lưu ý: Bạn có thể thêm logic lấy dữ liệu từ DAO tại đây nếu cần
+            else if (request.getParameter("SearchOrderByPhone") != null 
+                    || request.getParameter("EditOrder") != null) {
+                url = ORDER_LIST_PAGE;
+            }
+            else if (request.getParameter("ReceiveTrip") != null 
+                    || request.getParameter("ShipOrder") != null) {
+                url = TRIP_LIST_PAGE;
+            }
+
         } catch (Exception e) {
-            log("Error at GoodsController: " + e.toString());
+            e.getMessage();
             url = ERROR_PAGE;
         } finally {
             request.getRequestDispatcher(url).forward(request, response);

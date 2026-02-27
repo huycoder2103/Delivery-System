@@ -4,11 +4,7 @@
  */
 package controller;
 
-import dao.UserDAO;
-import dto.UserDTO;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,79 +12,74 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- *
- * @author ADMIN
- */
 @WebServlet(name = "MainController", urlPatterns = {"/MainController"})
 public class MainController extends HttpServlet {
 
     private static final String LOGIN_PAGE = "login.jsp";
     private static final String ERROR_PAGE = "error.jsp";
 
-    private final Map<String, String> actionMap = new HashMap<>();
-
-    public MainController() {
-        // --- 1. NHÓM ĐIỀU PHỐI VỀ LOGIN/LOGOUT ---
-        actionMap.put("Login", "LoginController");
-        actionMap.put("Logout", LOGIN_PAGE);
-        // --- 2. NHÓM ĐIỀU PHỐI VỀ HOME & REPORTS ---
-        actionMap.put("GoHome", "HomeController");
-        actionMap.put("ViewReports", "HomeController");
-        actionMap.put("AdminPanel", "AdminController");
-        // --- 3. NHÓM NGHIỆP VỤ HÀNG HÓA & CHUYẾN XE (GOODS_CONTROLLER) ---
-        actionMap.put("ViewOrderList", "GoodsController");
-        actionMap.put("CreateOrder", "GoodsController");
-        actionMap.put("SearchOrderByPhone", "GoodsController");
-        actionMap.put("SearchTripByTruck", "GoodsController");
-        actionMap.put("SearchArrivalByTruck", "GoodsController");
-        actionMap.put("ViewTripList", "GoodsController");
-        actionMap.put("ViewArrivalTripList", "GoodsController");
-        actionMap.put("AddArrivalTrip", "GoodsController");
-        actionMap.put("AddTrip", "GoodsController");
-        actionMap.put("ViewOrderReport", "GoodsController");
-        actionMap.put("ListHang", "GoodsController");
-        actionMap.put("ReceiveTrip", "GoodsController");
-        actionMap.put("ShipOrder", "GoodsController");
-        actionMap.put("EditOrder", "GoodsController");
-        actionMap.put("TransferGoods", "GoodsController");
-        actionMap.put("EditTrip", "GoodsController");
-        // --- 4. CÁC TRANG JSP TĨNH & LƯU DỮ LIỆU ---
-        actionMap.put("ViewGoods", "goods.jsp");
-        actionMap.put("SaveOrder", "SaveOrderController");
-        actionMap.put("SaveNewTrip", "SaveTripController");
-        actionMap.put("SaveArrivalTrip", "SaveArrivalController");
-//        actionMap.put("SaveUser", "admin.jsp");
-        actionMap.put("SaveUser", "CreateUserController");
-    }
-
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        String url = LOGIN_PAGE; // Mặc định quay về Login nếu không khớp action nào
+        String url = LOGIN_PAGE;
 
         try {
-            if (request.getParameter("AdminPanel") != null) {
+            // 1. Nhóm Login/Logout
+            if (request.getParameter("Login") != null) {
+                url = "LoginController";
+            } else if (request.getParameter("Logout") != null) {
+                url = LOGIN_PAGE;
+            } 
+            
+            // 2. Nhóm Home & Admin
+            else if (request.getParameter("GoHome") != null || request.getParameter("ViewReports") != null) {
+                url = "HomeController";
+            } else if (request.getParameter("AdminPanel") != null) {
                 HttpSession session = request.getSession(false);
                 String role = (session != null) ? (String) session.getAttribute("ROLE") : null;
-
                 if ("AD".equals(role)) {
                     url = "AdminController";
                 } else {
                     request.setAttribute("ERROR_MESSAGE", "Bạn không có quyền truy cập khu vực Quản trị!");
                     url = "home.jsp";
                 }
-            } //TỰ ĐỘNG TRA CỨU CÁC HÀNH ĐỘNG KHÁC TỪ MAP ---
-            else {
-                for (String action : actionMap.keySet()) {
-                    if (request.getParameter(action) != null) {
-                        url = actionMap.get(action);
-                        break;
-                    }
-                }
+            } 
+            
+            // 3. Nhóm GoodsController (Sử dụng toán tử || để gộp các hành động cùng đích đến)
+            else if (request.getParameter("ViewOrderList") != null 
+                    || request.getParameter("CreateOrder") != null
+                    || request.getParameter("SearchOrderByPhone") != null
+                    || request.getParameter("SearchTripByTruck") != null
+                    || request.getParameter("SearchArrivalByTruck") != null
+                    || request.getParameter("ViewTripList") != null
+                    || request.getParameter("ViewArrivalTripList") != null
+                    || request.getParameter("AddArrivalTrip") != null
+                    || request.getParameter("AddTrip") != null
+                    || request.getParameter("ViewOrderReport") != null
+                    || request.getParameter("ListHang") != null
+                    || request.getParameter("ReceiveTrip") != null
+                    || request.getParameter("ShipOrder") != null
+                    || request.getParameter("EditOrder") != null
+                    || request.getParameter("TransferGoods") != null
+                    || request.getParameter("EditTrip") != null) {
+                url = "GoodsController";
+            } 
+            
+            // 4. Các Controller xử lý Save dữ liệu & Trang tĩnh
+            else if (request.getParameter("ViewGoods") != null) {
+                url = "goods.jsp";
+            } else if (request.getParameter("SaveOrder") != null) {
+                url = "SaveOrderController";
+            } else if (request.getParameter("SaveNewTrip") != null) {
+                url = "SaveTripController";
+            } else if (request.getParameter("SaveArrivalTrip") != null) {
+                url = "SaveArrivalController";
+            } else if (request.getParameter("SaveUser") != null) {
+                url = "CreateUserController";
             }
+
         } catch (Exception e) {
             log("Error at MainController: " + e.toString());
             url = ERROR_PAGE;
