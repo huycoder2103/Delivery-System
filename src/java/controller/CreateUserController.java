@@ -38,7 +38,7 @@ public class CreateUserController extends HttpServlet {
             if (!check) {
                 request.setAttribute("ERROR_MESSAGE", "Lưu nhân viên thất bại!");
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             log("Error at CreateUserController: " + e.toString());
         } finally {
             request.getRequestDispatcher(url).forward(request, response);

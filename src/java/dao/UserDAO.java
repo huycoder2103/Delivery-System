@@ -10,7 +10,6 @@ package dao;
  */
 import dto.UserDTO;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,74 +19,42 @@ import utils.DBUtils;
 
 public class UserDAO {
 
+    // Kiểm tra đăng nhập
     public UserDTO checkLogin(String userID, String password) throws SQLException {
         UserDTO user = null;
-        Connection conn = null;
-        PreparedStatement ptm = null;
-        ResultSet rs = null;
-        try {
-            conn = DBUtils.getConnection();
-            if (conn != null) {
-                // Truy vấn lấy thông tin người dùng khớp với ID và Password
-                String sql = "SELECT fullName, roleID, phone, email, status FROM tblUsers "
-                        + "WHERE userID = ? AND password = ?";
-                ptm = conn.prepareStatement(sql);
-                ptm.setString(1, userID);
-                ptm.setString(2, password);
-                rs = ptm.executeQuery();
+        String sql = "SELECT fullName, roleID, phone, email, status FROM tblUsers WHERE userID = ? AND password = ?";
+
+        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ptm = conn.prepareStatement(sql)) {
+            ptm.setString(1, userID);
+            ptm.setString(2, password);
+            try ( ResultSet rs = ptm.executeQuery()) {
                 if (rs.next()) {
-                    String fullName = rs.getString("fullName");
-                    String roleID = rs.getString("roleID");
-                    String phone = rs.getString("phone");
-                    String email = rs.getString("email");
-                    boolean status = rs.getBoolean("status");
-                    user = new UserDTO(userID, fullName, roleID, "", phone, email, status);
+                    user = new UserDTO(userID, rs.getString("fullName"), rs.getString("roleID"),
+                            "", rs.getString("phone"), rs.getString("email"), rs.getBoolean("status"));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ptm != null) {
-                ptm.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
         }
         return user;
     }
 
-    // Cập nhật lại hàm insertUser để dùng DBUtils cho đồng bộ
-    public boolean insertUser(UserDTO user) throws SQLException, ClassNotFoundException {
-        boolean check = false;
-        Connection conn = null;
-        PreparedStatement ptm = null;
-        try {
-            conn = DBUtils.getConnection();
-            if (conn != null) {
-                String sql = "INSERT INTO tblUsers(userID, fullName, roleID, password, phone, email, status) VALUES(?,?,?,?,?,?,?)";
-                ptm = conn.prepareStatement(sql);
-                ptm.setString(1, user.getUserID());
-                ptm.setString(2, user.getFullName());
-                ptm.setString(3, user.getRoleID());
-                ptm.setString(4, user.getPassword());
-                ptm.setString(5, user.getPhone());
-                ptm.setString(6, user.getEmail());
-                ptm.setBoolean(7, user.isStatus());
-                check = ptm.executeUpdate() > 0;
-            }
-        } finally {
-            if (ptm != null) {
-                ptm.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+    // Thêm người dùng mới (Dùng try-with-resources)
+    public boolean insertUser(UserDTO user) throws SQLException {
+        String sql = "INSERT INTO tblUsers(userID, fullName, roleID, password, phone, email, status) VALUES(?,?,?,?,?,?,?)";
+        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ptm = conn.prepareStatement(sql)) {
+            ptm.setString(1, user.getUserID());
+            ptm.setString(2, user.getFullName());
+            ptm.setString(3, user.getRoleID());
+            ptm.setString(4, user.getPassword());
+            ptm.setString(5, user.getPhone());
+            ptm.setString(6, user.getEmail());
+            ptm.setBoolean(7, user.isStatus());
+            return ptm.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return check;
     }
 
     // Hàm lấy danh sách tất cả nhân viên

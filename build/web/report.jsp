@@ -23,8 +23,7 @@
             String role = (String) session.getAttribute("ROLE");
             if (role == null) role = ""; 
 
-            // Lấy dữ liệu đã được Controller đẩy vào request
-            // Sử dụng toán tử 3 ngôi để tránh hiển thị "null" nếu chưa có dữ liệu
+            
             Object totalOrders = request.getAttribute("TOTAL_ORDERS");
             Object cancelledOrders = request.getAttribute("CANCELLED_ORDERS");
             Object totalCash = request.getAttribute("TOTAL_CASH");
