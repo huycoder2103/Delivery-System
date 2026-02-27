@@ -23,14 +23,14 @@
 
         <form action="MainController" method="POST">
             <div class="order-toolbar">
-                <span style="color: white; font-weight: bold;">Thông tin hàng gửi</span>
+                <span ">Thông tin hàng gửi</span>
                 
                 <%-- SỬA TẠI ĐÂY: name="SaveOrder" để điều hướng trong Controller --%>
                 <input type="submit" name="SaveOrder" value="Lưu đơn hàng" class="btn-save">
             </div>
 
             <div class="form-body">
-                <div class="form-group" style="margin-bottom: 15px;">
+                <div class="form-group">
                     <label>Tên Hàng Gửi</label>
                     <input type="text" name="itemName" placeholder="Nhập Tên Hàng Gửi..." required>
                 </div>

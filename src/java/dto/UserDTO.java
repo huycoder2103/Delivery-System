@@ -19,6 +19,9 @@ public class UserDTO implements Serializable {
     private String phone;
     private String email;
     private boolean status;
+    
+    private int orderCount;
+    private double revenue;
 
     public UserDTO() {
     }
@@ -32,7 +35,32 @@ public class UserDTO implements Serializable {
         this.email = email;
         this.status = status;
     }
+    
+    public UserDTO(String userID, String fullName, int orderCount, double revenue) {
+        this.userID = userID;
+        this.fullName = fullName;
+        this.orderCount = orderCount;
+        this.revenue = revenue;
+    }
 
+    public int getOrderCount() {
+        return orderCount;
+    }
+
+    public void setOrderCount(int orderCount) {
+        this.orderCount = orderCount;
+    }
+
+    public double getRevenue() {
+        return revenue;
+    }
+
+    public void setRevenue(double revenue) {
+        this.revenue = revenue;
+    }
+
+    
+    
     public String getUserID() {
         return userID;
     }

@@ -64,7 +64,7 @@ public class MainController extends HttpServlet {
                     || request.getParameter("AddArrivalTrip") != null
                     || request.getParameter("AddTrip") != null
                     || request.getParameter("ListHang") != null
-                    || request.getParameter("ReceiveTrip") != null // Nhận hàng
+                    || request.getParameter("ReceiveTrip") != null 
                     || request.getParameter("ShipOrder") != null
                     || request.getParameter("EditOrder") != null
                     || request.getParameter("TransferGoods") != null

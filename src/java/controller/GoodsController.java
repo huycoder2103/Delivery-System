@@ -4,12 +4,8 @@
  */
 package controller;
 
-import dao.StationDAO;
-import dto.StationDTO;
-import dao.TruckDAO;
-import dto.TruckDTO;
+
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -38,9 +34,6 @@ public class GoodsController extends HttpServlet {
         try {
             // 1. Xử lý hành động liên quan đến ĐƠN HÀNG (Orders)
             if (request.getParameter("CreateOrder") != null) {
-                StationDAO dao = new StationDAO();
-                List<StationDTO> list = dao.getAllStations();
-                request.setAttribute("STATION_LIST", list);
                 url = CREATE_ORDER_PAGE;
             } 
             else if (request.getParameter("ViewOrderList") != null) {
@@ -49,10 +42,6 @@ public class GoodsController extends HttpServlet {
             
             // 2. Xử lý hành động liên quan đến CHUYẾN XE ĐI (Departure Trips)
             else if (request.getParameter("AddTrip") != null) {
-                StationDAO sDao = new StationDAO();
-                TruckDAO tDao = new TruckDAO();
-                request.setAttribute("STATION_LIST", sDao.getAllStations());
-                request.setAttribute("TRUCK_LIST", tDao.getAvailableTrucks());
                 url = TRIP_CREATE_PAGE;
             }
             else if (request.getParameter("ViewTripList") != null) {
@@ -66,9 +55,7 @@ public class GoodsController extends HttpServlet {
             else if (request.getParameter("AddArrivalTrip") != null) {
                 url = ARRIVAL_CREATE_PAGE;
             }
-            
-            // 4. Các hành động bổ trợ khác (Search, Edit, Ship...)
-            // Lưu ý: Bạn có thể thêm logic lấy dữ liệu từ DAO tại đây nếu cần
+
             else if (request.getParameter("SearchOrderByPhone") != null 
                     || request.getParameter("EditOrder") != null) {
                 url = ORDER_LIST_PAGE;
