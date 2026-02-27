@@ -49,6 +49,7 @@
                             <option value="">-- Chọn Trạm Nhận --</option>
                             <option value="Châu Đốc">Châu Đốc</option>
                             <option value="Long Xuyên">Long Xuyên</option>
+                            <option value="Long Xuyên">Kiên Giang</option>
                         </select>
                     </div>
                 </div>

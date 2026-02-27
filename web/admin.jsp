@@ -1,9 +1,3 @@
-<%-- 
-    Document   : admin
-    Created on : Feb 24, 2026, 5:51:10 PM
-    Author     : HuyNHSE190240
---%>
-
 <%@page import="dto.UserDTO"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -19,20 +13,26 @@
     <%@include file="includes/navbar.jsp" %>
 
     <%
-        List<UserDTO> list    = (List<UserDTO>) request.getAttribute("USER_LIST");
+        List<UserDTO> list     = (List<UserDTO>) request.getAttribute("USER_LIST");
         List<String[]> annList = (List<String[]>) request.getAttribute("ANN_LIST");
         String errMsg = (String) request.getAttribute("ERROR_MESSAGE");
+        String sucMsg = (String) request.getAttribute("SUCCESS_MESSAGE");
     %>
 
     <% if (errMsg != null) { %>
-    <div style="background:#f8d7da;color:#721c24;padding:10px 20px;text-align:center;">
-        <%= errMsg %>
+    <div style="background:#f8d7da;color:#721c24;padding:10px 20px;text-align:center;font-weight:bold;">
+        ❌ <%= errMsg %>
+    </div>
+    <% } %>
+    <% if (sucMsg != null) { %>
+    <div style="background:#d4edda;color:#155724;padding:10px 20px;text-align:center;font-weight:bold;">
+        ✅ <%= sucMsg %>
     </div>
     <% } %>
 
-    <!-- ═══════════════════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════════════
          PHẦN 1: QUẢN LÝ NHÂN VIÊN
-    ═══════════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div class="admin-container">
         <div class="admin-header">
             <h2>QUẢN LÝ NHÂN VIÊN</h2>
@@ -76,12 +76,19 @@
                             </span>
                         </td>
                         <td>
+                            <%-- Bật/Tắt --%>
                             <form action="AdminController" method="POST" style="display:inline;">
                                 <input type="hidden" name="userID" value="<%= user.getUserID() %>">
                                 <input type="submit" name="ToggleUser"
                                        value="<%= user.isStatus() ? "Khóa" : "Mở khóa" %>"
                                        class="btn-action <%= user.isStatus() ? "btn-orange" : "btn-green" %>">
                             </form>
+                            <%-- Đổi mật khẩu --%>
+                            <button class="btn-action btn-blue"
+                                    onclick="showChangePassModal('<%= user.getUserID() %>', '<%= user.getFullName() %>')">
+                                Đổi MK
+                            </button>
+                            <%-- Xóa (không xóa admin) --%>
                             <% if (!"admin".equals(user.getUserID())) { %>
                             <form action="AdminController" method="POST" style="display:inline;"
                                   onsubmit="return confirm('Xác nhận vô hiệu hóa nhân viên này?');">
@@ -97,9 +104,9 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════════════
          PHẦN 2: QUẢN LÝ BẢNG TIN HỆ THỐNG
-    ═══════════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div class="admin-container" style="margin-top: 30px;">
         <div class="admin-header">
             <h2>📢 BẢNG TIN HỆ THỐNG</h2>
@@ -124,13 +131,12 @@
                         if (annList != null && !annList.isEmpty()) {
                             int i = 1;
                             for (String[] ann : annList) {
-                                // ann[0]=annID, [1]=title, [2]=content,
-                                // [3]=fullName, [4]=createdDate, [5]=isActive
+                                // ann[0]=id, [1]=title, [2]=content, [3]=fullName, [4]=createdDate, [5]=isActive
                     %>
                     <tr>
                         <td><%= i++ %></td>
                         <td><strong><%= ann[1] %></strong></td>
-                        <td style="max-width:300px; word-wrap:break-word; text-align:left;">
+                        <td style="max-width:300px;word-wrap:break-word;text-align:left;">
                             <%= ann[2] %>
                         </td>
                         <td><%= ann[3] %></td>
@@ -149,10 +155,12 @@
                             </form>
                         </td>
                     </tr>
-                    <%  }
-                        } else { %>
+                    <%
+                            }
+                        } else {
+                    %>
                     <tr>
-                        <td colspan="7" style="text-align:center; padding:20px; color:#888;">
+                        <td colspan="7" style="text-align:center;padding:20px;color:#888;">
                             Chưa có bảng tin nào.
                         </td>
                     </tr>
@@ -162,32 +170,41 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         MODAL: THÊM NHÂN VIÊN
-    ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL: THÊM NHÂN VIÊN (có xác nhận mật khẩu)
+    ═══════════════════════════════════════════════════════ -->
     <div id="addModal" class="modal">
         <div class="modal-content">
             <h3>➕ THÊM NHÂN VIÊN MỚI</h3>
-            <form action="MainController" method="POST">
+            <form action="MainController" method="POST" onsubmit="return validateAddForm()">
                 <div class="group">
                     <label>Mã Tài Khoản <span style="color:red">*</span></label>
-                    <input type="text" name="newUserID" class="inp" required placeholder="VD: NV05">
+                    <input type="text" name="newUserID" id="newUserID" class="inp" required
+                           placeholder="VD: NV05">
                 </div>
                 <div class="group">
                     <label>Họ Tên <span style="color:red">*</span></label>
-                    <input type="text" name="newFullName" class="inp" required>
+                    <input type="text" name="newFullName" class="inp" required
+                           placeholder="Nguyễn Văn A">
                 </div>
                 <div class="group">
                     <label>Mật Khẩu <span style="color:red">*</span></label>
-                    <input type="password" name="newPassword" class="inp" required>
+                    <input type="password" name="newPassword" id="newPassword" class="inp" required
+                           placeholder="Nhập mật khẩu">
+                </div>
+                <div class="group">
+                    <label>Xác Nhận Mật Khẩu <span style="color:red">*</span></label>
+                    <input type="password" name="newConfirmPassword" id="newConfirmPassword" class="inp" required
+                           placeholder="Nhập lại mật khẩu">
+                    <small id="addPassErr" style="color:red;display:none;">Mật khẩu không khớp!</small>
                 </div>
                 <div class="group">
                     <label>Số Điện Thoại</label>
-                    <input type="tel" name="newPhone" class="inp" placeholder="SDT">
+                    <input type="tel" name="newPhone" class="inp" placeholder="0901234567">
                 </div>
                 <div class="group">
                     <label>Email</label>
-                    <input type="email" name="newEmail" class="inp">
+                    <input type="email" name="newEmail" class="inp" placeholder="abc@company.vn">
                 </div>
                 <div class="modal-footer">
                     <input type="submit" name="SaveUser" value="💾 Lưu Nhân Viên" class="btn-cyan">
@@ -197,9 +214,37 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL: ĐỔI MẬT KHẨU
+    ═══════════════════════════════════════════════════════ -->
+    <div id="changePassModal" class="modal">
+        <div class="modal-content">
+            <h3>🔑 ĐỔI MẬT KHẨU</h3>
+            <p id="cpUserLabel" style="color:#555;margin-bottom:15px;"></p>
+            <form action="AdminController" method="POST" onsubmit="return validateChangePassForm()">
+                <input type="hidden" name="cpUserID" id="cpUserID">
+                <div class="group">
+                    <label>Mật Khẩu Mới <span style="color:red">*</span></label>
+                    <input type="password" name="cpNewPassword" id="cpNewPassword" class="inp" required
+                           placeholder="Nhập mật khẩu mới">
+                </div>
+                <div class="group">
+                    <label>Xác Nhận Mật Khẩu Mới <span style="color:red">*</span></label>
+                    <input type="password" name="cpConfirmPassword" id="cpConfirmPassword" class="inp" required
+                           placeholder="Nhập lại mật khẩu mới">
+                    <small id="cpPassErr" style="color:red;display:none;">Mật khẩu không khớp!</small>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="ChangePassword" value="✅ Xác Nhận Đổi" class="btn-cyan">
+                    <button type="button" onclick="hideChangePassModal()" class="btn-back">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
          MODAL: THÊM BẢNG TIN
-    ═══════════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="annModal" class="modal">
         <div class="modal-content">
             <h3>📢 THÊM BẢNG TIN MỚI</h3>
@@ -212,7 +257,7 @@
                 <div class="group">
                     <label>Nội Dung <span style="color:red">*</span></label>
                     <textarea name="annContent" class="inp" required rows="5"
-                              style="resize:vertical; padding:10px;"
+                              style="resize:vertical;padding:10px;"
                               placeholder="Nhập nội dung thông báo..."></textarea>
                 </div>
                 <div class="modal-footer">
@@ -224,11 +269,48 @@
     </div>
 
     <script>
-        // Modal nhân viên
+        // ── Modal nhân viên ──────────────────────────────────────────────
         function showAddModal() { document.getElementById('addModal').style.display = 'flex'; }
         function hideAddModal() { document.getElementById('addModal').style.display = 'none'; }
 
-        // Modal bảng tin
+        function validateAddForm() {
+            var p1 = document.getElementById('newPassword').value;
+            var p2 = document.getElementById('newConfirmPassword').value;
+            var err = document.getElementById('addPassErr');
+            if (p1 !== p2) {
+                err.style.display = 'block';
+                return false;
+            }
+            err.style.display = 'none';
+            return true;
+        }
+
+        // ── Modal đổi mật khẩu ───────────────────────────────────────────
+        function showChangePassModal(userID, fullName) {
+            document.getElementById('cpUserID').value = userID;
+            document.getElementById('cpUserLabel').textContent = 'Nhân viên: ' + fullName + ' (' + userID + ')';
+            document.getElementById('cpNewPassword').value = '';
+            document.getElementById('cpConfirmPassword').value = '';
+            document.getElementById('cpPassErr').style.display = 'none';
+            document.getElementById('changePassModal').style.display = 'flex';
+        }
+        function hideChangePassModal() {
+            document.getElementById('changePassModal').style.display = 'none';
+        }
+
+        function validateChangePassForm() {
+            var p1 = document.getElementById('cpNewPassword').value;
+            var p2 = document.getElementById('cpConfirmPassword').value;
+            var err = document.getElementById('cpPassErr');
+            if (p1 !== p2) {
+                err.style.display = 'block';
+                return false;
+            }
+            err.style.display = 'none';
+            return true;
+        }
+
+        // ── Modal bảng tin ───────────────────────────────────────────────
         function showAnnModal() { document.getElementById('annModal').style.display = 'flex'; }
         function hideAnnModal() { document.getElementById('annModal').style.display = 'none'; }
 
@@ -237,9 +319,9 @@
             if (e.target.className === 'modal') {
                 hideAddModal();
                 hideAnnModal();
+                hideChangePassModal();
             }
         }
     </script>
 </body>
 </html>
-

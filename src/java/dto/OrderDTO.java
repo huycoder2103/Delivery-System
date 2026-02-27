@@ -1,14 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dto;
-
-/**
- *
- * @author jayke
- */
-// File: src/java/dto/OrderDTO.java
 
 import java.io.Serializable;
 
@@ -25,165 +15,94 @@ public class OrderDTO implements Serializable {
     private String receiveStation;
     private String staffInput;
     private String staffReceive;
-    private String tr;        // Tiền đã thanh toán
-    private String ct;        // Tiền chưa thanh toán
+    private String tr;           // trạng thái: Chưa Chuyển / Đã Chuyển / Đã Nhận
+    private String ct;           // loại hàng / ghi chú loại
     private String receiveDate;
-    private String note;      // Ghi chú
+    private String tripID;
+    private String note;
 
-    public OrderDTO() {
-    }
+    public OrderDTO() {}
 
+    // Constructor đầy đủ (không có note, tripID)
     public OrderDTO(String orderID, String itemName, double amount,
-            String senderName, String senderPhone, String sendStation,
-            String receiverName, String receiverPhone, String receiveStation,
-            String staffInput, String staffReceive,
-            String tr, String ct, String receiveDate) {
-        this.orderID = orderID;
-        this.itemName = itemName;
-        this.amount = amount;
-        this.senderName = senderName;
-        this.senderPhone = senderPhone;
-        this.sendStation = sendStation;
-        this.receiverName = receiverName;
-        this.receiverPhone = receiverPhone;
+                    String senderName, String senderPhone, String sendStation,
+                    String receiverName, String receiverPhone, String receiveStation,
+                    String staffInput, String staffReceive,
+                    String tr, String ct, String receiveDate) {
+        this.orderID        = orderID;
+        this.itemName       = itemName;
+        this.amount         = amount;
+        this.senderName     = senderName;
+        this.senderPhone    = senderPhone;
+        this.sendStation    = sendStation;
+        this.receiverName   = receiverName;
+        this.receiverPhone  = receiverPhone;
         this.receiveStation = receiveStation;
-        this.staffInput = staffInput;
-        this.staffReceive = staffReceive;
-        this.tr = tr;
-        this.ct = ct;
-        this.receiveDate = receiveDate;
+        this.staffInput     = staffInput;
+        this.staffReceive   = staffReceive;
+        this.tr             = tr;
+        this.ct             = ct;
+        this.receiveDate    = receiveDate;
     }
 
-    // Constructor đầy đủ có note
+    // Constructor có note
     public OrderDTO(String orderID, String itemName, double amount,
-            String senderName, String senderPhone, String sendStation,
-            String receiverName, String receiverPhone, String receiveStation,
-            String staffInput, String staffReceive,
-            String tr, String ct, String receiveDate, String note) {
+                    String senderName, String senderPhone, String sendStation,
+                    String receiverName, String receiverPhone, String receiveStation,
+                    String staffInput, String staffReceive,
+                    String tr, String ct, String receiveDate, String note) {
         this(orderID, itemName, amount, senderName, senderPhone, sendStation,
-                receiverName, receiverPhone, receiveStation,
-                staffInput, staffReceive, tr, ct, receiveDate);
+             receiverName, receiverPhone, receiveStation, staffInput, staffReceive,
+             tr, ct, receiveDate);
         this.note = note;
     }
 
     // Getters & Setters
-    public String getOrderID() {
-        return orderID;
-    }
+    public String getOrderID()              { return orderID; }
+    public void   setOrderID(String v)      { this.orderID = v; }
 
-    public void setOrderID(String orderID) {
-        this.orderID = orderID;
-    }
+    public String getItemName()             { return itemName; }
+    public void   setItemName(String v)     { this.itemName = v; }
 
-    public String getItemName() {
-        return itemName;
-    }
+    public double getAmount()               { return amount; }
+    public void   setAmount(double v)       { this.amount = v; }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
+    public String getSenderName()           { return senderName; }
+    public void   setSenderName(String v)   { this.senderName = v; }
 
-    public double getAmount() {
-        return amount;
-    }
+    public String getSenderPhone()          { return senderPhone; }
+    public void   setSenderPhone(String v)  { this.senderPhone = v; }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
+    public String getSendStation()          { return sendStation; }
+    public void   setSendStation(String v)  { this.sendStation = v; }
 
-    public String getSenderName() {
-        return senderName;
-    }
+    public String getReceiverName()         { return receiverName; }
+    public void   setReceiverName(String v) { this.receiverName = v; }
 
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
+    public String getReceiverPhone()         { return receiverPhone; }
+    public void   setReceiverPhone(String v) { this.receiverPhone = v; }
 
-    public String getSenderPhone() {
-        return senderPhone;
-    }
+    public String getReceiveStation()           { return receiveStation; }
+    public void   setReceiveStation(String v)   { this.receiveStation = v; }
 
-    public void setSenderPhone(String senderPhone) {
-        this.senderPhone = senderPhone;
-    }
+    public String getStaffInput()               { return staffInput; }
+    public void   setStaffInput(String v)       { this.staffInput = v; }
 
-    public String getSendStation() {
-        return sendStation;
-    }
+    public String getStaffReceive()             { return staffReceive; }
+    public void   setStaffReceive(String v)     { this.staffReceive = v; }
 
-    public void setSendStation(String sendStation) {
-        this.sendStation = sendStation;
-    }
+    public String getTr()                   { return tr; }
+    public void   setTr(String v)           { this.tr = v; }
 
-    public String getReceiverName() {
-        return receiverName;
-    }
+    public String getCt()                   { return ct; }
+    public void   setCt(String v)           { this.ct = v; }
 
-    public void setReceiverName(String receiverName) {
-        this.receiverName = receiverName;
-    }
+    public String getReceiveDate()          { return receiveDate; }
+    public void   setReceiveDate(String v)  { this.receiveDate = v; }
 
-    public String getReceiverPhone() {
-        return receiverPhone;
-    }
+    public String getTripID()               { return tripID; }
+    public void   setTripID(String v)       { this.tripID = v; }
 
-    public void setReceiverPhone(String receiverPhone) {
-        this.receiverPhone = receiverPhone;
-    }
-
-    public String getReceiveStation() {
-        return receiveStation;
-    }
-
-    public void setReceiveStation(String receiveStation) {
-        this.receiveStation = receiveStation;
-    }
-
-    public String getStaffInput() {
-        return staffInput;
-    }
-
-    public void setStaffInput(String staffInput) {
-        this.staffInput = staffInput;
-    }
-
-    public String getStaffReceive() {
-        return staffReceive;
-    }
-
-    public void setStaffReceive(String staffReceive) {
-        this.staffReceive = staffReceive;
-    }
-
-    public String getTr() {
-        return tr;
-    }
-
-    public void setTr(String tr) {
-        this.tr = tr;
-    }
-
-    public String getCt() {
-        return ct;
-    }
-
-    public void setCt(String ct) {
-        this.ct = ct;
-    }
-
-    public String getReceiveDate() {
-        return receiveDate;
-    }
-
-    public void setReceiveDate(String receiveDate) {
-        this.receiveDate = receiveDate;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
+    public String getNote()                 { return note; }
+    public void   setNote(String v)         { this.note = v; }
 }

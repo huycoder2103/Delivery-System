@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import java.io.IOException;
@@ -25,19 +21,16 @@ public class HomeController extends HttpServlet {
 
         String url = "home.jsp";
         try {
-            // Tải bản tin hệ thống từ database
+            // Tải bản tin hệ thống (bao gồm id để nút xóa hoạt động)
             List<String[]> newsList = getAnnouncements();
             request.setAttribute("NEWS_LIST", newsList);
 
-            // Điều hướng trang
             if (request.getParameter("ViewGoods") != null) {
                 url = "goods.jsp";
-            } else if (request.getParameter("ViewReports") != null) {
-                url = "ReportController";
-            } else if (request.getParameter("ViewOrderReport") != null) {
+            } else if (request.getParameter("ViewReports") != null
+                    || request.getParameter("ViewOrderReport") != null) {
                 url = "ReportController";
             }
-            // GoHome → mặc định home.jsp với news
 
         } catch (Exception e) {
             log("Error at HomeController: " + e.toString());
@@ -46,10 +39,14 @@ public class HomeController extends HttpServlet {
         }
     }
 
-    /** Lấy danh sách thông báo đang hoạt động từ DB */
+    /**
+     * Lấy danh sách thông báo đang hoạt động.
+     * FIX: Thêm a.id vào SELECT để nút xóa trong home.jsp hoạt động.
+     * Trả về: [0]=id, [1]=title, [2]=content, [3]=fullName, [4]=createdDate
+     */
     private List<String[]> getAnnouncements() {
         List<String[]> list = new ArrayList<>();
-        String sql = "SELECT TOP 5 a.title, a.content, u.fullName, "
+        String sql = "SELECT TOP 5 a.id, a.title, a.content, u.fullName, "
                    + "CONVERT(NVARCHAR, a.createdAt, 103) AS createdDate "
                    + "FROM tblAnnouncements a "
                    + "LEFT JOIN tblUsers u ON a.createdBy = u.userID "
@@ -60,10 +57,11 @@ public class HomeController extends HttpServlet {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new String[]{
-                    rs.getString("title"),
-                    rs.getString("content"),
-                    rs.getString("fullName") != null ? rs.getString("fullName") : "Admin",
-                    rs.getString("createdDate")
+                    rs.getString("id"),           // [0] dùng cho nút xóa
+                    rs.getString("title"),        // [1]
+                    rs.getString("content"),      // [2]
+                    rs.getString("fullName") != null ? rs.getString("fullName") : "Admin", // [3]
+                    rs.getString("createdDate")   // [4]
                 });
             }
         } catch (Exception e) {
@@ -72,43 +70,14 @@ public class HomeController extends HttpServlet {
         return list;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    public String getServletInfo() { return "HomeController"; }
 }
