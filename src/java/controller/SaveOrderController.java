@@ -20,7 +20,6 @@ public class SaveOrderController extends HttpServlet {
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
-        // Sau khi lưu → quay về danh sách đơn hàng
         String url = "GoodsController?ViewOrderList=true";
 
         try {
@@ -33,11 +32,31 @@ public class SaveOrderController extends HttpServlet {
             String receiverPhone  = request.getParameter("receiverPhone");
             String note           = request.getParameter("note");
 
-            // Parse tiền cước (tránh crash khi ô trống)
-            double paid = 0;
+            // TR = tiền đã thanh toán (để trống nếu không nhập)
+            String trValue = "";
+            String paidStr = request.getParameter("paidAmount");
+            if (paidStr != null && !paidStr.trim().isEmpty()) {
+                try {
+                    double paid = Double.parseDouble(paidStr.trim());
+                    if (paid > 0) trValue = String.format("%.0f", paid);
+                } catch (NumberFormatException ignored) {}
+            }
+
+            // CT = tiền chưa thanh toán (để trống nếu không nhập)
+            String ctValue = "";
+            String remainStr = request.getParameter("remainAmount");
+            if (remainStr != null && !remainStr.trim().isEmpty()) {
+                try {
+                    double remain = Double.parseDouble(remainStr.trim());
+                    if (remain > 0) ctValue = String.format("%.0f", remain);
+                } catch (NumberFormatException ignored) {}
+            }
+
+            // amount = tổng paid + remain
+            double totalAmount = 0;
             try {
-                String paidStr = request.getParameter("paidAmount");
-                if (paidStr != null && !paidStr.isEmpty()) paid = Double.parseDouble(paidStr);
+                if (!trValue.isEmpty()) totalAmount += Double.parseDouble(trValue);
+                if (!ctValue.isEmpty()) totalAmount += Double.parseDouble(ctValue);
             } catch (NumberFormatException ignored) {}
 
             // Validate bắt buộc
@@ -50,20 +69,30 @@ public class SaveOrderController extends HttpServlet {
 
             // Lấy nhân viên đang đăng nhập
             HttpSession session = request.getSession(false);
-            String staffID = "NV01"; // fallback
+            String staffID = "NV01";
             if (session != null && session.getAttribute("LOGIN_USER") != null) {
                 staffID = ((UserDTO) session.getAttribute("LOGIN_USER")).getUserID();
             }
 
-            // Tạo mã đơn hàng: DH + 6 chữ số ngẫu nhiên
-            String orderID  = "DH" + String.format("%05d", System.currentTimeMillis() % 100000L);
-            String dateStr  = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
+            String orderID = "DH" + String.format("%05d", System.currentTimeMillis() % 100000L);
+            String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
 
             OrderDTO order = new OrderDTO(
-                orderID, itemName.trim(), paid,
-                senderName, senderPhone, sendStation,
-                receiverName, receiverPhone, receiveStation,
-                staffID, null, "Chưa Chuyển", note, dateStr
+                orderID,
+                itemName.trim(),
+                totalAmount,
+                senderName,
+                senderPhone,
+                sendStation,
+                receiverName,
+                receiverPhone,
+                receiveStation,
+                staffID,
+                null,
+                trValue,   // TR = tiền đã thanh toán
+                ctValue,   // CT = tiền chưa thanh toán
+                dateStr,
+                note       // Ghi chú
             );
 
             OrderDAO dao = new OrderDAO();

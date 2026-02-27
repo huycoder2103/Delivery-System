@@ -43,7 +43,6 @@
         <input type="text" name="searchPhone"
                placeholder="Nhập SĐT người gửi hoặc nhận..."
                value="<%= request.getParameter("searchPhone") != null ? request.getParameter("searchPhone") : "" %>">
-
         <input type="submit" name="SearchOrderByPhone" value="Tìm kiếm" class="btn-filter">
     </form>
 
@@ -58,17 +57,18 @@
             <tr>
                 <th><input type="checkbox"></th>
                 <th>Mã</th>
-                <th>Tên Hàng - Số Tiền</th>
-                <th>Gửi</th>
+                <th>Tên Hàng</th>
+                <th>Người Gửi</th>
                 <th>SĐT</th>
                 <th>Trạm Gửi</th>
-                <th>Nhận</th>
+                <th>Người Nhận</th>
                 <th>SĐT</th>
                 <th>Trạm Nhận</th>
                 <th>NV Nhập</th>
                 <th>NV Nhận</th>
                 <th>TR</th>
                 <th>CT</th>
+                <th>Ghi Chú</th>
                 <th>Ngày Nhận</th>
                 <th>Handling</th>
             </tr>
@@ -85,10 +85,7 @@
                                 <a href="#">${o.orderID}</a>
                             </td>
 
-                            <td>
-                                <strong>${o.itemName}</strong><br>
-                                <small>${o.amount}</small>
-                            </td>
+                            <td><strong>${o.itemName}</strong></td>
 
                             <td>${o.senderName}</td>
                             <td>${o.senderPhone}</td>
@@ -104,20 +101,22 @@
                             <td>${o.tr}</td>
                             <td>${o.ct}</td>
 
+                            <%-- Cột Ghi Chú --%>
+                            <td style="max-width:150px; word-wrap:break-word; text-align:left;">
+                                ${o.note}
+                            </td>
+
                             <td>${o.receiveDate}</td>
 
                             <td>
                                 <form action="MainController" method="POST">
                                     <input type="hidden" name="orderID" value="${o.orderID}">
-
                                     <input type="submit" name="ShipOrder"
                                            value="Chuyển Hàng"
                                            class="btn-action btn-ship">
-
                                     <input type="submit" name="EditOrder"
                                            value="Sửa"
                                            class="btn-action btn-edit">
-
                                     <input type="submit" name="DeleteOrder"
                                            value="Delete"
                                            class="btn-action btn-delete">
@@ -128,8 +127,8 @@
                 </c:when>
                 <c:otherwise>
                     <tr>
-                        <td colspan="15" style="text-align:center;padding:30px;color:#888;">
-                            Không có dữ liệu hiển thị (No data available)
+                        <td colspan="16" style="text-align:center;padding:30px;color:#888;">
+                            Không có dữ liệu hiển thị
                         </td>
                     </tr>
                 </c:otherwise>
