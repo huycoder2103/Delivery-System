@@ -5,7 +5,7 @@
 package controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -13,40 +13,63 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import utils.DBUtils;
 
-/**
- *
- * @author HuyNHSE190240
- */
 @WebServlet(name = "HomeController", urlPatterns = {"/HomeController"})
 public class HomeController extends HttpServlet {
-
-    private static final String HOME_PAGE = "home.jsp";
-    private static final String GOODS_PAGE = "goods.jsp";
-    private static final String ADMIN_PAGE = "admin.jsp";
-    private static final String REPORTS_PAGE = "report.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        String url = HOME_PAGE;
-
+        String url = "home.jsp";
         try {
+            // Tải bản tin hệ thống từ database
+            List<String[]> newsList = getAnnouncements();
+            request.setAttribute("NEWS_LIST", newsList);
 
+            // Điều hướng trang
             if (request.getParameter("ViewGoods") != null) {
-                url = GOODS_PAGE;
+                url = "goods.jsp";
             } else if (request.getParameter("ViewReports") != null) {
-                url = REPORTS_PAGE;
-            } else if (request.getParameter("GoHome") != null) {
-                url = HOME_PAGE;
+                url = "ReportController";
+            } else if (request.getParameter("ViewOrderReport") != null) {
+                url = "ReportController";
             }
+            // GoHome → mặc định home.jsp với news
+
         } catch (Exception e) {
             log("Error at HomeController: " + e.toString());
         } finally {
             request.getRequestDispatcher(url).forward(request, response);
         }
+    }
+
+    /** Lấy danh sách thông báo đang hoạt động từ DB */
+    private List<String[]> getAnnouncements() {
+        List<String[]> list = new ArrayList<>();
+        String sql = "SELECT TOP 5 a.title, a.content, u.fullName, "
+                   + "CONVERT(NVARCHAR, a.createdAt, 103) AS createdDate "
+                   + "FROM tblAnnouncements a "
+                   + "LEFT JOIN tblUsers u ON a.createdBy = u.userID "
+                   + "WHERE a.isActive = 1 "
+                   + "ORDER BY a.createdAt DESC";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new String[]{
+                    rs.getString("title"),
+                    rs.getString("content"),
+                    rs.getString("fullName") != null ? rs.getString("fullName") : "Admin",
+                    rs.getString("createdDate")
+                });
+            }
+        } catch (Exception e) {
+            // Không crash trang chủ nếu DB lỗi
+        }
+        return list;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

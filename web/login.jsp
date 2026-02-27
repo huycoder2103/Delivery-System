@@ -22,13 +22,13 @@
             <form action="MainController" method="POST">
                 <div class="group">
                     <span class="label">User ID</span>
-                    <input type="text" name="userID" class="inp" placeholder="Nhập tài khoản" required 
+                     <input type="text" name="userID" class="inp" placeholder="Nhập tài khoản" required 
                            value="<%= request.getParameter("userID") != null ? request.getParameter("userID") : ""%>">
                 </div>
 
                 <div class="group">
                     <span class="label">Password</span>
-                    <input type="password" name="password" class="inp" placeholder="Nhập mật khẩu" required>
+                     <input type="password" name="password" class="inp" placeholder="Nhập mật khẩu" required>
                 </div>
 
 

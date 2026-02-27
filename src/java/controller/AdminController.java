@@ -7,7 +7,6 @@ package controller;
 import dao.UserDAO;
 import dto.UserDTO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,35 +14,31 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author HuyNHSE190240
- */
 @WebServlet(name = "AdminController", urlPatterns = {"/AdminController"})
 public class AdminController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         try {
-            // Lấy dữ liệu từ Database thông qua DAO
-            UserDAO dao = new UserDAO();
-            List<UserDTO> list = dao.getAllUsers(); 
-            
-            // Đẩy danh sách vào request để trang JSP có thể lấy ra
-            request.setAttribute("USER_LIST", list); 
+            // Xử lý Toggle trạng thái nhân viên (Kích hoạt / Vô hiệu hóa)
+            if (request.getParameter("ToggleUser") != null) {
+                String uid = request.getParameter("userID");
+                new UserDAO().toggleUserStatus(uid);
+
+            // Xóa nhân viên (soft delete: status = 0)
+            } else if (request.getParameter("DeleteUser") != null) {
+                String uid = request.getParameter("userID");
+                new UserDAO().deactivateUser(uid);
+            }
+
+            // Luôn load lại danh sách nhân viên
+            List<UserDTO> list = new UserDAO().getAllUsers();
+            request.setAttribute("USER_LIST", list);
+
         } catch (Exception e) {
             log("Error at AdminController: " + e.toString());
         } finally {
-            // Chuyển hướng sang trang admin.jsp
             request.getRequestDispatcher("admin.jsp").forward(request, response);
         }
     }

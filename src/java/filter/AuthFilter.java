@@ -1,50 +1,50 @@
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package filter;
-//
-///**
-// *
-// * @author HuyNHSE190240
-// */
-//import java.io.IOException;
-//import javax.servlet.Filter;
-//import javax.servlet.FilterChain;
-//import javax.servlet.FilterConfig;
-//import javax.servlet.ServletException;
-//import javax.servlet.ServletRequest;
-//import javax.servlet.ServletResponse;
-//import javax.servlet.annotation.WebFilter;
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import javax.servlet.http.HttpSession;
-//
-//@WebFilter(filterName = "AuthFilter", urlPatterns = {"*.jsp", "/MainController"})
-//public class AuthFilter implements Filter {
-//
-//    @Override
-//    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-//            throws IOException, ServletException {
-//        HttpServletRequest req = (HttpServletRequest) request;
-//        HttpServletResponse res = (HttpServletResponse) response;
-//        HttpSession session = req.getSession(false);
-//
-//        String loginURI = req.getContextPath() + "/login.jsp";
-//        String mainController = req.getContextPath() + "/MainController";
-//        
-//        // Kiểm tra xem người dùng đã đăng nhập chưa thông qua attribute "FULLNAME"
-//        boolean loggedIn = (session != null && session.getAttribute("FULLNAME") != null);
-//        boolean loginRequest = req.getRequestURI().equals(loginURI);
-//        boolean loginAction = "Login".equals(req.getParameter("Login"));
-//
-//        if (loggedIn || loginRequest || loginAction) {
-//            chain.doFilter(request, response); // Cho phép đi tiếp
-//        } else {
-//            res.sendRedirect(loginURI); // Bắt buộc quay lại trang login
-//        }
-//    }
-//
-//    @Override public void init(FilterConfig filterConfig) {}
-//    @Override public void destroy() {}
-//}
+package filter;
+
+import java.io.IOException;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.*;
+
+/**
+ * AuthFilter - Bảo vệ toàn bộ trang JSP & Controller.
+ * Người chưa đăng nhập sẽ bị redirect về login.jsp.
+ */
+@WebFilter(filterName = "AuthFilter", urlPatterns = {"*.jsp", "/MainController",
+           "/AdminController", "/GoodsController", "/HomeController",
+           "/ReportController", "/SaveOrderController", "/SaveTripController",
+           "/SaveArrivalController", "/CreateUserController"})
+public class AuthFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest  req = (HttpServletRequest)  request;
+        HttpServletResponse res = (HttpServletResponse) response;
+        HttpSession session     = req.getSession(false);
+
+        String uri        = req.getRequestURI();
+        String contextPath = req.getContextPath();
+
+        // ── Các URL được phép truy cập khi chưa đăng nhập ────────────────
+        boolean isLoginPage       = uri.equals(contextPath + "/login.jsp");
+        boolean isLoginAction     = "Login".equals(req.getParameter("Login"));
+        boolean isStaticResource  = uri.contains("/css/") || uri.contains("/js/")
+                                    || uri.contains("/images/");
+        boolean isLogoutAction    = "Logout".equals(req.getParameter("Logout"));
+        boolean isRootMainCtrl    = uri.endsWith("/MainController")
+                                    && req.getParameterMap().isEmpty();
+
+        boolean loggedIn = (session != null && session.getAttribute("LOGIN_USER") != null);
+
+        if (loggedIn || isLoginPage || isLoginAction || isStaticResource || isLogoutAction || isRootMainCtrl) {
+            chain.doFilter(request, response);
+        } else {
+            // Chưa đăng nhập → về trang login
+            res.sendRedirect(contextPath + "/login.jsp");
+        }
+    }
+
+    @Override public void init(FilterConfig fc) {}
+    @Override public void destroy() {}
+}
