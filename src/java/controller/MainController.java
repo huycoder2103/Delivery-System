@@ -68,7 +68,8 @@ public class MainController extends HttpServlet {
                     || request.getParameter("ShipOrder") != null
                     || request.getParameter("EditOrder") != null
                     || request.getParameter("TransferGoods") != null
-                    || request.getParameter("EditTrip") != null) {
+                    || request.getParameter("EditTrip") != null
+                    || request.getParameter("FilterOrder")!=null) {
                 url = "GoodsController";
             } 
             
