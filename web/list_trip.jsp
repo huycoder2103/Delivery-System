@@ -77,7 +77,7 @@
                                 <%-- SỬA: Form xử lý hàng dùng name định danh --%>
                                 <form action="MainController" method="POST" style="display: inline;">
                                     <input type="hidden" name="tripID" value="<%= t[0]%>">
-                                    <input type="submit" name="ListHang" value="List Hàng" class="btn-action btn-blue">
+                                    <input type="submit" name="ListGoods" value="List Hàng" class="btn-action btn-blue">
                                     <input type="submit" name="EditTrip" value="Sửa" class="btn-action btn-blue">
                                     <input type="submit" name="TransferGoods" value="Chuyển Hàng" class="btn-action btn-cyan">
                                 </form>

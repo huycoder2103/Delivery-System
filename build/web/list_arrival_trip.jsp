@@ -66,7 +66,7 @@
                         <td>
                             <form action="MainController" method="POST">
                                 <input type="hidden" name="tripID" value="<%= t[0]%>">
-                                <input type="submit" name="ListHang" value="List Hàng" class="btn-action btn-list">
+                                <input type="submit" name="ListGoods" value="List Hàng" class="btn-action btn-list">
                                 <% if ("received".equals(t[9])) { %>
                                 <input type="button" value="Đã nhận" class="btn-action btn-received">
                                 <% } else { %>

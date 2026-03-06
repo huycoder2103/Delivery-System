@@ -34,7 +34,7 @@ public class TruckDAO {
     }
 
     /** Lấy tất cả xe (kể cả đang đi) */
-    public List<TruckDTO> getAllTrucks() throws Exception {
+    public  List<TruckDTO> getAllTrucks() throws Exception {
         String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
                      "FROM tblTrucks ORDER BY truckID";
         List<TruckDTO> list = new ArrayList<>();
