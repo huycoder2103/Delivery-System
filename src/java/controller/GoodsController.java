@@ -43,14 +43,14 @@ public class GoodsController extends HttpServlet {
                 // ═══════════════════════════════════════════════════
                 // DANH SÁCH ĐƠN HÀNG
                 // ═══════════════════════════════════════════════════
-                case "listOrder":
+                case "ViewOrderList":
                     handleListOrder(request, response);
                     break;
 
                 // ═══════════════════════════════════════════════════
                 // THÊM ĐƠN HÀNG
                 // ═══════════════════════════════════════════════════
-                case "addOrder":
+                case "CreateOrder":
                     handleAddOrder(request, response);
                     break;
 
@@ -82,7 +82,7 @@ public class GoodsController extends HttpServlet {
                 // ═══════════════════════════════════════════════════
                 // CHUYẾN XE ĐI
                 // ═══════════════════════════════════════════════════
-                case "listTripDepart":
+                case "ViewTripList":
                     handleListTripDepart(request, response);
                     break;
 
@@ -93,7 +93,7 @@ public class GoodsController extends HttpServlet {
                 // ═══════════════════════════════════════════════════
                 // CHUYẾN XE ĐẾN
                 // ═══════════════════════════════════════════════════
-                case "listTripArrive":
+                case "ViewArrivalTripList":
                     handleListTripArrive(request, response);
                     break;
 
