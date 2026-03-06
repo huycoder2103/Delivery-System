@@ -9,7 +9,6 @@
     <title>Danh Sách Nhận Hàng</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/list_order.css">
-
 </head>
 <body>
 <%@include file="includes/navbar.jsp" %>
@@ -57,7 +56,6 @@
             <option value="" <%= "".equals(selStatus) ? "selected" : "" %>>-- Tất Cả Trạng Thái --</option>
             <option value="Chưa Chuyển" <%= "Chưa Chuyển".equals(selStatus) ? "selected" : "" %>>Chưa Chuyển</option>
             <option value="Đã Chuyển"   <%= "Đã Chuyển".equals(selStatus)   ? "selected" : "" %>>Đã Chuyển</option>
-            <option value="Đã Nhận"     <%= "Đã Nhận".equals(selStatus)     ? "selected" : "" %>>Đã Nhận</option>
         </select>
 
         <input type="submit" name="FilterOrder" value="🔍 Lọc" class="btn-filter">
@@ -91,9 +89,9 @@
                     <th>SĐT</th>
                     <th>Trạm Nhận</th>
                     <th>NV Nhập</th>
-                    <th>Đã thanh toán</th>
-                    <th>chưa thanh toán</th>
-                    <th>Trạng thái</th>
+                    <th>Đã Thanh Toán (TR)</th>
+                    <th>Chưa Thanh Toán (CT)</th>
+                    <th>Trạng Thái Chuyển</th>
                     <th>Ghi Chú</th>
                     <th>Ngày Nhận</th>
                     <th>Thao Tác</th>
@@ -113,20 +111,49 @@
                             <td>${o.receiverPhone}</td>
                             <td>${o.receiveStation}</td>
                             <td>${o.staffInput}</td>
-                            <td>
-                                <span style="font-size:0.75rem;font-weight:700;padding:2px 7px;border-radius:8px;
-                                    background:${o.tr == 'Đã Nhận' ? '#d6eaf8' : o.tr == 'Đã Chuyển' ? '#d5f5e3' : '#fdebd0'};
-                                    color:${o.tr == 'Đã Nhận' ? '#1a5276' : o.tr == 'Đã Chuyển' ? '#1e8449' : '#a04000'}">
-                                    ${o.tr}
-                                </span>
+
+                            <%-- Cột Đã Thanh Toán (TR) - hiển thị số tiền đã trả --%>
+                            <td style="text-align:center;">
+                                <c:choose>
+                                    <c:when test="${not empty o.tr}">
+                                        <span class="badge-tr">${o.tr}.000đ</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span style="color:#aaa;font-size:.78rem">—</span>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
-                            <td style="max-width:100px;font-size:0.78rem">${o.ct}</td>
+
+                            <%-- Cột Chưa Thanh Toán (CT) - hiển thị số tiền còn nợ --%>
+                            <td style="text-align:center;">
+                                <c:choose>
+                                    <c:when test="${not empty o.ct}">
+                                        <span class="badge-ct">${o.ct}.000đ</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span style="color:#aaa;font-size:.78rem">—</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+
+                            <%-- Cột Trạng Thái Chuyển Hàng (shipStatus) --%>
+                            <td style="text-align:center;">
+                                <c:choose>
+                                    <c:when test="${o.shipStatus == 'Đã Chuyển'}">
+                                        <span class="badge-da-chuyen">✅ Đã Chuyển</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge-chua-chuyen">⏳ Chưa Chuyển</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+
                             <td style="max-width:120px;word-wrap:break-word;font-size:0.78rem">${o.note}</td>
                             <td style="font-size:0.8rem">${o.receiveDate}</td>
                             <td>
                                 <form action="GoodsController" method="POST">
                                     <input type="hidden" name="orderID" value="${o.orderID}">
-                                    <input type="submit" name="ShipOrder" value="Chuyển Hàng"
+                                    <input type="submit" name="ShipOrder" value="🚚 Chuyển Hàng"
                                            class="btn-action btn-ship" style="margin-bottom:3px;display:block;">
                                     <input type="submit" name="EditOrder" value="✏ Sửa"
                                            class="btn-action btn-edit" style="margin-bottom:3px;display:block;">
@@ -140,7 +167,7 @@
                 </c:when>
                 <c:otherwise>
                     <tr>
-                        <td colspan="14" style="text-align:center;padding:30px;color:#888;">
+                        <td colspan="15" style="text-align:center;padding:30px;color:#888;">
                             Không có dữ liệu hiển thị
                         </td>
                     </tr>

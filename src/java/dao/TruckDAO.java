@@ -11,7 +11,6 @@ public class TruckDAO {
     private TruckDTO mapRow(ResultSet rs) throws SQLException {
         return new TruckDTO(
             rs.getString("truckID"),
-            rs.getString("truckType"),
             rs.getString("licensePlate"),
             rs.getString("driverName"),
             rs.getString("driverPhone"),
@@ -20,10 +19,12 @@ public class TruckDAO {
         );
     }
 
-    /** Lấy tất cả xe đang hoạt động (status = 1 = rảnh) — dùng cho dropdown chọn xe */
+    private static final String SELECT_COLS =
+        "SELECT truckID, licensePlate, driverName, driverPhone, status, notes FROM tblTrucks";
+
+    /** Lấy tất cả xe đang rảnh (status = 1) — dùng cho dropdown */
     public List<TruckDTO> getActiveTrucks() throws Exception {
-        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
-                     "FROM tblTrucks WHERE status = 1 ORDER BY truckID";
+        String sql = SELECT_COLS + " WHERE status = 1 ORDER BY truckID";
         List<TruckDTO> list = new ArrayList<>();
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -33,10 +34,9 @@ public class TruckDAO {
         return list;
     }
 
-    /** Lấy tất cả xe (kể cả đang đi) */
-    public  List<TruckDTO> getAllTrucks() throws Exception {
-        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
-                     "FROM tblTrucks ORDER BY truckID";
+    /** Lấy tất cả xe */
+    public List<TruckDTO> getAllTrucks() throws Exception {
+        String sql = SELECT_COLS + " ORDER BY truckID";
         List<TruckDTO> list = new ArrayList<>();
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -48,8 +48,7 @@ public class TruckDAO {
 
     /** Lấy xe theo ID */
     public TruckDTO getTruckByID(String truckID) throws Exception {
-        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
-                     "FROM tblTrucks WHERE truckID = ?";
+        String sql = SELECT_COLS + " WHERE truckID = ?";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, truckID);
@@ -61,17 +60,16 @@ public class TruckDAO {
 
     /** Thêm xe mới */
     public boolean insertTruck(TruckDTO t) throws Exception {
-        String sql = "INSERT INTO tblTrucks(truckID, truckType, licensePlate, driverName, driverPhone, status, notes) " +
-                     "VALUES(?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO tblTrucks(truckID, licensePlate, driverName, driverPhone, status, notes) " +
+                     "VALUES(?,?,?,?,?,?)";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1,  t.getTruckID());
-            ps.setString(2,  t.getTruckType());
-            ps.setString(3,  t.getLicensePlate());
-            ps.setString(4,  t.getDriverName());
-            ps.setString(5,  t.getDriverPhone());
-            ps.setBoolean(6, t.isStatus());
-            ps.setString(7,  t.getNotes());
+            ps.setString(2,  t.getLicensePlate());
+            ps.setString(3,  t.getDriverName());
+            ps.setString(4,  t.getDriverPhone());
+            ps.setBoolean(5, t.isStatus());
+            ps.setString(6,  t.getNotes());
             return ps.executeUpdate() > 0;
         }
     }

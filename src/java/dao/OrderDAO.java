@@ -46,6 +46,12 @@ public class OrderDAO {
         return queryList(sql, new ArrayList<>());
     }
 
+    /** Lấy đơn hàng trong thùng rác (isDeleted = 1) */
+    public List<OrderDTO> getTrashOrders() throws Exception {
+        String sql = SELECT_COLS + "FROM tblOrders WHERE isDeleted = 1 ORDER BY createdAt DESC";
+        return queryList(sql, new ArrayList<>());
+    }
+
     /**
      * Lọc đơn — mọi tham số null/rỗng đều bị bỏ qua
      */
@@ -144,12 +150,17 @@ public class OrderDAO {
     // CẬP NHẬT
     // ════════════════════════════════════════════════════════════════════
 
-    /** Cập nhật thông tin đơn — không đổi shipStatus và tr */
+    /**
+     * Cập nhật đầy đủ thông tin đơn hàng khi chỉnh sửa
+     * (itemName, stations, sender, receiver, tr, ct, amount, note)
+     */
     public boolean updateOrder(OrderDTO o) throws Exception {
         String sql =
             "UPDATE tblOrders SET " +
-            "itemName = ?, amount = ?, senderName = ?, senderPhone = ?, sendStation = ?, " +
-            "receiverName = ?, receiverPhone = ?, receiveStation = ?, ct = ?, note = ? " +
+            "itemName = ?, amount = ?, " +
+            "senderName = ?, senderPhone = ?, sendStation = ?, " +
+            "receiverName = ?, receiverPhone = ?, receiveStation = ?, " +
+            "tr = ?, ct = ?, note = ? " +
             "WHERE orderID = ? AND isDeleted = 0";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -161,16 +172,16 @@ public class OrderDAO {
             ps.setString(6,  o.getReceiverName());
             ps.setString(7,  o.getReceiverPhone());
             ps.setString(8,  o.getReceiveStation());
-            ps.setString(9,  o.getCt());
-            ps.setString(10, o.getNote());
-            ps.setString(11, o.getOrderID());
+            ps.setString(9,  o.getTr());
+            ps.setString(10, o.getCt());
+            ps.setString(11, o.getNote());
+            ps.setString(12, o.getOrderID());
             return ps.executeUpdate() > 0;
         }
     }
 
     /**
      * Đổi shipStatus → "Đã Chuyển"
-     * Gọi khi bấm nút Chuyển Hàng trong list_order.jsp
      */
     public boolean markAsShipped(String orderID) throws Exception {
         String sql = "UPDATE tblOrders SET shipStatus = N'Đã Chuyển' " +
@@ -229,6 +240,7 @@ public class OrderDAO {
     // XÓA
     // ════════════════════════════════════════════════════════════════════
 
+    /** Xóa mềm: chuyển vào thùng rác */
     public boolean softDelete(String orderID) throws Exception {
         String sql = "UPDATE tblOrders SET isDeleted = 1 WHERE orderID = ?";
         try (Connection c = DBUtils.getConnection();
@@ -238,12 +250,39 @@ public class OrderDAO {
         }
     }
 
+    /** Khôi phục từ thùng rác */
     public boolean restore(String orderID) throws Exception {
         String sql = "UPDATE tblOrders SET isDeleted = 0 WHERE orderID = ?";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, orderID);
             return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Xóa vĩnh viễn khỏi database */
+    public boolean permanentDelete(String orderID) throws Exception {
+        try (Connection c = DBUtils.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                // Xóa liên kết chuyến xe trước
+                try (PreparedStatement ps = c.prepareStatement(
+                        "DELETE FROM tblOrderTrip WHERE orderID = ?")) {
+                    ps.setString(1, orderID);
+                    ps.executeUpdate();
+                }
+                // Xóa đơn hàng
+                try (PreparedStatement ps = c.prepareStatement(
+                        "DELETE FROM tblOrders WHERE orderID = ?")) {
+                    ps.setString(1, orderID);
+                    ps.executeUpdate();
+                }
+                c.commit();
+                return true;
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            }
         }
     }
 

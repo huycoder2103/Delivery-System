@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import java.io.IOException;
@@ -17,7 +13,6 @@ public class MainController extends HttpServlet {
 
     private static final String LOGIN_PAGE = "login.jsp";
     private static final String ERROR_PAGE = "error.jsp";
-    private static final String HOME_PAGE = "home.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -33,12 +28,10 @@ public class MainController extends HttpServlet {
 
             } else if (request.getParameter("Logout") != null) {
                 HttpSession session = request.getSession(false);
-                if (session != null) {
-                    session.invalidate();
-                }
+                if (session != null) session.invalidate();
                 url = LOGIN_PAGE;
 
-                // ── 2. Home & Báo cáo ────────────────────────────────────────
+            // ── 2. Home & Báo cáo ────────────────────────────────────────
             } else if (request.getParameter("GoHome") != null) {
                 url = "HomeController";
 
@@ -47,10 +40,9 @@ public class MainController extends HttpServlet {
                 url = "ReportController";
 
             } else if (request.getParameter("SubmitShiftReport") != null) {
-                // Nhân viên chốt ca → lưu ghi chú (chức năng mở rộng sau)
                 url = "ReportController";
 
-                // ── 3. Quản trị ──────────────────────────────────────────────
+            // ── 3. Quản trị ──────────────────────────────────────────────
             } else if (request.getParameter("AdminPanel") != null) {
                 HttpSession session = request.getSession(false);
                 String role = (session != null) ? (String) session.getAttribute("ROLE") : null;
@@ -61,30 +53,35 @@ public class MainController extends HttpServlet {
                     url = "HomeController";
                 }
 
-                // ── 4. Hàng hóa (GoodsController) ───────────────────────────
+            // ── 4. Hàng hóa (trang menu) ─────────────────────────────────
             } else if (request.getParameter("ViewGoods") != null) {
                 url = "goods.jsp";
 
+            // ── 5. Tất cả action của GoodsController ─────────────────────
             } else if (request.getParameter("ViewOrderList") != null
                     || request.getParameter("CreateOrder") != null
+                    || request.getParameter("FilterOrder") != null
                     || request.getParameter("SearchOrderByPhone") != null
-                    || request.getParameter("SearchTripByTruck") != null
-                    || request.getParameter("SearchArrivalByTruck") != null
+                    || request.getParameter("EditOrder") != null
+                    || request.getParameter("UpdateOrder") != null
+                    || request.getParameter("DeleteOrder") != null
+                    || request.getParameter("ViewTrashOrder") != null
+                    || request.getParameter("RestoreOrder") != null
+                    || request.getParameter("PermanentDeleteOrder") != null
+                    || request.getParameter("ShipOrder") != null
+                    || request.getParameter("AssignOrderToTrip") != null
                     || request.getParameter("ViewTripList") != null
                     || request.getParameter("ViewArrivalTripList") != null
-                    || request.getParameter("AddArrivalTrip") != null
                     || request.getParameter("AddTrip") != null
+                    || request.getParameter("AddArrivalTrip") != null
+                    || request.getParameter("SearchTripByTruck") != null
+                    || request.getParameter("SearchArrivalByTruck") != null
                     || request.getParameter("ListGoods") != null
-                    || request.getParameter("ReceiveTrip") != null
-                    || request.getParameter("ShipOrder") != null
-                    || request.getParameter("EditOrder") != null
-                    || request.getParameter("DeleteOrder") != null
                     || request.getParameter("TransferGoods") != null
-                    || request.getParameter("EditTrip") != null
-                    || request.getParameter("FilterOrder") != null) {
+                    || request.getParameter("EditTrip") != null) {
                 url = "GoodsController";
 
-                // ── 5. Save ──────────────────────────────────────────────────
+            // ── 6. Save controllers ───────────────────────────────────────
             } else if (request.getParameter("SaveOrder") != null) {
                 url = "SaveOrderController";
 
@@ -97,7 +94,7 @@ public class MainController extends HttpServlet {
             } else if (request.getParameter("SaveUser") != null) {
                 url = "CreateUserController";
 
-                // ── 6. Mặc định: chuyển về login ─────────────────────────────
+            // ── 7. Mặc định ──────────────────────────────────────────────
             } else {
                 HttpSession session = request.getSession(false);
                 if (session != null && session.getAttribute("LOGIN_USER") != null) {
@@ -115,38 +112,18 @@ public class MainController extends HttpServlet {
         }
     }
 
-   
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException,
-            IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     *
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException,
-            IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    public String getServletInfo() { return "MainController"; }
 }

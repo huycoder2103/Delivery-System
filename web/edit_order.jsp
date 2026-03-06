@@ -1,76 +1,70 @@
 <%@page import="dto.OrderDTO"%>
 <%@page import="dto.StationDTO"%>
-<%@page import="dto.UserDTO"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Chỉnh Sửa Hàng Hóa</title>
+    <title>Chỉnh Sửa Đơn Hàng</title>
     <link rel="stylesheet" href="css/home.css">
     <style>
         body { background: #f5f6f7; font-family: 'Segoe UI', sans-serif; }
-
         .edit-wrap {
-            max-width: 1420px;
-            margin: 14px auto 30px;
+            max-width: 900px;
+            margin: 20px auto 30px;
             background: #fff;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.07);
         }
-
-        /* Header thanh tiêu đề */
         .edit-title {
             text-align: center;
-            padding: 12px 0 8px;
-            border-bottom: 3px solid #c8a800;
+            padding: 14px 0 10px;
+            border-bottom: 3px solid #f39c12;
         }
         .edit-title h2 {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 700;
             text-decoration: underline;
             margin: 0;
-            letter-spacing: 1px;
             text-transform: uppercase;
+            color: #2c3e50;
         }
-
-        /* Toolbar với tab và nút lưu */
         .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-bottom: 1px solid #e8e8e8;
             background: #fafafa;
         }
         .toolbar-tab {
-            font-size: 0.86rem;
+            font-size: 0.88rem;
             color: #333;
-            font-weight: 500;
-            border-bottom: 2px solid #c8a800;
-            padding-bottom: 2px;
+            font-weight: 600;
+            border-bottom: 2px solid #f39c12;
+            padding-bottom: 3px;
         }
         .btn-save {
             background: #27ae60;
             color: #fff;
             border: none;
-            padding: 8px 26px;
+            padding: 9px 28px;
             border-radius: 4px;
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: background .2s;
         }
         .btn-save:hover { background: #1e8449; }
 
-        /* Alert thông báo */
         .alert-warn {
-            margin: 10px 16px;
+            margin: 12px 20px 0;
             background: #fdf6e3;
             border: 1px solid #e8d48a;
-            border-left: 4px solid #c8a800;
-            padding: 9px 14px 9px 12px;
+            border-left: 4px solid #f39c12;
+            padding: 9px 14px;
             font-size: 0.83rem;
             color: #7a5c00;
             border-radius: 3px;
@@ -80,29 +74,23 @@
         }
         .close-btn { cursor: pointer; font-size: 1rem; color: #aaa; }
         .close-btn:hover { color: #555; }
-
         .err-bar {
-            margin: 0 16px 8px;
+            margin: 8px 20px;
             padding: 9px 14px;
             background: #f8d7da;
             color: #721c24;
-            border-radius: 3px;
+            border-radius: 4px;
             font-size: 0.86rem;
             font-weight: 600;
         }
-
-        /* Form */
-        .form-body { padding: 12px 16px 20px; }
-
-        .row2  { display: grid; grid-template-columns: 1fr 1fr;         gap: 12px; margin-bottom: 12px; }
-        .row4  { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        .row14 { display: grid; grid-template-columns: 2fr 1fr;         gap: 12px; margin-bottom: 12px; }
-
+        .form-body { padding: 16px 20px 24px; }
+        .row2  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .row3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
         .field label {
             display: block;
-            font-size: 0.80rem;
+            font-size: 0.82rem;
             font-weight: 600;
-            color: #444;
+            color: #555;
             margin-bottom: 5px;
         }
         .field input[type="text"],
@@ -110,30 +98,45 @@
         .field select,
         .field textarea {
             width: 100%;
-            padding: 7px 10px;
+            padding: 8px 10px;
             border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 0.86rem;
+            border-radius: 4px;
+            font-size: 0.87rem;
             box-sizing: border-box;
             transition: border-color .2s;
-            background: #fff;
             font-family: inherit;
         }
         .field input:focus, .field select:focus, .field textarea:focus {
             border-color: #3498db;
             outline: none;
         }
-        .field textarea { resize: vertical; min-height: 76px; }
-
-        hr.divider { border: none; border-top: 1px dashed #e0e0e0; margin: 14px 0 12px; }
-
-        .footer-bar { padding: 0 16px 16px; }
+        .field textarea { resize: vertical; min-height: 80px; }
+        hr.divider { border: none; border-top: 1px dashed #e0e0e0; margin: 14px 0; }
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 10px;
+        }
+        .footer-bar {
+            padding: 0 20px 20px;
+            display: flex;
+            gap: 10px;
+        }
         .btn-back {
             background: #6c757d; color: #fff;
-            border: none; padding: 7px 20px;
+            border: none; padding: 9px 22px;
             border-radius: 4px; cursor: pointer; font-weight: 600;
+            font-size: 0.88rem;
         }
         .btn-back:hover { background: #545b62; }
+        .readonly-field {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -142,36 +145,29 @@
 <%
     OrderDTO order = (OrderDTO) request.getAttribute("EDIT_ORDER");
     List<StationDTO> stations = (List<StationDTO>) request.getAttribute("STATION_LIST");
-    List<UserDTO>    staffList = (List<UserDTO>)   request.getAttribute("STAFF_LIST");
     String errMsg = (String) request.getAttribute("ERROR_MESSAGE");
 
     if (order == null) {
         response.sendRedirect("GoodsController?ViewOrderList=true");
         return;
     }
-
-    String[] goodsTypes = {"Hàng Hóa","Vé Xe","Bưu Phẩm","Tài Liệu","Đồ Dễ Vỡ","Thực Phẩm","Khác"};
-    String curCt = order.getCt() != null ? order.getCt() : "";
 %>
 
 <div class="edit-wrap">
-    <!-- Tiêu đề -->
     <div class="edit-title">
-        <h2>Chỉnh Sửa Hàng Hóa</h2>
+        <h2>✏ Chỉnh Sửa Đơn Hàng — <%= order.getOrderID() %></h2>
     </div>
 
     <form action="GoodsController" method="POST">
         <input type="hidden" name="orderID" value="<%= order.getOrderID() %>">
 
-        <!-- Toolbar -->
         <div class="toolbar">
             <span class="toolbar-tab">Thông Tin Chỉnh Sửa</span>
-            <input type="submit" name="UpdateOrder" value="Lưu Lại" class="btn-save">
+            <input type="submit" name="UpdateOrder" value="💾 Lưu Lại" class="btn-save">
         </div>
 
-        <!-- Alert -->
         <div class="alert-warn" id="alertWarn">
-            <span>- Lưu ý Hàng hóa đã thanh toán, một số nội dung không được chỉnh sửa.</span>
+            <span>⚠ Lưu ý: Mã đơn và ngày nhận không thể thay đổi. Các thông tin khác có thể chỉnh sửa tự do.</span>
             <span class="close-btn" onclick="this.parentElement.style.display='none'">✕</span>
         </div>
 
@@ -181,36 +177,15 @@
 
         <div class="form-body">
 
-            <!-- Tên hàng + Loại hàng -->
-            <div class="row14">
-                <div class="field">
-                    <label>Tên Hàng Gửi</label>
-                    <input type="text" name="itemName"
-                           value="<%= order.getItemName() != null ? order.getItemName() : "" %>" required>
-                </div>
-                <div class="field">
-                    <label>Loại Hàng Hóa - Tiền Gửi</label>
-                    <select name="ct">
-                        <% for (String t : goodsTypes) { %>
-                        <option value="<%= t %>" <%= t.equals(curCt) ? "selected" : "" %>><%= t %></option>
-                        <% } %>
-                    </select>
-                </div>
+            <!-- Tên hàng -->
+            <div class="field" style="margin-bottom:14px;">
+                <label>Tên Hàng Gửi <span style="color:red">*</span></label>
+                <input type="text" name="itemName"
+                       value="<%= order.getItemName() != null ? order.getItemName() : "" %>" required>
             </div>
 
-            <!-- NV + Trạm gửi + Trạm nhận + Loại hàng 2 -->
-            <div class="row4">
-                <div class="field">
-                    <label>Nhân Viên Nhận</label>
-                    <select name="staffInput">
-                        <%
-                            if (staffList != null) for (UserDTO u : staffList) {
-                                boolean sel = u.getUserID().equals(order.getStaffInput() != null ? order.getStaffInput() : "");
-                        %>
-                        <option value="<%= u.getUserID() %>" <%= sel ? "selected" : "" %>><%= u.getFullName() %></option>
-                        <% } %>
-                    </select>
-                </div>
+            <!-- Trạm gửi + Trạm nhận -->
+            <div class="row2">
                 <div class="field">
                     <label>Trạm Gửi</label>
                     <select name="sendStation">
@@ -233,59 +208,62 @@
                         <% } %>
                     </select>
                 </div>
-                <div class="field">
-                    <label>Loại Hàng Hóa - Tiền Gửi</label>
-                    <select name="ct2" disabled>
-                        <% for (String t : goodsTypes) { %>
-                        <option value="<%= t %>" <%= t.equals(curCt) ? "selected" : "" %>><%= t %></option>
-                        <% } %>
-                    </select>
-                </div>
             </div>
 
             <hr class="divider">
+            <div class="section-label">Thông Tin Người Gửi</div>
 
             <!-- Người gửi + SĐT -->
             <div class="row2">
                 <div class="field">
-                    <label>Người Gửi</label>
+                    <label>Họ Tên Người Gửi</label>
                     <input type="text" name="senderName"
                            value="<%= order.getSenderName() != null ? order.getSenderName() : "" %>">
                 </div>
                 <div class="field">
-                    <label>SĐT</label>
+                    <label>Số Điện Thoại</label>
                     <input type="text" name="senderPhone"
                            value="<%= order.getSenderPhone() != null ? order.getSenderPhone() : "" %>">
                 </div>
             </div>
 
+            <hr class="divider">
+            <div class="section-label">Thông Tin Người Nhận</div>
+
             <!-- Người nhận + SĐT -->
             <div class="row2">
                 <div class="field">
-                    <label>Người Nhận</label>
+                    <label>Họ Tên Người Nhận</label>
                     <input type="text" name="receiverName"
                            value="<%= order.getReceiverName() != null ? order.getReceiverName() : "" %>">
                 </div>
                 <div class="field">
-                    <label>SĐT</label>
+                    <label>Số Điện Thoại</label>
                     <input type="text" name="receiverPhone"
                            value="<%= order.getReceiverPhone() != null ? order.getReceiverPhone() : "" %>">
                 </div>
             </div>
 
-            <!-- Thanh toán + Chưa thanh toán -->
+            <hr class="divider">
+            <div class="section-label">Thanh Toán</div>
+
+            <!-- TR + CT -->
             <div class="row2">
                 <div class="field">
-                    <label>Thanh Toán</label>
+                    <label>Đã Thanh Toán (TR) — nghìn đồng</label>
                     <input type="number" name="paidAmount" min="0"
-                           value="<%= (int) order.getAmount() %>">
+                           placeholder="Số tiền đã thanh toán..."
+                           value="<%= (order.getTr() != null && !order.getTr().isEmpty()) ? order.getTr() : "" %>">
                 </div>
                 <div class="field">
-                    <label>Chưa Thanh Toán</label>
+                    <label>Chưa Thanh Toán (CT) — nghìn đồng</label>
                     <input type="number" name="remainAmount" min="0"
-                           placeholder="Số tiền phí khách chưa thanh toán...">
+                           placeholder="Số tiền còn nợ..."
+                           value="<%= (order.getCt() != null && !order.getCt().isEmpty()) ? order.getCt() : "" %>">
                 </div>
             </div>
+
+            <hr class="divider">
 
             <!-- Ghi chú -->
             <div class="field">
@@ -293,7 +271,7 @@
                 <textarea name="note" placeholder="Nhập ghi chú..."><%= order.getNote() != null ? order.getNote() : "" %></textarea>
             </div>
 
-        </div><!-- /form-body -->
+        </div>
     </form>
 
     <div class="footer-bar">

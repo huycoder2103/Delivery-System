@@ -8,6 +8,11 @@ import java.util.List;
 
 public class TripDAO {
 
+    private static final String SELECT_COLS =
+        "SELECT tripID, truckID, departure, destination, departureTime, " +
+        "driverName, assistantName, status, tripType, staffCreated, notes, " +
+        "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt ";
+
     private TripDTO mapRow(ResultSet rs) throws SQLException {
         TripDTO t = new TripDTO(
             rs.getString("tripID"),
@@ -31,11 +36,7 @@ public class TripDAO {
      * @param tripType "depart" = chuyến xe đi | "arrive" = chuyến xe đến
      */
     public List<TripDTO> getTripsByType(String tripType) throws Exception {
-        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
-                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
-                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
-                     "FROM tblTrips WHERE tripType = ? " +
-                     "ORDER BY createdAt DESC";
+        String sql = SELECT_COLS + "FROM tblTrips WHERE tripType = ? ORDER BY createdAt DESC";
         List<TripDTO> list = new ArrayList<>();
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -49,10 +50,7 @@ public class TripDAO {
 
     /** Lấy tất cả chuyến xe */
     public List<TripDTO> getAllTrips() throws Exception {
-        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
-                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
-                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
-                     "FROM tblTrips ORDER BY createdAt DESC";
+        String sql = SELECT_COLS + "FROM tblTrips ORDER BY createdAt DESC";
         List<TripDTO> list = new ArrayList<>();
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -64,10 +62,7 @@ public class TripDAO {
 
     /** Lấy chuyến xe theo ID */
     public TripDTO getTripByID(String tripID) throws Exception {
-        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
-                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
-                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
-                     "FROM tblTrips WHERE tripID = ?";
+        String sql = SELECT_COLS + "FROM tblTrips WHERE tripID = ?";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, tripID);
@@ -77,13 +72,10 @@ public class TripDAO {
         }
     }
 
-    /** Lấy chuyến xe đang chạy (status = 'Đang đi' hoặc 'Đang đến') */
+    /** Lấy chuyến xe đang chạy */
     public List<TripDTO> getActiveTrips() throws Exception {
-        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
-                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
-                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
-                     "FROM tblTrips WHERE status IN (N'Đang đi', N'Đang đến') " +
-                     "ORDER BY createdAt DESC";
+        String sql = SELECT_COLS +
+            "FROM tblTrips WHERE status IN (N'Đang đi', N'Đang đến') ORDER BY createdAt DESC";
         List<TripDTO> list = new ArrayList<>();
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
