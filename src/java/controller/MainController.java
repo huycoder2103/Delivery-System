@@ -17,12 +17,12 @@ public class MainController extends HttpServlet {
 
     private static final String LOGIN_PAGE = "login.jsp";
     private static final String ERROR_PAGE = "error.jsp";
-    private static final String HOME_PAGE  = "home.jsp";
+    private static final String HOME_PAGE = "home.jsp";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
 
         String url = LOGIN_PAGE;
         try {
@@ -33,10 +33,12 @@ public class MainController extends HttpServlet {
 
             } else if (request.getParameter("Logout") != null) {
                 HttpSession session = request.getSession(false);
-                if (session != null) session.invalidate();
+                if (session != null) {
+                    session.invalidate();
+                }
                 url = LOGIN_PAGE;
 
-            // ── 2. Home & Báo cáo ────────────────────────────────────────
+                // ── 2. Home & Báo cáo ────────────────────────────────────────
             } else if (request.getParameter("GoHome") != null) {
                 url = "HomeController";
 
@@ -48,7 +50,7 @@ public class MainController extends HttpServlet {
                 // Nhân viên chốt ca → lưu ghi chú (chức năng mở rộng sau)
                 url = "ReportController";
 
-            // ── 3. Quản trị ──────────────────────────────────────────────
+                // ── 3. Quản trị ──────────────────────────────────────────────
             } else if (request.getParameter("AdminPanel") != null) {
                 HttpSession session = request.getSession(false);
                 String role = (session != null) ? (String) session.getAttribute("ROLE") : null;
@@ -59,7 +61,7 @@ public class MainController extends HttpServlet {
                     url = "HomeController";
                 }
 
-            // ── 4. Hàng hóa (GoodsController) ───────────────────────────
+                // ── 4. Hàng hóa (GoodsController) ───────────────────────────
             } else if (request.getParameter("ViewGoods") != null) {
                 url = "goods.jsp";
 
@@ -82,7 +84,7 @@ public class MainController extends HttpServlet {
                     || request.getParameter("FilterOrder") != null) {
                 url = "GoodsController";
 
-            // ── 5. Save ──────────────────────────────────────────────────
+                // ── 5. Save ──────────────────────────────────────────────────
             } else if (request.getParameter("SaveOrder") != null) {
                 url = "SaveOrderController";
 
@@ -95,7 +97,7 @@ public class MainController extends HttpServlet {
             } else if (request.getParameter("SaveUser") != null) {
                 url = "CreateUserController";
 
-            // ── 6. Mặc định: chuyển về login ─────────────────────────────
+                // ── 6. Mặc định: chuyển về login ─────────────────────────────
             } else {
                 HttpSession session = request.getSession(false);
                 if (session != null && session.getAttribute("LOGIN_USER") != null) {

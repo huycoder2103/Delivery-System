@@ -1,12 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.TripDAO;
+import dto.TripDTO;
 import dto.UserDTO;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,20 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- * SaveArrivalController - Lưu thông tin chuyến xe đến.
- * Thực chất là tạo một chuyến xe mới với hướng đi ngược lại,
- * hoặc cập nhật chuyến xe đã tạo sang trạng thái "Đã đến".
- *
- * Hiện tại: Tạo chuyến xe mới từ form create_arrival_trip.jsp
- * (Tương tự SaveTrip nhưng dành cho hướng xe về trạm)
- */
 @WebServlet(name = "SaveArrivalController", urlPatterns = {"/SaveArrivalController"})
 public class SaveArrivalController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+
         String url = "GoodsController?ViewArrivalTripList=true";
 
         try {
@@ -39,62 +33,69 @@ public class SaveArrivalController extends HttpServlet {
             String assistant = request.getParameter("assistant");
             String notes     = request.getParameter("note");
 
-            // Lấy staff ID từ session
+            // Lấy staffID từ session
             HttpSession session = request.getSession(false);
-            String staffID = "NV01";
+            String staffID = "NV01"; // fallback
             if (session != null && session.getAttribute("LOGIN_USER") != null) {
                 staffID = ((UserDTO) session.getAttribute("LOGIN_USER")).getUserID();
             }
 
-            if (truckID != null && !truckID.isEmpty()) {
+            // Validate bắt buộc
+            if (truckID == null || truckID.isEmpty()
+                    || dep == null || dep.isEmpty()
+                    || des == null || des.isEmpty()
+                    || time == null || time.isEmpty()) {
+                request.setAttribute("ERROR_MESSAGE", "Vui lòng nhập đầy đủ thông tin chuyến xe!");
+                url = "GoodsController?AddArrival=true";
+
+            } else if (dep.equals(des)) {
+                request.setAttribute("ERROR_MESSAGE", "Trạm đi và trạm đến không được giống nhau!");
+                url = "GoodsController?AddArrival=true";
+
+            } else {
+                // Tạo TripDTO — tripType = "arrive" (chuyến xe ĐẾN)
+                String tripID = "TRIP" + new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+
+                TripDTO trip = new TripDTO();
+                trip.setTripID(tripID);
+                trip.setTruckID(truckID);
+                trip.setDeparture(dep);
+                trip.setDestination(des);
+                trip.setDepartureTime(time);
+                trip.setDriverName(driver);
+                trip.setAssistantName(assistant);
+                trip.setNotes(notes);
+                trip.setStatus("Đang đến");
+                trip.setTripType("arrive");
+                trip.setStaffCreated(staffID);
+
                 TripDAO dao = new TripDAO();
-                dao.insertTrip(truckID, dep, des, time, driver, assistant, staffID, notes);
+                boolean ok = dao.insertTrip(trip);
+
+                if (!ok) {
+                    request.setAttribute("ERROR_MESSAGE", "Lưu chuyến xe thất bại!");
+                    url = "GoodsController?AddArrival=true";
+                }
             }
 
         } catch (Exception e) {
             log("Error at SaveArrivalController: " + e.toString());
+            request.setAttribute("ERROR_MESSAGE", "Lỗi hệ thống: " + e.getMessage());
+            url = "GoodsController?AddArrival=true";
+
         } finally {
             request.getRequestDispatcher(url).forward(request, response);
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    public String getServletInfo() { return "SaveArrivalController"; }
 }

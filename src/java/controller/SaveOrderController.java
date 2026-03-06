@@ -19,18 +19,19 @@ public class SaveOrderController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
 
         String url = "GoodsController?ViewOrderList=true";
 
         try {
-            String itemName       = request.getParameter("itemName");
-            String sendStation    = request.getParameter("sendStation");
+            String itemName = request.getParameter("itemName");
+            String sendStation = request.getParameter("sendStation");
             String receiveStation = request.getParameter("receiveStation");
-            String senderName     = request.getParameter("senderName");
-            String senderPhone    = request.getParameter("senderPhone");
-            String receiverName   = request.getParameter("receiverName");
-            String receiverPhone  = request.getParameter("receiverPhone");
-            String note           = request.getParameter("note");
+            String senderName = request.getParameter("senderName");
+            String senderPhone = request.getParameter("senderPhone");
+            String receiverName = request.getParameter("receiverName");
+            String receiverPhone = request.getParameter("receiverPhone");
+            String note = request.getParameter("note");
 
             // TR = tiền đã thanh toán (để trống nếu không nhập)
             String trValue = "";
@@ -38,8 +39,11 @@ public class SaveOrderController extends HttpServlet {
             if (paidStr != null && !paidStr.trim().isEmpty()) {
                 try {
                     double paid = Double.parseDouble(paidStr.trim());
-                    if (paid > 0) trValue = String.format("%.0f", paid);
-                } catch (NumberFormatException ignored) {}
+                    if (paid > 0) {
+                        trValue = String.format("%.0f", paid);
+                    }
+                } catch (NumberFormatException ignored) {
+                }
             }
 
             // CT = tiền chưa thanh toán (để trống nếu không nhập)
@@ -48,16 +52,24 @@ public class SaveOrderController extends HttpServlet {
             if (remainStr != null && !remainStr.trim().isEmpty()) {
                 try {
                     double remain = Double.parseDouble(remainStr.trim());
-                    if (remain > 0) ctValue = String.format("%.0f", remain);
-                } catch (NumberFormatException ignored) {}
+                    if (remain > 0) {
+                        ctValue = String.format("%.0f", remain);
+                    }
+                } catch (NumberFormatException ignored) {
+                }
             }
 
             // amount = tổng paid + remain
             double totalAmount = 0;
             try {
-                if (!trValue.isEmpty()) totalAmount += Double.parseDouble(trValue);
-                if (!ctValue.isEmpty()) totalAmount += Double.parseDouble(ctValue);
-            } catch (NumberFormatException ignored) {}
+                if (!trValue.isEmpty()) {
+                    totalAmount += Double.parseDouble(trValue);
+                }
+                if (!ctValue.isEmpty()) {
+                    totalAmount += Double.parseDouble(ctValue);
+                }
+            } catch (NumberFormatException ignored) {
+            }
 
             // Validate bắt buộc
             if (itemName == null || itemName.trim().isEmpty()) {
@@ -78,21 +90,21 @@ public class SaveOrderController extends HttpServlet {
             String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
 
             OrderDTO order = new OrderDTO(
-                orderID,
-                itemName.trim(),
-                totalAmount,
-                senderName,
-                senderPhone,
-                sendStation,
-                receiverName,
-                receiverPhone,
-                receiveStation,
-                staffID,
-                null,
-                trValue,   // TR = tiền đã thanh toán
-                ctValue,   // CT = tiền chưa thanh toán
-                dateStr,
-                note       // Ghi chú
+                    orderID,
+                    itemName.trim(),
+                    totalAmount,
+                    senderName,
+                    senderPhone,
+                    sendStation,
+                    receiverName,
+                    receiverPhone,
+                    receiveStation,
+                    staffID,
+                    null,
+                    trValue, // TR = tiền đã thanh toán
+                    ctValue, // CT = tiền chưa thanh toán
+                    dateStr,
+                    note // Ghi chú
             );
 
             OrderDAO dao = new OrderDAO();
@@ -110,8 +122,15 @@ public class SaveOrderController extends HttpServlet {
         }
     }
 
-    @Override protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException { processRequest(req, res); }
-    @Override protected void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException { processRequest(req, res); }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        processRequest(req, res);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        processRequest(req, res);
+    }
 }

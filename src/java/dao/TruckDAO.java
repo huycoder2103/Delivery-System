@@ -1,48 +1,89 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-/**
- *
- * @author HuyNHSE190240
- */
-
 import dto.TruckDTO;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import utils.DBUtils;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import utils.DBUtils;
 
 public class TruckDAO {
-    // Hàm lấy danh sách xe đang rảnh (status = 1)
-    public List<TruckDTO> getAvailableTrucks() throws SQLException, ClassNotFoundException {
+
+    private TruckDTO mapRow(ResultSet rs) throws SQLException {
+        return new TruckDTO(
+            rs.getString("truckID"),
+            rs.getString("truckType"),
+            rs.getString("licensePlate"),
+            rs.getString("driverName"),
+            rs.getString("driverPhone"),
+            rs.getBoolean("status"),
+            rs.getString("notes")
+        );
+    }
+
+    /** Lấy tất cả xe đang hoạt động (status = 1 = rảnh) — dùng cho dropdown chọn xe */
+    public List<TruckDTO> getActiveTrucks() throws Exception {
+        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
+                     "FROM tblTrucks WHERE status = 1 ORDER BY truckID";
         List<TruckDTO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ptm = null;
-        ResultSet rs = null;
-        try {
-            conn = DBUtils.getConnection();
-            if (conn != null) {
-                String sql = "SELECT truckID, truckType, status FROM tblTrucks WHERE status = 1";
-                ptm = conn.prepareStatement(sql);
-                rs = ptm.executeQuery();
-                while (rs.next()) {
-                    String truckID = rs.getString("truckID");
-                    String truckType = rs.getString("truckType");
-                    boolean status = rs.getBoolean("status");
-                    list.add(new TruckDTO(truckID, truckType, status));
-                }
-            }
-        } finally {
-            if (rs != null) rs.close();
-            if (ptm != null) ptm.close();
-            if (conn != null) conn.close();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
         }
         return list;
+    }
+
+    /** Lấy tất cả xe (kể cả đang đi) */
+    public List<TruckDTO> getAllTrucks() throws Exception {
+        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
+                     "FROM tblTrucks ORDER BY truckID";
+        List<TruckDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        }
+        return list;
+    }
+
+    /** Lấy xe theo ID */
+    public TruckDTO getTruckByID(String truckID) throws Exception {
+        String sql = "SELECT truckID, truckType, licensePlate, driverName, driverPhone, status, notes " +
+                     "FROM tblTrucks WHERE truckID = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, truckID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRow(rs) : null;
+            }
+        }
+    }
+
+    /** Thêm xe mới */
+    public boolean insertTruck(TruckDTO t) throws Exception {
+        String sql = "INSERT INTO tblTrucks(truckID, truckType, licensePlate, driverName, driverPhone, status, notes) " +
+                     "VALUES(?,?,?,?,?,?,?)";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1,  t.getTruckID());
+            ps.setString(2,  t.getTruckType());
+            ps.setString(3,  t.getLicensePlate());
+            ps.setString(4,  t.getDriverName());
+            ps.setString(5,  t.getDriverPhone());
+            ps.setBoolean(6, t.isStatus());
+            ps.setString(7,  t.getNotes());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Cập nhật trạng thái xe: true=rảnh, false=đang đi */
+    public boolean updateTruckStatus(String truckID, boolean status) throws Exception {
+        String sql = "UPDATE tblTrucks SET status = ? WHERE truckID = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setBoolean(1, status);
+            ps.setString(2, truckID);
+            return ps.executeUpdate() > 0;
+        }
     }
 }

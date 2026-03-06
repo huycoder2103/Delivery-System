@@ -1,92 +1,139 @@
 package dao;
 
-import java.sql.*;
+import dto.TripDTO;
 import utils.DBUtils;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TripDAO {
 
+    private TripDTO mapRow(ResultSet rs) throws SQLException {
+        TripDTO t = new TripDTO(
+            rs.getString("tripID"),
+            rs.getString("truckID"),
+            rs.getString("departure"),
+            rs.getString("destination"),
+            rs.getString("departureTime"),
+            rs.getString("driverName"),
+            rs.getString("assistantName"),
+            rs.getString("status"),
+            rs.getString("tripType"),
+            rs.getString("staffCreated"),
+            rs.getString("notes")
+        );
+        try { t.setCreatedAt(rs.getString("createdAt")); } catch (Exception ignored) {}
+        return t;
+    }
+
     /**
-     * Tạo chuyến xe mới + cập nhật trạng thái xe sang "Đang đi" (status=0)
-     * Dùng transaction để đảm bảo tính toàn vẹn dữ liệu.
+     * Lấy danh sách chuyến xe theo loại.
+     * @param tripType "depart" = chuyến xe đi | "arrive" = chuyến xe đến
      */
-    public boolean insertTrip(String truckID, String dep, String des,
-                              String time, String driverName, String assistant,
-                              String staffCreated, String notes)
-            throws SQLException, ClassNotFoundException {
+    public List<TripDTO> getTripsByType(String tripType) throws Exception {
+        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
+                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
+                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
+                     "FROM tblTrips WHERE tripType = ? " +
+                     "ORDER BY createdAt DESC";
+        List<TripDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, tripType);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        }
+        return list;
+    }
 
-        // Tạo mã chuyến tự động: TRIP + timestamp 6 chữ số cuối
-        String tripID = "TRIP" + (System.currentTimeMillis() % 1000000L);
+    /** Lấy tất cả chuyến xe */
+    public List<TripDTO> getAllTrips() throws Exception {
+        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
+                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
+                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
+                     "FROM tblTrips ORDER BY createdAt DESC";
+        List<TripDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        }
+        return list;
+    }
 
-        String sqlTrip  = "INSERT INTO tblTrips "
-                        + "(tripID, truckID, departure, destination, departureTime, "
-                        + " driverName, assistantName, status, staffCreated, notes) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?)";
-        String sqlTruck = "UPDATE tblTrucks SET status = 0 WHERE truckID = ?";
-
-        try (Connection conn = DBUtils.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement ps1 = conn.prepareStatement(sqlTrip);
-                 PreparedStatement ps2 = conn.prepareStatement(sqlTruck)) {
-
-                ps1.setString(1, tripID);
-                ps1.setString(2, truckID);
-                ps1.setString(3, dep);
-                ps1.setString(4, des);
-                ps1.setString(5, time);
-                ps1.setString(6, driverName);
-                ps1.setString(7, assistant);
-                ps1.setString(8, "Đang đi");
-                ps1.setString(9, staffCreated);
-                ps1.setString(10, notes);
-
-                ps2.setString(1, truckID);
-
-                boolean ok = ps1.executeUpdate() > 0 && ps2.executeUpdate() > 0;
-                conn.commit();
-                return ok;
-            } catch (Exception e) {
-                conn.rollback();
-                throw e;
+    /** Lấy chuyến xe theo ID */
+    public TripDTO getTripByID(String tripID) throws Exception {
+        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
+                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
+                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
+                     "FROM tblTrips WHERE tripID = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, tripID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRow(rs) : null;
             }
         }
     }
 
-    /** Phiên bản đơn giản (tương thích SaveTripController cũ) */
-    public boolean insertTrip(String truckID, String dep, String des, String time)
-            throws SQLException, ClassNotFoundException {
-        return insertTrip(truckID, dep, des, time, null, null, null, null);
+    /** Lấy chuyến xe đang chạy (status = 'Đang đi' hoặc 'Đang đến') */
+    public List<TripDTO> getActiveTrips() throws Exception {
+        String sql = "SELECT tripID, truckID, departure, destination, departureTime, " +
+                     "driverName, assistantName, status, tripType, staffCreated, notes, " +
+                     "CONVERT(NVARCHAR(20), createdAt, 120) AS createdAt " +
+                     "FROM tblTrips WHERE status IN (N'Đang đi', N'Đang đến') " +
+                     "ORDER BY createdAt DESC";
+        List<TripDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        }
+        return list;
     }
 
-    /**
-     * Cập nhật trạng thái chuyến xe.
-     * Nếu trạng thái mới là "Đã đến" → trả xe về rảnh (status=1).
-     */
-    public boolean updateTripStatus(String tripID, String status)
-            throws SQLException, ClassNotFoundException {
+    /** Thêm chuyến xe mới */
+    public boolean insertTrip(TripDTO t) throws Exception {
+        String sql = "INSERT INTO tblTrips " +
+                     "(tripID, truckID, departure, destination, departureTime, " +
+                     "driverName, assistantName, status, tripType, staffCreated, notes) " +
+                     "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1,  t.getTripID());
+            ps.setString(2,  t.getTruckID());
+            ps.setString(3,  t.getDeparture());
+            ps.setString(4,  t.getDestination());
+            ps.setString(5,  t.getDepartureTime());
+            ps.setString(6,  t.getDriverName());
+            ps.setString(7,  t.getAssistantName());
+            ps.setString(8,  t.getStatus());
+            ps.setString(9,  t.getTripType());
+            ps.setString(10, t.getStaffCreated());
+            ps.setString(11, t.getNotes());
+            return ps.executeUpdate() > 0;
+        }
+    }
 
-        String sqlTrip  = "UPDATE tblTrips SET status = ? WHERE tripID = ?";
-        String sqlTruck = "UPDATE tblTrucks SET status = 1 "
-                        + "WHERE truckID = (SELECT truckID FROM tblTrips WHERE tripID = ?)";
+    /** Cập nhật trạng thái chuyến xe */
+    public boolean updateTripStatus(String tripID, String status) throws Exception {
+        String sql = "UPDATE tblTrips SET status = ? WHERE tripID = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setString(2, tripID);
+            return ps.executeUpdate() > 0;
+        }
+    }
 
-        try (Connection conn = DBUtils.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement ps1 = conn.prepareStatement(sqlTrip)) {
-                ps1.setString(1, status);
-                ps1.setString(2, tripID);
-                ps1.executeUpdate();
-
-                if ("Đã đến".equals(status)) {
-                    try (PreparedStatement ps2 = conn.prepareStatement(sqlTruck)) {
-                        ps2.setString(1, tripID);
-                        ps2.executeUpdate();
-                    }
-                }
-                conn.commit();
-                return true;
-            } catch (Exception e) {
-                conn.rollback();
-                throw e;
-            }
+    /** Xóa chuyến xe */
+    public boolean deleteTrip(String tripID) throws Exception {
+        String sql = "DELETE FROM tblTrips WHERE tripID = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, tripID);
+            return ps.executeUpdate() > 0;
         }
     }
 }

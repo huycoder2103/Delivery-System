@@ -16,15 +16,16 @@ public class CreateUserController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         // Forward về AdminController để load lại danh sách và hiển thị admin.jsp
         String url = "AdminController";
         try {
-            String userID    = request.getParameter("newUserID");
-            String fullName  = request.getParameter("newFullName");
-            String password  = request.getParameter("newPassword");
-            String confirm   = request.getParameter("newConfirmPassword");
-            String phone     = request.getParameter("newPhone");
-            String email     = request.getParameter("newEmail");
+            String userID = request.getParameter("newUserID");
+            String fullName = request.getParameter("newFullName");
+            String password = request.getParameter("newPassword");
+            String confirm = request.getParameter("newConfirmPassword");
+            String phone = request.getParameter("newPhone");
+            String email = request.getParameter("newEmail");
 
             // Validate
             if (userID == null || userID.trim().isEmpty()) {
@@ -38,16 +39,16 @@ public class CreateUserController extends HttpServlet {
             } else {
                 UserDAO dao = new UserDAO();
                 UserDTO user = new UserDTO(
-                    userID.trim(), fullName.trim(), "US",
-                    password.trim(), phone, email, true
+                        userID.trim(), fullName.trim(), "US",
+                        password.trim(), phone, email, true
                 );
                 boolean ok = dao.insertUser(user);
                 if (!ok) {
                     request.setAttribute("ERROR_MESSAGE",
-                        "Lưu nhân viên thất bại! Mã tài khoản có thể đã tồn tại.");
+                            "Lưu nhân viên thất bại! Mã tài khoản có thể đã tồn tại.");
                 } else {
                     request.setAttribute("SUCCESS_MESSAGE",
-                        "Thêm nhân viên " + fullName.trim() + " thành công!");
+                            "Thêm nhân viên " + fullName.trim() + " thành công!");
                 }
             }
         } catch (Exception e) {
@@ -60,12 +61,18 @@ public class CreateUserController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { processRequest(request, response); }
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { processRequest(request, response); }
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
 
     @Override
-    public String getServletInfo() { return "CreateUserController"; }
+    public String getServletInfo() {
+        return "CreateUserController";
+    }
 }

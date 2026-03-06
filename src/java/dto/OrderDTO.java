@@ -2,6 +2,13 @@ package dto;
 
 import java.io.Serializable;
 
+/**
+ * OrderDTO — Đơn hàng vận chuyển
+ *
+ *  tr         = tiền ĐÃ thanh toán   (viết tắt "Trả rồi")
+ *  ct         = tiền CHƯA thanh toán  (viết tắt "Chưa trả")
+ *  shipStatus = trạng thái chuyển hàng: "Chưa Chuyển" | "Đã Chuyển"
+ */
 public class OrderDTO implements Serializable {
 
     private String orderID;
@@ -15,15 +22,17 @@ public class OrderDTO implements Serializable {
     private String receiveStation;
     private String staffInput;
     private String staffReceive;
-    private String tr;           // trạng thái: Chưa Chuyển / Đã Chuyển / Đã Nhận
-    private String ct;           // loại hàng / ghi chú loại
+    private String tr;
+    private String ct;
     private String receiveDate;
     private String tripID;
     private String note;
+    private String shipStatus;
 
-    public OrderDTO() {}
+    public OrderDTO() {
+        this.shipStatus = "Chưa Chuyển";
+    }
 
-    // Constructor đầy đủ (không có note, tripID)
     public OrderDTO(String orderID, String itemName, double amount,
                     String senderName, String senderPhone, String sendStation,
                     String receiverName, String receiverPhone, String receiveStation,
@@ -43,9 +52,9 @@ public class OrderDTO implements Serializable {
         this.tr             = tr;
         this.ct             = ct;
         this.receiveDate    = receiveDate;
+        this.shipStatus     = "Chưa Chuyển";
     }
 
-    // Constructor có note
     public OrderDTO(String orderID, String itemName, double amount,
                     String senderName, String senderPhone, String sendStation,
                     String receiverName, String receiverPhone, String receiveStation,
@@ -57,30 +66,29 @@ public class OrderDTO implements Serializable {
         this.note = note;
     }
 
-    // Getters & Setters
-    public String getOrderID()              { return orderID; }
-    public void   setOrderID(String v)      { this.orderID = v; }
+    public String getOrderID()                  { return orderID; }
+    public void   setOrderID(String v)          { this.orderID = v; }
 
-    public String getItemName()             { return itemName; }
-    public void   setItemName(String v)     { this.itemName = v; }
+    public String getItemName()                 { return itemName; }
+    public void   setItemName(String v)         { this.itemName = v; }
 
-    public double getAmount()               { return amount; }
-    public void   setAmount(double v)       { this.amount = v; }
+    public double getAmount()                   { return amount; }
+    public void   setAmount(double v)           { this.amount = v; }
 
-    public String getSenderName()           { return senderName; }
-    public void   setSenderName(String v)   { this.senderName = v; }
+    public String getSenderName()               { return senderName; }
+    public void   setSenderName(String v)       { this.senderName = v; }
 
-    public String getSenderPhone()          { return senderPhone; }
-    public void   setSenderPhone(String v)  { this.senderPhone = v; }
+    public String getSenderPhone()              { return senderPhone; }
+    public void   setSenderPhone(String v)      { this.senderPhone = v; }
 
-    public String getSendStation()          { return sendStation; }
-    public void   setSendStation(String v)  { this.sendStation = v; }
+    public String getSendStation()              { return sendStation; }
+    public void   setSendStation(String v)      { this.sendStation = v; }
 
-    public String getReceiverName()         { return receiverName; }
-    public void   setReceiverName(String v) { this.receiverName = v; }
+    public String getReceiverName()             { return receiverName; }
+    public void   setReceiverName(String v)     { this.receiverName = v; }
 
-    public String getReceiverPhone()         { return receiverPhone; }
-    public void   setReceiverPhone(String v) { this.receiverPhone = v; }
+    public String getReceiverPhone()            { return receiverPhone; }
+    public void   setReceiverPhone(String v)    { this.receiverPhone = v; }
 
     public String getReceiveStation()           { return receiveStation; }
     public void   setReceiveStation(String v)   { this.receiveStation = v; }
@@ -91,18 +99,24 @@ public class OrderDTO implements Serializable {
     public String getStaffReceive()             { return staffReceive; }
     public void   setStaffReceive(String v)     { this.staffReceive = v; }
 
-    public String getTr()                   { return tr; }
-    public void   setTr(String v)           { this.tr = v; }
+    /** Tiền đã thanh toán — cột TR */
+    public String getTr()                       { return tr; }
+    public void   setTr(String v)               { this.tr = v; }
 
-    public String getCt()                   { return ct; }
-    public void   setCt(String v)           { this.ct = v; }
+    /** Tiền chưa thanh toán — cột CT */
+    public String getCt()                       { return ct; }
+    public void   setCt(String v)               { this.ct = v; }
 
-    public String getReceiveDate()          { return receiveDate; }
-    public void   setReceiveDate(String v)  { this.receiveDate = v; }
+    public String getReceiveDate()              { return receiveDate; }
+    public void   setReceiveDate(String v)      { this.receiveDate = v; }
 
-    public String getTripID()               { return tripID; }
-    public void   setTripID(String v)       { this.tripID = v; }
+    public String getTripID()                   { return tripID; }
+    public void   setTripID(String v)           { this.tripID = v; }
 
-    public String getNote()                 { return note; }
-    public void   setNote(String v)         { this.note = v; }
+    public String getNote()                     { return note; }
+    public void   setNote(String v)             { this.note = v; }
+
+    /** "Chưa Chuyển" hoặc "Đã Chuyển" */
+    public String getShipStatus()               { return shipStatus; }
+    public void   setShipStatus(String v)       { this.shipStatus = (v != null ? v : "Chưa Chuyển"); }
 }

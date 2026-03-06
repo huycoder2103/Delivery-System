@@ -1,412 +1,476 @@
 package controller;
 
 import dao.OrderDAO;
-import dao.StationDAO;
+import dao.TruckDAO;
 import dao.TripDAO;
-import dao.UserDAO;
+import dao.StationDAO;
 import dto.OrderDTO;
+import dto.TruckDTO;
+import dto.TripDTO;
 import dto.StationDTO;
-import dto.UserDTO;
+
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import utils.DBUtils;
+import javax.servlet.http.*;
 
 @WebServlet(name = "GoodsController", urlPatterns = {"/GoodsController"})
 public class GoodsController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        request.setCharacterEncoding("UTF-8");
 
-        String url = "list_order.jsp";
-        OrderDAO orderDAO = new OrderDAO();
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+
+        String action = request.getParameter("action");
+        if (action == null) action = "";
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 
         try {
-            // ════════════════════════════════════════════════════════════
-            // A. DANH SÁCH & LỌC ĐƠN HÀNG
-            // ════════════════════════════════════════════════════════════
+            switch (action) {
 
-            if (request.getParameter("ViewOrderList") != null) {
-                loadOrderList(request, null, null, null);
-                url = "list_order.jsp";
+                // ═══════════════════════════════════════════════════
+                // DANH SÁCH ĐƠN HÀNG
+                // ═══════════════════════════════════════════════════
+                case "listOrder":
+                    handleListOrder(request, response);
+                    break;
 
-            } else if (request.getParameter("FilterOrder") != null) {
-                String stationF = request.getParameter("stationFilter");
-                String dateF    = request.getParameter("dateFilter");
-                String statusF  = request.getParameter("statusFilter");
-                loadOrderList(request, stationF, dateF, statusF);
-                url = "list_order.jsp";
+                // ═══════════════════════════════════════════════════
+                // THÊM ĐƠN HÀNG
+                // ═══════════════════════════════════════════════════
+                case "addOrder":
+                    handleAddOrder(request, response);
+                    break;
 
-            } else if (request.getParameter("SearchOrderByPhone") != null) {
-                String phone = request.getParameter("searchPhone");
-                List<OrderDTO> list = orderDAO.searchByPhone(phone != null ? phone : "");
-                request.setAttribute("ORDER_LIST", list);
-                request.setAttribute("TOTAL_COUNT", list.size());
-                loadStations(request);
-                url = "list_order.jsp";
+                // ═══════════════════════════════════════════════════
+                // SỬA ĐƠN HÀNG
+                // ═══════════════════════════════════════════════════
+                case "editOrder":
+                    handleEditOrder(request, response);
+                    break;
 
-            // ════════════════════════════════════════════════════════════
-            // B. TẠO ĐƠN HÀNG MỚI
-            // ════════════════════════════════════════════════════════════
+                case "updateOrder":
+                    handleUpdateOrder(request, response);
+                    break;
 
-            } else if (request.getParameter("CreateOrder") != null) {
-                loadStations(request);
-                loadStaff(request);
-                url = "create_order.jsp";
+                // ═══════════════════════════════════════════════════
+                // XÓA ĐƠN HÀNG
+                // ═══════════════════════════════════════════════════
+                case "deleteOrder":
+                    handleDeleteOrder(request, response);
+                    break;
 
-            // ════════════════════════════════════════════════════════════
-            // C. SỬA ĐƠN HÀNG - Load form
-            // ════════════════════════════════════════════════════════════
+                // ═══════════════════════════════════════════════════
+                // CẬP NHẬT TRẠNG THÁI CHUYỂN HÀNG ← MỚI
+                // ═══════════════════════════════════════════════════
+                case "updateShipStatus":
+                    handleUpdateShipStatus(request, response);
+                    break;
 
-            } else if (request.getParameter("EditOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                OrderDTO order = orderDAO.getOrderByID(orderID);
-                if (order == null) {
-                    request.setAttribute("ERROR_MESSAGE", "Không tìm thấy đơn hàng: " + orderID);
-                    loadOrderList(request, null, null, null);
-                    url = "list_order.jsp";
-                } else {
-                    request.setAttribute("EDIT_ORDER", order);
-                    loadStations(request);
-                    loadStaff(request);
-                    url = "edit_order.jsp";
-                }
+                // ═══════════════════════════════════════════════════
+                // CHUYẾN XE ĐI
+                // ═══════════════════════════════════════════════════
+                case "listTripDepart":
+                    handleListTripDepart(request, response);
+                    break;
 
-            // ════════════════════════════════════════════════════════════
-            // D. LƯU SỬA ĐƠN HÀNG
-            // ════════════════════════════════════════════════════════════
+                case "addTripDepart":
+                    handleAddTripDepart(request, response);
+                    break;
 
-            } else if (request.getParameter("UpdateOrder") != null) {
-                String orderID       = request.getParameter("orderID");
-                String itemName      = request.getParameter("itemName");
-                String sendStation   = request.getParameter("sendStation");
-                String receiveStation = request.getParameter("receiveStation");
-                String senderName    = request.getParameter("senderName");
-                String senderPhone   = request.getParameter("senderPhone");
-                String receiverName  = request.getParameter("receiverName");
-                String receiverPhone = request.getParameter("receiverPhone");
-                String note          = request.getParameter("note");
-                String ct            = request.getParameter("ct");
-                String staffInput    = request.getParameter("staffInput");
+                // ═══════════════════════════════════════════════════
+                // CHUYẾN XE ĐẾN
+                // ═══════════════════════════════════════════════════
+                case "listTripArrive":
+                    handleListTripArrive(request, response);
+                    break;
 
-                String paidStr = request.getParameter("paidAmount");
-                double amount = 0;
-                if (paidStr != null && !paidStr.trim().isEmpty()) {
-                    try { amount = Double.parseDouble(paidStr.trim()); } catch (Exception ignored) {}
-                }
+                case "addTripArrive":
+                    handleAddTripArrive(request, response);
+                    break;
 
-                if (itemName == null || itemName.trim().isEmpty()) {
-                    OrderDTO order = orderDAO.getOrderByID(orderID);
-                    request.setAttribute("EDIT_ORDER", order);
-                    loadStations(request);
-                    loadStaff(request);
-                    request.setAttribute("ERROR_MESSAGE", "Tên hàng gửi không được để trống!");
-                    url = "edit_order.jsp";
-                } else {
-                    OrderDTO order = new OrderDTO(orderID, itemName.trim(), amount,
-                        senderName, senderPhone, sendStation,
-                        receiverName, receiverPhone, receiveStation,
-                        staffInput, null, null, ct, null, note);
-                    boolean ok = orderDAO.updateOrder(order);
-                    if (ok) {
-                        request.setAttribute("SUCCESS_MESSAGE", "Cập nhật đơn hàng thành công!");
-                    } else {
-                        request.setAttribute("ERROR_MESSAGE", "Cập nhật đơn hàng thất bại!");
-                    }
-                    loadOrderList(request, null, null, null);
-                    url = "list_order.jsp";
-                }
+                // ═══════════════════════════════════════════════════
+                // GÁN ĐƠN LÊN CHUYẾN XE
+                // ═══════════════════════════════════════════════════
+                case "assignTrip":
+                    handleAssignTrip(request, response);
+                    break;
 
-            // ════════════════════════════════════════════════════════════
-            // E. XÓA MỀM ĐƠN HÀNG (đưa vào thùng rác)
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("DeleteOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                orderDAO.softDelete(orderID);
-                loadOrderList(request, null, null, null);
-                url = "list_order.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // F. THÙNG RÁC ĐƠN HÀNG
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("ViewTrashOrder") != null) {
-                request.setAttribute("TRASH_LIST", orderDAO.getDeletedOrders());
-                url = "trash_order.jsp";
-
-            } else if (request.getParameter("RestoreOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                orderDAO.restore(orderID);
-                request.setAttribute("TRASH_LIST", orderDAO.getDeletedOrders());
-                request.setAttribute("SUCCESS_MESSAGE", "Đã khôi phục đơn hàng: " + orderID);
-                url = "trash_order.jsp";
-
-            } else if (request.getParameter("PermanentDeleteOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                orderDAO.permanentDelete(orderID);
-                request.setAttribute("TRASH_LIST", orderDAO.getDeletedOrders());
-                request.setAttribute("SUCCESS_MESSAGE", "Đã xóa vĩnh viễn: " + orderID);
-                url = "trash_order.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // G. CHUYỂN HÀNG - Từ ds nhận hàng: chọn chuyến xe khớp trạm gửi
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("ShipOrder") != null) {
-                String orderID = request.getParameter("orderID");
-                OrderDTO order = orderDAO.getOrderByID(orderID);
-                request.setAttribute("ORDER_FOR_SHIP", order);
-                if (order != null) {
-                    List<String[]> trips = getTripsByDeparture(order.getSendStation());
-                    request.setAttribute("MATCHING_TRIPS", trips);
-                }
-                url = "ship_order.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // H. GÁN ĐƠN HÀNG LÊN CHUYẾN XE
-            //    (từ ship_order.jsp hoặc assign_goods.jsp)
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("AssignOrderToTrip") != null) {
-                String orderID = request.getParameter("orderID");
-                String tripID  = request.getParameter("tripID");
-                String source  = request.getParameter("source"); // "ship" | "trip"
-
-                orderDAO.assignToTrip(orderID, tripID);
-
-                if ("trip".equals(source)) {
-                    // Từ trang assign_goods (ds chuyến xe) → reload pending orders
-                    String[] info = getTripInfo(tripID);
-                    String dep = info != null ? info[2] : "";
-                    request.setAttribute("TRIP_ID",        tripID);
-                    request.setAttribute("TRIP_ROUTE",     info != null ? info[1] : "");
-                    request.setAttribute("TRIP_DEPARTURE", dep);
-                    request.setAttribute("PENDING_ORDERS", orderDAO.getPendingOrdersByStation(dep));
-                    request.setAttribute("SUCCESS_MESSAGE", "Đã gán đơn " + orderID + " lên chuyến " + tripID);
-                    url = "assign_goods.jsp";
-                } else {
-                    // Từ ship_order.jsp → về ds nhận hàng
-                    request.setAttribute("SUCCESS_MESSAGE", "Đã chuyển hàng thành công!");
-                    loadOrderList(request, null, null, null);
-                    url = "list_order.jsp";
-                }
-
-            // ════════════════════════════════════════════════════════════
-            // I. TỪ DS CHUYẾN XE: bấm "Chuyển Hàng" → hiện đơn chờ khớp trạm
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("TransferGoods") != null) {
-                String tripID = request.getParameter("tripID");
-                String[] info = getTripInfo(tripID);
-                String dep = info != null ? info[2] : "";
-                request.setAttribute("TRIP_ID",        tripID);
-                request.setAttribute("TRIP_ROUTE",     info != null ? info[1] : "");
-                request.setAttribute("TRIP_DEPARTURE", dep);
-                request.setAttribute("PENDING_ORDERS", orderDAO.getPendingOrdersByStation(dep));
-                url = "assign_goods.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // J. LIST HÀNG TRÊN CHUYẾN XE
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("ListHang") != null) {
-                String tripID = request.getParameter("tripID");
-                String[] info = getTripInfo(tripID);
-                List<OrderDTO> orders = orderDAO.getOrdersByTrip(tripID);
-                request.setAttribute("TRIP_ID",    tripID);
-                request.setAttribute("TRIP_ROUTE", info != null ? info[1] : "");
-                request.setAttribute("ORDER_LIST",  orders);
-                url = "list_goods_on_trip.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // K. DANH SÁCH CHUYẾN XE ĐI
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("ViewTripList") != null) {
-                loadTripList(request, null);
-                url = "list_trip.jsp";
-
-            } else if (request.getParameter("SearchTripByTruck") != null) {
-                String truck = request.getParameter("searchTruck");
-                loadTripList(request, truck);
-                url = "list_trip.jsp";
-
-            } else if (request.getParameter("AddTrip") != null) {
-                loadTrucksAndStations(request);
-                url = "create_trip.jsp";
-
-            // ════════════════════════════════════════════════════════════
-            // L. DANH SÁCH XE ĐẾN / CHUYẾN ĐẾN
-            // ════════════════════════════════════════════════════════════
-
-            } else if (request.getParameter("ViewArrivalTripList") != null) {
-                loadArrivalList(request, null);
-                url = "list_arrival_trip.jsp";
-
-            } else if (request.getParameter("SearchArrivalByTruck") != null) {
-                String truck = request.getParameter("searchArrivalTruck");
-                loadArrivalList(request, truck);
-                url = "list_arrival_trip.jsp";
-
-            } else if (request.getParameter("AddArrivalTrip") != null) {
-                loadTrucksAndStations(request);
-                url = "create_arrival_trip.jsp";
-
-            } else if (request.getParameter("ReceiveTrip") != null) {
-                String tripID = request.getParameter("tripID");
-                updateTripStatus(tripID, "Đã đến");
-                loadArrivalList(request, null);
-                url = "list_arrival_trip.jsp";
-
-            // ── Default ──────────────────────────────────────────────────
-            } else {
-                loadOrderList(request, null, null, null);
+                default:
+                    handleListOrder(request, response);
+                    break;
             }
-
         } catch (Exception e) {
-            log("Error GoodsController: " + e.toString());
             e.printStackTrace();
-            request.setAttribute("ERROR_MESSAGE", "Lỗi hệ thống: " + e.getMessage());
-            try { loadOrderList(request, null, null, null); } catch (Exception ignored) {}
-            url = "list_order.jsp";
-        } finally {
-            request.getRequestDispatcher(url).forward(request, response);
+            request.setAttribute("errorMsg", "❌ Lỗi hệ thống: " + e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // PRIVATE HELPERS
-    // ═══════════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════
+    // Danh sách đơn hàng — forward list_order.jsp
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleListOrder(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
 
-    private void loadOrderList(HttpServletRequest req,
-                                String stationF, String dateF, String statusF) throws Exception {
-        OrderDAO dao = new OrderDAO();
-        List<OrderDTO> list;
-        if ((stationF != null && !stationF.isEmpty())
-                || (dateF != null && !dateF.isEmpty())
-                || (statusF != null && !statusF.isEmpty())) {
-            list = dao.getFilteredOrders(stationF, dateF, statusF);
+        String stationFilter    = request.getParameter("stationFilter");
+        String dateFilter       = request.getParameter("dateFilter");
+        String shipStatusFilter = request.getParameter("shipStatusFilter");
+
+        OrderDAO   orderDAO   = new OrderDAO();
+        StationDAO stationDAO = new StationDAO();
+
+        List<OrderDTO>   orderList   = orderDAO.getFilteredOrders(stationFilter, dateFilter, shipStatusFilter);
+        List<StationDTO> stationList = stationDAO.getAllStations();
+
+        request.setAttribute("orderList",        orderList);
+        request.setAttribute("stationList",      stationList);
+        request.setAttribute("stationFilter",    stationFilter    != null ? stationFilter    : "");
+        request.setAttribute("dateFilter",       dateFilter       != null ? dateFilter       : "");
+        request.setAttribute("shipStatusFilter", shipStatusFilter != null ? shipStatusFilter : "");
+
+        request.getRequestDispatcher("list_order.jsp").forward(request, response);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Thêm đơn hàng
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleAddOrder(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String orderID       = request.getParameter("orderID");
+            String itemName      = request.getParameter("itemName");
+            String amountStr     = request.getParameter("amount");
+            String senderName    = request.getParameter("senderName");
+            String senderPhone   = request.getParameter("senderPhone");
+            String sendStation   = request.getParameter("sendStation");
+            String receiverName  = request.getParameter("receiverName");
+            String receiverPhone = request.getParameter("receiverPhone");
+            String recvStation   = request.getParameter("receiveStation");
+            String tr            = request.getParameter("tr");
+            String ct            = request.getParameter("ct");
+            String note          = request.getParameter("note");
+
+            HttpSession session = request.getSession(false);
+            String staffInput   = (String) session.getAttribute("userID");
+
+            if (orderID == null || orderID.trim().isEmpty()) {
+                orderID = "DH" + new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+            }
+
+            double amount = 0;
+            try { amount = Double.parseDouble(amountStr != null ? amountStr.trim() : "0"); }
+            catch (NumberFormatException ignored) {}
+
+            String receiveDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
+
+            OrderDTO order = new OrderDTO(
+                orderID.trim(), itemName, amount,
+                senderName, senderPhone, sendStation,
+                receiverName, receiverPhone, recvStation,
+                staffInput, null, tr, ct, receiveDate, note
+            );
+            // shipStatus tự động = "Chưa Chuyển" (set trong DAO khi INSERT)
+
+            OrderDAO orderDAO = new OrderDAO();
+            boolean ok = orderDAO.insertOrder(order);
+
+            if (ok) {
+                request.getSession().setAttribute("successMsg", "✅ Thêm đơn hàng thành công!");
+            } else {
+                request.getSession().setAttribute("errorMsg", "❌ Thêm đơn hàng thất bại!");
+            }
+            response.sendRedirect("GoodsController?action=listOrder");
+
         } else {
-            list = dao.getAllOrders();
-        }
-        req.setAttribute("ORDER_LIST",  list);
-        req.setAttribute("TOTAL_COUNT", list.size());
-        loadStations(req);
-    }
-
-    private void loadStations(HttpServletRequest req) throws Exception {
-        req.setAttribute("STATION_LIST", new StationDAO().getAllStations());
-    }
-
-    private void loadStaff(HttpServletRequest req) throws Exception {
-        req.setAttribute("STAFF_LIST", new UserDAO().getAllUsers());
-    }
-
-    private void loadTrucksAndStations(HttpServletRequest req) throws Exception {
-        loadStations(req);
-        req.setAttribute("TRUCK_LIST", getTrucks());
-    }
-
-    /** Lấy chuyến xe theo trạm xuất phát (cho tính năng Ship Order) */
-    private List<String[]> getTripsByDeparture(String departure) throws Exception {
-        String sql = "SELECT tripID,(departure+N' → '+destination) AS route,"
-                   + "departure,destination,truckID,driverName,departureTime,status "
-                   + "FROM tblTrips WHERE departure=? ORDER BY createdAt DESC";
-        List<String[]> list = new ArrayList<>();
-        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, departure != null ? departure : "");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(new String[]{
-                    rs.getString("tripID"),
-                    rs.getString("route"),
-                    rs.getString("departure"),
-                    rs.getString("destination"),
-                    rs.getString("truckID"),
-                    rs.getString("driverName"),
-                    rs.getString("departureTime"),
-                    rs.getString("status")
-                });
-            }
-        }
-        return list;
-    }
-
-    /** Lấy thông tin chuyến xe: [0]=tripID, [1]=route, [2]=departure, [3]=destination */
-    private String[] getTripInfo(String tripID) throws Exception {
-        String sql = "SELECT tripID,(departure+N' → '+destination) AS route,departure,destination "
-                   + "FROM tblTrips WHERE tripID=?";
-        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, tripID);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return new String[]{
-                    rs.getString("tripID"), rs.getString("route"),
-                    rs.getString("departure"), rs.getString("destination")
-                };
-            }
-        }
-        return null;
-    }
-
-    private void loadTripList(HttpServletRequest req, String truckFilter) throws Exception {
-        String sql = "SELECT tripID,(departure+N' → '+destination) AS route,"
-                   + "departure,destination,truckID,driverName,departureTime,status,"
-                   + "staffCreated,notes FROM tblTrips "
-                   + (truckFilter != null && !truckFilter.isEmpty() ? "WHERE truckID LIKE ? " : "")
-                   + "ORDER BY createdAt DESC";
-        List<String[]> list = new ArrayList<>();
-        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-            if (truckFilter != null && !truckFilter.isEmpty()) ps.setString(1, "%" + truckFilter + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(new String[]{
-                    rs.getString("tripID"),        rs.getString("route"),
-                    rs.getString("departure"),     rs.getString("destination"),
-                    rs.getString("truckID"),       rs.getString("driverName"),
-                    rs.getString("departureTime"), rs.getString("status"),
-                    rs.getString("staffCreated"),  rs.getString("notes")
-                });
-            }
-        }
-        req.setAttribute("TRIP_LIST", list);
-    }
-
-    private void loadArrivalList(HttpServletRequest req, String truckFilter) throws Exception {
-        loadTripList(req, truckFilter); // same data, different display
-    }
-
-    private void updateTripStatus(String tripID, String status) throws Exception {
-        String sql = "UPDATE tblTrips SET status=? WHERE tripID=?";
-        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, status); ps.setString(2, tripID);
-            ps.executeUpdate();
+            StationDAO stationDAO = new StationDAO();
+            request.setAttribute("stationList", stationDAO.getAllStations());
+            request.getRequestDispatcher("add_order.jsp").forward(request, response);
         }
     }
 
-    private List<String[]> getTrucks() throws Exception {
-        List<String[]> list = new ArrayList<>();
-        String sql = "SELECT truckID,truckType,capacity FROM tblTrucks WHERE status=1";
-        try (Connection c = DBUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(new String[]{
-                rs.getString("truckID"), rs.getString("truckType"), rs.getString("capacity")
-            });
+    // ═══════════════════════════════════════════════════════════════════
+    // Load form sửa đơn
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleEditOrder(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String orderID    = request.getParameter("orderID");
+        OrderDAO orderDAO = new OrderDAO();
+        OrderDTO order    = orderDAO.getOrderByID(orderID);
+
+        if (order == null) {
+            request.getSession().setAttribute("errorMsg", "❌ Không tìm thấy đơn hàng!");
+            response.sendRedirect("GoodsController?action=listOrder");
+            return;
         }
-        return list;
+
+        StationDAO stationDAO = new StationDAO();
+        request.setAttribute("order",       order);
+        request.setAttribute("stationList", stationDAO.getAllStations());
+        request.getRequestDispatcher("edit_order.jsp").forward(request, response);
     }
 
-    @Override protected void doGet(HttpServletRequest req, HttpServletResponse res)
+    // ═══════════════════════════════════════════════════════════════════
+    // Cập nhật đơn hàng
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleUpdateOrder(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String orderID       = request.getParameter("orderID");
+        String itemName      = request.getParameter("itemName");
+        String amountStr     = request.getParameter("amount");
+        String senderName    = request.getParameter("senderName");
+        String senderPhone   = request.getParameter("senderPhone");
+        String sendStation   = request.getParameter("sendStation");
+        String receiverName  = request.getParameter("receiverName");
+        String receiverPhone = request.getParameter("receiverPhone");
+        String recvStation   = request.getParameter("receiveStation");
+        String ct            = request.getParameter("ct");
+        String note          = request.getParameter("note");
+
+        double amount = 0;
+        try { amount = Double.parseDouble(amountStr != null ? amountStr.trim() : "0"); }
+        catch (NumberFormatException ignored) {}
+
+        OrderDAO orderDAO = new OrderDAO();
+        OrderDTO existing = orderDAO.getOrderByID(orderID);
+        if (existing == null) {
+            request.getSession().setAttribute("errorMsg", "❌ Không tìm thấy đơn hàng!");
+            response.sendRedirect("GoodsController?action=listOrder");
+            return;
+        }
+
+        existing.setItemName(itemName);
+        existing.setAmount(amount);
+        existing.setSenderName(senderName);
+        existing.setSenderPhone(senderPhone);
+        existing.setSendStation(sendStation);
+        existing.setReceiverName(receiverName);
+        existing.setReceiverPhone(receiverPhone);
+        existing.setReceiveStation(recvStation);
+        existing.setCt(ct);
+        existing.setNote(note);
+
+        boolean ok = orderDAO.updateOrder(existing);
+        request.getSession().setAttribute(
+            ok ? "successMsg" : "errorMsg",
+            ok ? "✅ Cập nhật đơn hàng thành công!" : "❌ Cập nhật thất bại!"
+        );
+        response.sendRedirect("GoodsController?action=listOrder");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Xóa mềm đơn hàng
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleDeleteOrder(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String orderID    = request.getParameter("orderID");
+        OrderDAO orderDAO = new OrderDAO();
+        boolean ok        = orderDAO.softDelete(orderID);
+
+        request.getSession().setAttribute(
+            ok ? "successMsg" : "errorMsg",
+            ok ? "✅ Đã xóa đơn hàng " + orderID : "❌ Xóa thất bại!"
+        );
+        response.sendRedirect("GoodsController?action=listOrder");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // CẬP NHẬT TRẠNG THÁI CHUYỂN HÀNG ← MỚI
+    // Khi bấm nút "Chuyển Hàng" trong list_order.jsp
+    // shipStatus: "Chưa Chuyển" → "Đã Chuyển"
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleUpdateShipStatus(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String orderID = request.getParameter("orderID");
+
+        if (orderID == null || orderID.trim().isEmpty()) {
+            sendJson(response, false, "Thiếu mã đơn hàng");
+            return;
+        }
+
+        OrderDAO orderDAO = new OrderDAO();
+        boolean ok = orderDAO.markAsShipped(orderID.trim());
+
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))
+                      || (request.getHeader("Accept") != null
+                          && request.getHeader("Accept").contains("application/json"));
+
+        if (isAjax) {
+            sendJson(response, ok, ok ? "Đã cập nhật trạng thái" : "Không tìm thấy đơn " + orderID);
+        } else {
+            request.getSession().setAttribute(
+                ok ? "successMsg" : "errorMsg",
+                ok ? "✅ Đã chuyển đơn hàng " + orderID : "❌ Không tìm thấy đơn hàng " + orderID
+            );
+            response.sendRedirect("GoodsController?action=listOrder");
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Danh sách chuyến xe ĐI
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleListTripDepart(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        TripDAO    tripDAO    = new TripDAO();
+        TruckDAO   truckDAO   = new TruckDAO();
+        StationDAO stationDAO = new StationDAO();
+
+        request.setAttribute("tripList",    tripDAO.getTripsByType("depart"));
+        request.setAttribute("truckList",   truckDAO.getActiveTrucks());
+        request.setAttribute("stationList", stationDAO.getAllStations());
+        request.getRequestDispatcher("list_trip_depart.jsp").forward(request, response);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Thêm chuyến xe ĐI
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleAddTripDepart(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String tripID = "TRIP" + new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+        HttpSession session = request.getSession(false);
+
+        TripDTO trip = buildTripDTO(request, tripID, "Đang đi", "depart",
+                                    (String) session.getAttribute("userID"));
+
+        TripDAO tripDAO = new TripDAO();
+        boolean ok = tripDAO.insertTrip(trip);
+
+        request.getSession().setAttribute(
+            ok ? "successMsg" : "errorMsg",
+            ok ? "✅ Thêm chuyến xe đi thành công!" : "❌ Thêm chuyến xe thất bại!"
+        );
+        response.sendRedirect("GoodsController?action=listTripDepart");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Danh sách chuyến xe ĐẾN
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleListTripArrive(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        TripDAO    tripDAO    = new TripDAO();
+        TruckDAO   truckDAO   = new TruckDAO();
+        StationDAO stationDAO = new StationDAO();
+
+        request.setAttribute("tripList",    tripDAO.getTripsByType("arrive"));
+        request.setAttribute("truckList",   truckDAO.getActiveTrucks());
+        request.setAttribute("stationList", stationDAO.getAllStations());
+        request.getRequestDispatcher("list_trip_arrive.jsp").forward(request, response);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Thêm chuyến xe ĐẾN
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleAddTripArrive(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String tripID = "TRIP" + new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+        HttpSession session = request.getSession(false);
+
+        TripDTO trip = buildTripDTO(request, tripID, "Đang đến", "arrive",
+                                    (String) session.getAttribute("userID"));
+
+        TripDAO tripDAO = new TripDAO();
+        boolean ok = tripDAO.insertTrip(trip);
+
+        request.getSession().setAttribute(
+            ok ? "successMsg" : "errorMsg",
+            ok ? "✅ Thêm chuyến xe đến thành công!" : "❌ Thêm chuyến xe thất bại!"
+        );
+        response.sendRedirect("GoodsController?action=listTripArrive");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Gán đơn hàng lên chuyến xe → shipStatus = "Đã Chuyển"
+    // ═══════════════════════════════════════════════════════════════════
+    private void handleAssignTrip(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        String orderID = request.getParameter("orderID");
+        String tripID  = request.getParameter("tripID");
+
+        if (orderID == null || tripID == null
+                || orderID.trim().isEmpty() || tripID.trim().isEmpty()) {
+            sendJson(response, false, "Thiếu mã đơn hoặc mã chuyến");
+            return;
+        }
+
+        OrderDAO orderDAO = new OrderDAO();
+        boolean ok = orderDAO.assignToTrip(orderID.trim(), tripID.trim());
+
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))
+                      || (request.getHeader("Accept") != null
+                          && request.getHeader("Accept").contains("application/json"));
+
+        if (isAjax) {
+            sendJson(response, ok, ok ? "Gán chuyến thành công" : "Gán chuyến thất bại");
+        } else {
+            request.getSession().setAttribute(
+                ok ? "successMsg" : "errorMsg",
+                ok ? "✅ Đã gán đơn " + orderID + " vào chuyến " + tripID
+                   : "❌ Gán chuyến thất bại!"
+            );
+            response.sendRedirect("GoodsController?action=listOrder");
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPER: Build TripDTO từ request params
+    // ═══════════════════════════════════════════════════════════════════
+    private TripDTO buildTripDTO(HttpServletRequest req, String tripID,
+                                  String status, String tripType, String staffCreated) {
+        TripDTO t = new TripDTO();
+        t.setTripID(tripID);
+        t.setTruckID(req.getParameter("truckID"));
+        t.setDeparture(req.getParameter("departure"));
+        t.setDestination(req.getParameter("destination"));
+        t.setDepartureTime(req.getParameter("departureTime"));
+        t.setDriverName(req.getParameter("driverName"));
+        t.setAssistantName(req.getParameter("assistantName"));
+        t.setNotes(req.getParameter("notes"));
+        t.setStatus(status);
+        t.setTripType(tripType);
+        t.setStaffCreated(staffCreated);
+        return t;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPER: Trả về JSON
+    // ═══════════════════════════════════════════════════════════════════
+    private void sendJson(HttpServletResponse response, boolean success, String message)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.print("{\"success\":" + success + ",\"message\":\""
+                + message.replace("\"", "'") + "\"}");
+        out.flush();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException { processRequest(req, res); }
-    @Override protected void doPost(HttpServletRequest req, HttpServletResponse res)
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException { processRequest(req, res); }
-    @Override public String getServletInfo() { return "GoodsController"; }
 }

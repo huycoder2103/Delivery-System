@@ -7,25 +7,7 @@
     <meta charset="UTF-8">
     <title>Trang Chủ - Hệ thống Quản lý Vận tải</title>
     <link rel="stylesheet" href="css/home.css">
-    <style>
-        .news-entry {
-            position: relative;
-        }
-        .btn-delete-news {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 3px 10px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-delete-news:hover { background: #c0392b; }
-    </style>
+    
 </head>
 <body>
     <%@include file="includes/navbar.jsp" %>

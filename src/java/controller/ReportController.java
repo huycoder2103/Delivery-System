@@ -36,8 +36,8 @@ public class ReportController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");;
 
         try {
             HttpSession session = request.getSession(false);
@@ -60,80 +60,83 @@ public class ReportController extends HttpServlet {
         }
     }
 
-    /** Thống kê tổng quát cho Admin */
+    
     private void loadAdminStats(HttpServletRequest request) {
         String sql = "SELECT "
-                   + "  COUNT(*) AS totalOrders, "
-                   + "  SUM(CASE WHEN tr=N'Đã Nhận' THEN 1 ELSE 0 END) AS completedOrders, "
-                   + "  SUM(CASE WHEN tr=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS pendingOrders, "
-                   + "  ISNULL(SUM(amount),0) AS totalRevenue, "
-                   + "  SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS todayOrders, "
-                   + "  ISNULL(SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN amount ELSE 0 END),0) AS todayRevenue "
-                   + "FROM tblOrders WHERE isDeleted=0";
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                + "  COUNT(*) AS totalOrders, "
+                + "  SUM(CASE WHEN tr=N'Đã Nhận' THEN 1 ELSE 0 END) AS completedOrders, "
+                + "  SUM(CASE WHEN tr=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS pendingOrders, "
+                + "  ISNULL(SUM(amount),0) AS totalRevenue, "
+                + "  SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS todayOrders, "
+                + "  ISNULL(SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN amount ELSE 0 END),0) AS todayRevenue "
+                + "FROM tblOrders WHERE isDeleted=0";
+        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                request.setAttribute("TOTAL_ORDERS",     rs.getInt("totalOrders"));
+                request.setAttribute("TOTAL_ORDERS", rs.getInt("totalOrders"));
                 request.setAttribute("COMPLETED_ORDERS", rs.getInt("completedOrders"));
-                request.setAttribute("PENDING_ORDERS",   rs.getInt("pendingOrders"));
-                request.setAttribute("TOTAL_REVENUE",    formatMoney(rs.getDouble("totalRevenue")));
-                request.setAttribute("TODAY_ORDERS",     rs.getInt("todayOrders"));
-                request.setAttribute("TODAY_REVENUE",    formatMoney(rs.getDouble("todayRevenue")));
+                request.setAttribute("PENDING_ORDERS", rs.getInt("pendingOrders"));
+                request.setAttribute("TOTAL_REVENUE", formatMoney(rs.getDouble("totalRevenue")));
+                request.setAttribute("TODAY_ORDERS", rs.getInt("todayOrders"));
+                request.setAttribute("TODAY_REVENUE", formatMoney(rs.getDouble("todayRevenue")));
             }
-        } catch (Exception e) { /* silent */ }
+        } catch (Exception e) {
+            /* silent */ }
     }
 
-    /** Thống kê hiệu suất từng nhân viên cho Admin */
+    /**
+     * Thống kê hiệu suất từng nhân viên cho Admin
+     */
     private void loadStaffStats(HttpServletRequest request) {
         String sql = "SELECT u.userID, u.fullName, "
-                   + "  COUNT(o.orderID) AS orderCount, "
-                   + "  ISNULL(SUM(o.amount),0) AS revenue "
-                   + "FROM tblUsers u "
-                   + "LEFT JOIN tblOrders o ON u.userID=o.staffInput AND o.isDeleted=0 "
-                   + "WHERE u.roleID='US' "
-                   + "GROUP BY u.userID, u.fullName "
-                   + "ORDER BY revenue DESC";
+                + "  COUNT(o.orderID) AS orderCount, "
+                + "  ISNULL(SUM(o.amount),0) AS revenue "
+                + "FROM tblUsers u "
+                + "LEFT JOIN tblOrders o ON u.userID=o.staffInput AND o.isDeleted=0 "
+                + "WHERE u.roleID='US' "
+                + "GROUP BY u.userID, u.fullName "
+                + "ORDER BY revenue DESC";
         List<UserDTO> list = new ArrayList<>();
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 UserDTO u = new UserDTO(
-                    rs.getString("userID"),
-                    rs.getString("fullName"),
-                    rs.getInt("orderCount"),
-                    rs.getDouble("revenue")
+                        rs.getString("userID"),
+                        rs.getString("fullName"),
+                        rs.getInt("orderCount"),
+                        rs.getDouble("revenue")
                 );
                 list.add(u);
             }
-        } catch (Exception e) { /* silent */ }
+        } catch (Exception e) {
+            /* silent */ }
         request.setAttribute("STAFF_LIST", list);
     }
 
-    /** Thống kê ca làm việc của nhân viên (tính theo ngày hôm nay) */
+    /**
+     * Thống kê ca làm việc của nhân viên (tính theo ngày hôm nay)
+     */
     private void loadStaffShift(HttpServletRequest request, String staffID) {
         String sql = "SELECT COUNT(*) AS totalOrders, ISNULL(SUM(amount),0) AS totalCash "
-                   + "FROM tblOrders WHERE staffInput=? AND isDeleted=0 "
-                   + "AND CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE)";
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                + "FROM tblOrders WHERE staffInput=? AND isDeleted=0 "
+                + "AND CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE)";
+        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, staffID);
-            try (ResultSet rs = ps.executeQuery()) {
+            try ( ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     request.setAttribute("TOTAL_ORDERS", rs.getInt("totalOrders"));
-                    request.setAttribute("TOTAL_CASH",   formatMoney(rs.getDouble("totalCash")));
+                    request.setAttribute("TOTAL_CASH", formatMoney(rs.getDouble("totalCash")));
                 }
             }
-        } catch (Exception e) { /* silent */ }
+        } catch (Exception e) {
+            /* silent */ }
         request.setAttribute("CANCELLED_ORDERS", 0);
     }
 
-    /** Format số tiền có dấu phân cách hàng nghìn */
+    /**
+     * Format số tiền có dấu phân cách hàng nghìn
+     */
     private String formatMoney(double amount) {
         return String.format("%,.0f", amount);
     }
-
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
