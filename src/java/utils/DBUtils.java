@@ -31,7 +31,8 @@ public class DBUtils {
     private static final String DB_PORT = "19281";
     private static final String DB_NAME = "defaultdb";
     private static final String USER_NAME = "avnadmin";
-    private static final String PASSWORD = "AVNS_txLmskApkmP4v1bHS0y";
+//    private static final String PASSWORD = "AVNS_txLmskApkmP4v1bHS0y";
+    private static final String PASSWORD = System.getenv("DB_PASSWORD");
 
     // URL kết nối MySQL có bật SSL
     private static final String DB_URL =
