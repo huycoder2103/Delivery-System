@@ -1,111 +1,159 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.List"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Danh Sách Chuyến Xe Đến</title>
-        <link rel="stylesheet" href="css/home.css">
-        <link rel="stylesheet" href="css/list_arrival_trip.css">
-    </head>
-    <body>
-        <%@include file="includes/navbar.jsp" %>
+<head>
+    <meta charset="UTF-8">
+    <title>Danh Sách Chuyến Xe Đến</title>
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/list_arrival_trip.css">
+    
+</head>
+<body>
+<%@include file="includes/navbar.jsp" %>
 
-        <div class="list-container">
-            <form action="GoodsController" method="POST" class="filter-bar">
-                <input type="date" name="arrivalDate"
-                       value="<%= request.getParameter("arrivalDate") != null ? request.getParameter("arrivalDate") : "" %>">
-                <select name="departureStation">
-                    <option value="">-- Tất Cả Các Trạm Đến --</option>
-                </select>
-                <input type="submit" name="ViewArrivalTripList" value="Xem" class="btn-filter">
-                <input type="submit" name="AddArrivalTrip" value="+ Thêm Chuyến Xe Đến" class="btn-cyan">
-            </form>
+<div class="list-container">
 
-            <!-- Tìm kiếm theo Biển số xe -->
-            <div class="search-box">
-                <form action="GoodsController" method="POST" class="filter-bar">
-                    <input type="text" name="searchArrivalTruck" class="inp-search"
-                           placeholder="Tìm theo biển số xe (VD: 51A-12345)..."
-                           value="<%= request.getParameter("searchArrivalTruck") != null ? request.getParameter("searchArrivalTruck") : "" %>">
-                    <input type="submit" name="SearchArrivalByTruck" value="🔍 Tìm xe đến" class="btn-filter">
-                </form>
-            </div>
+    <c:if test="${not empty requestScope.SUCCESS_MESSAGE}">
+        <div class="alert-success">✅ ${requestScope.SUCCESS_MESSAGE}</div>
+    </c:if>
+    <c:if test="${not empty requestScope.ERROR_MESSAGE}">
+        <div class="alert-error">❌ ${requestScope.ERROR_MESSAGE}</div>
+    </c:if>
 
-            <%
-                String sucMsg = (String) request.getAttribute("SUCCESS_MESSAGE");
-                String errMsg = (String) request.getAttribute("ERROR_MESSAGE");
-            %>
-            <% if (sucMsg != null) { %>
-            <div style="background:#d4edda;color:#155724;padding:9px 14px;border-radius:4px;margin:10px 0;font-weight:600;">✅ <%= sucMsg %></div>
-            <% } %>
-            <% if (errMsg != null) { %>
-            <div style="background:#f8d7da;color:#721c24;padding:9px 14px;border-radius:4px;margin:10px 0;font-weight:600;">❌ <%= errMsg %></div>
-            <% } %>
+    <!-- BỘ LỌC -->
+    <div class="filter-section">
+        <div class="filter-label">🔍 Lọc &amp; Tìm kiếm chuyến xe đến</div>
 
-            <h3>DANH SÁCH CHUYẾN XE ĐẾN</h3>
+        <!-- Hàng 1: Ngày + Trạm -->
+        <form action="GoodsController" method="POST" class="filter-row">
+            <input type="date" name="arrivalDate"
+                   value="${param.arrivalDate}"
+                   title="Lọc theo ngày">
+            <select name="departureStation">
+                <option value="">-- Tất Cả Trạm Xuất Phát --</option>
+                <c:forEach var="s" items="${requestScope.STATION_LIST}">
+                    <option value="${s.stationName}"
+                        <c:if test="${param.departureStation eq s.stationName}">selected</c:if>>
+                        ${s.stationName}
+                    </option>
+                </c:forEach>
+            </select>
+            <select name="arrivalStation">
+                <option value="">-- Tất Cả Trạm Đến --</option>
+                <c:forEach var="s" items="${requestScope.STATION_LIST}">
+                    <option value="${s.stationName}"
+                        <c:if test="${param.arrivalStation eq s.stationName}">selected</c:if>>
+                        ${s.stationName}
+                    </option>
+                </c:forEach>
+            </select>
+            <input type="submit" name="ViewArrivalTripList" value="🔍 Lọc" class="btn-filter">
+            <input type="submit" name="AddArrivalTrip" value="+ Thêm Chuyến Xe Đến" class="btn-cyan btn-add">
+        </form>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Mã Chuyến</th>
-                        <th style="text-align:left">Lộ Trình</th>
-                        <th>Biển Số Xe</th>
-                        <th>Tài Xế</th>
-                        <th>Giờ Xuất Phát</th>
-                        <th>Trạng Thái</th>
-                        <th>Thao Tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%
-                        List<String[]> arrivalList = (List<String[]>) request.getAttribute("ARRIVAL_LIST");
-                        if (arrivalList != null && !arrivalList.isEmpty()) {
-                            int count = 1;
-                            for (String[] t : arrivalList) {
-                                // t[0]=tripID, [1]=route, [2]=dep, [3]=dest,
-                                // [4]=licensePlate, [5]=driver, [6]=depTime, [7]=status, [8]=staffCreated, [9]=createdAt
-                    %>
-                    <tr>
-                        <td><%= count++ %></td>
-                        <td style="color:#3c8dbc;font-weight:bold;"><%= t[0] %></td>
-                        <td class="trip-info"><%= t[1] %></td>
-                        <td><strong><%= t[4] %></strong></td>
-                        <td><%= t[5] %></td>
-                        <td><%= t[6] %></td>
-                        <td>
-                            <span style="padding:3px 9px;border-radius:9px;font-size:.78rem;font-weight:700;
-                                background:<%= "Đang đến".equals(t[7]) ? "#fdebd0" : "#d4efdf" %>;
-                                color:<%= "Đang đến".equals(t[7]) ? "#a04000" : "#1e8449" %>">
-                                <%= t[7] %>
-                            </span>
-                        </td>
-                        <td>
-                            <form action="GoodsController" method="POST" style="display:inline;">
-                                <input type="hidden" name="tripID" value="<%= t[0] %>">
-                                <input type="submit" name="ListGoods" value="📋 List Hàng"
-                                       class="btn-action btn-list" style="margin:2px;">
-                            </form>
-                        </td>
-                    </tr>
-                    <% }
-                    } else { %>
-                    <tr>
-                        <td colspan="8" style="padding:20px;color:#888;text-align:center;">
-                            Không có dữ liệu chuyến xe đến.
-                        </td>
-                    </tr>
-                    <% } %>
-                </tbody>
-            </table>
+        <!-- Hàng 2: Tìm theo biển số xe -->
+        <form action="GoodsController" method="POST" class="filter-row">
+            <input type="text" name="searchArrivalTruck" class="inp-search"
+                   placeholder="🔎 Tìm theo biển số xe (VD: 51A-12345)..."
+                   value="${param.searchArrivalTruck}"
+                   style="min-width:280px;">
+            <input type="submit" name="SearchArrivalByTruck" value="Tìm xe đến" class="btn-filter">
+        </form>
+    </div>
 
-            <div style="margin-top:16px;">
-                <form action="GoodsController" method="POST" style="display:inline;">
-                    <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Hàng" class="btn-back"
-                           style="padding:9px 20px;">
-                </form>
-            </div>
-        </div>
-    </body>
+    <!-- TIÊU ĐỀ BẢNG -->
+    <div class="page-header">
+        <h3>🏁 DANH SÁCH CHUYẾN XE ĐẾN</h3>
+        <span class="count-pill">
+            <c:choose>
+                <c:when test="${not empty requestScope.ARRIVAL_LIST}">
+                    ${fn:length(requestScope.ARRIVAL_LIST)} chuyến
+                </c:when>
+                <c:otherwise>0 chuyến</c:otherwise>
+            </c:choose>
+        </span>
+    </div>
+
+    <!-- BẢNG DỮ LIỆU -->
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Mã Chuyến</th>
+                    <th style="text-align:left">Lộ Trình</th>
+                    <th>Trạm Xuất Phát</th>
+                    <th>Trạm Đến</th>
+                    <th>Biển Số Xe</th>
+                    <th>Tài Xế</th>
+                    <th>NV Tạo</th>
+                    <th>Ngày Tạo</th>
+                    <th>Giờ Xuất Phát</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:choose>
+                    <c:when test="${not empty requestScope.ARRIVAL_LIST}">
+                        <c:forEach var="t" items="${requestScope.ARRIVAL_LIST}" varStatus="st">
+                            <%-- t[0]=tripID, [1]=route, [2]=dep, [3]=dest,
+                                 [4]=licensePlate, [5]=driver, [6]=depTime,
+                                 [7]=status, [8]=staffCreated, [9]=createdAt --%>
+                            <tr>
+                                <td>${st.count}</td>
+                                <td class="trip-id">${t[0]}</td>
+                                <td class="trip-info">${t[1]}</td>
+                                <td>${t[2]}</td>
+                                <td>${t[3]}</td>
+                                <td><strong>${t[4]}</strong></td>
+                                <td>${t[5]}</td>
+                                <td>${t[8]}</td>
+                                <td style="font-size:.78rem;color:#888;">${t[9]}</td>
+                                <td>${t[6]}</td>
+                                <td>
+                                    <span class="badge-status
+                                        <c:choose>
+                                            <c:when test="${t[7] eq 'Đang đến'}">badge-arriving</c:when>
+                                            <c:when test="${t[7] eq 'Đã đến'}">badge-arrived</c:when>
+                                            <c:otherwise>badge-other</c:otherwise>
+                                        </c:choose>">
+                                        ${t[7]}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="GoodsController" method="POST">
+                                        <input type="hidden" name="tripID" value="${t[0]}">
+                                        <button type="submit" name="ListGoods" class="btn-list">📋 List Hàng</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="12">
+                                <div class="no-data">
+                                    <div class="icon">🏁</div>
+                                    <p>Không có dữ liệu chuyến xe đến.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:16px;">
+        <form action="GoodsController" method="POST" style="display:inline;">
+            <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Hàng"
+                   class="btn-back" style="padding:9px 20px;">
+        </form>
+    </div>
+</div>
+
+</body>
 </html>

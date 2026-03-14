@@ -1,22 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-/**
- *
- * @author jayke
- */
-import dao.OrderDAO;
 import dao.UserDAO;
 import dto.UserDTO;
 import java.io.IOException;
@@ -37,144 +20,314 @@ public class ReportController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");;
+        response.setContentType("text/html;charset=UTF-8");
 
         try {
-            HttpSession session = request.getSession(false);
-            String role = (session != null) ? (String) session.getAttribute("ROLE") : "US";
-            UserDTO loginUser = (session != null) ? (UserDTO) session.getAttribute("LOGIN_USER") : null;
+            HttpSession session   = request.getSession(false);
+            String    role        = (session != null) ? (String)  session.getAttribute("ROLE")       : "US";
+            UserDTO   loginUser   = (session != null) ? (UserDTO) session.getAttribute("LOGIN_USER") : null;
+
+            // Ngày được chọn (mặc định hôm nay)
+            String selectedDate = request.getParameter("selectedDate");
+            if (selectedDate == null || selectedDate.trim().isEmpty()) {
+                selectedDate = java.time.LocalDate.now().toString();
+            }
+            request.setAttribute("SELECTED_DATE", selectedDate);
+            request.setAttribute("CURRENT_MONTH",
+                java.time.LocalDate.now().getMonthValue() + "/" + java.time.LocalDate.now().getYear());
 
             if ("AD".equals(role)) {
-                // ── Admin: xem toàn hệ thống ──────────────────────────────
                 loadAdminStats(request);
-                loadStaffStats(request);
+                loadMonthlyAdminStats(request);
+                loadDayStats(request, selectedDate);
+                loadDailyHistory(request);
+                loadOrdersOfDay(request, selectedDate);
+                loadStaffStatsByDay(request, selectedDate);
             } else {
-                // ── Nhân viên: xem ca của mình ────────────────────────────
                 String staffID = (loginUser != null) ? loginUser.getUserID() : "NV01";
                 loadStaffShift(request, staffID);
+                loadMonthlyStaffStats(request, staffID);
+                loadDayStatsForStaff(request, staffID, selectedDate);
+                loadDailyHistoryForStaff(request, staffID);
+                loadOrdersOfDayForStaff(request, staffID, selectedDate);
             }
         } catch (Exception e) {
             log("Error at ReportController: " + e.toString());
+            e.printStackTrace();
         } finally {
             request.getRequestDispatcher("report.jsp").forward(request, response);
         }
     }
 
-    
+    // ── Admin tổng + hôm nay ───────────────────────────────────────
     private void loadAdminStats(HttpServletRequest request) {
-        String sql = "SELECT "
-                + "  COUNT(*) AS totalOrders, "
-                + "  SUM(CASE WHEN tr=N'Đã Nhận' THEN 1 ELSE 0 END) AS completedOrders, "
-                + "  SUM(CASE WHEN tr=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS pendingOrders, "
-                + "  ISNULL(SUM(amount),0) AS totalRevenue, "
-                + "  SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS todayOrders, "
-                + "  ISNULL(SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN amount ELSE 0 END),0) AS todayRevenue "
-                + "FROM tblOrders WHERE isDeleted=0";
-        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
+        String sql =
+            "SELECT COUNT(*) AS totalOrders,"
+            + " SUM(CASE WHEN shipStatus=N'Đã Chuyển'  THEN 1 ELSE 0 END) AS completedOrders,"
+            + " SUM(CASE WHEN shipStatus=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS pendingOrders,"
+            + " ISNULL(SUM(amount),0) AS totalRevenue,"
+            + " SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS todayOrders,"
+            + " ISNULL(SUM(CASE WHEN CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE) THEN amount ELSE 0 END),0) AS todayRevenue"
+            + " FROM tblOrders WHERE isDeleted=0";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                request.setAttribute("TOTAL_ORDERS", rs.getInt("totalOrders"));
+                request.setAttribute("TOTAL_ORDERS",     rs.getInt("totalOrders"));
                 request.setAttribute("COMPLETED_ORDERS", rs.getInt("completedOrders"));
-                request.setAttribute("PENDING_ORDERS", rs.getInt("pendingOrders"));
-                request.setAttribute("TOTAL_REVENUE", formatMoney(rs.getDouble("totalRevenue")));
-                request.setAttribute("TODAY_ORDERS", rs.getInt("todayOrders"));
-                request.setAttribute("TODAY_REVENUE", formatMoney(rs.getDouble("todayRevenue")));
+                request.setAttribute("PENDING_ORDERS",   rs.getInt("pendingOrders"));
+                request.setAttribute("TOTAL_REVENUE",    fmt(rs.getDouble("totalRevenue")));
+                request.setAttribute("TODAY_ORDERS",     rs.getInt("todayOrders"));
+                request.setAttribute("TODAY_REVENUE",    fmt(rs.getDouble("todayRevenue")));
             }
-        } catch (Exception e) {
-            /* silent */ }
+        } catch (Exception e) { log("loadAdminStats: " + e); }
+    }
+
+    // ── Admin tháng hiện tại ───────────────────────────────────────
+    private void loadMonthlyAdminStats(HttpServletRequest request) {
+        String sql =
+            "SELECT COUNT(*) AS monthOrders,"
+            + " SUM(CASE WHEN shipStatus=N'Đã Chuyển'  THEN 1 ELSE 0 END) AS monthCompleted,"
+            + " SUM(CASE WHEN shipStatus=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS monthPending,"
+            + " ISNULL(SUM(amount),0) AS monthRevenue"
+            + " FROM tblOrders WHERE isDeleted=0"
+            + " AND MONTH(createdAt)=MONTH(GETDATE()) AND YEAR(createdAt)=YEAR(GETDATE())";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                request.setAttribute("MONTH_ORDERS",    rs.getInt("monthOrders"));
+                request.setAttribute("MONTH_COMPLETED", rs.getInt("monthCompleted"));
+                request.setAttribute("MONTH_PENDING",   rs.getInt("monthPending"));
+                request.setAttribute("MONTH_REVENUE",   fmt(rs.getDouble("monthRevenue")));
+            }
+        } catch (Exception e) { log("loadMonthlyAdminStats: " + e); }
+    }
+
+    // ── Admin ngày chọn ───────────────────────────────────────────
+    private void loadDayStats(HttpServletRequest request, String date) {
+        String sql =
+            "SELECT COUNT(*) AS dayOrders,"
+            + " ISNULL(SUM(amount),0) AS dayRevenue,"
+            + " SUM(CASE WHEN shipStatus=N'Đã Chuyển'  THEN 1 ELSE 0 END) AS dayCompleted,"
+            + " SUM(CASE WHEN shipStatus=N'Chưa Chuyển' THEN 1 ELSE 0 END) AS dayPending"
+            + " FROM tblOrders WHERE isDeleted=0 AND CAST(createdAt AS DATE)=?";
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, date);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    request.setAttribute("DAY_ORDERS",    rs.getInt("dayOrders"));
+                    request.setAttribute("DAY_REVENUE",   fmt(rs.getDouble("dayRevenue")));
+                    request.setAttribute("DAY_COMPLETED", rs.getInt("dayCompleted"));
+                    request.setAttribute("DAY_PENDING",   rs.getInt("dayPending"));
+                }
+            }
+        } catch (Exception e) { log("loadDayStats: " + e); }
     }
 
     /**
-     * Thống kê hiệu suất từng nhân viên cho Admin
+     * Lịch sử 30 ngày — Admin.
+     * [0]=dd/MM/yyyy [1]=yyyy-MM-dd [2]=orders [3]=revenue [4]=done
      */
-    private void loadStaffStats(HttpServletRequest request) {
-        String sql = "SELECT u.userID, u.fullName, "
-                + "  COUNT(o.orderID) AS orderCount, "
-                + "  ISNULL(SUM(o.amount),0) AS revenue "
-                + "FROM tblUsers u "
-                + "LEFT JOIN tblOrders o ON u.userID=o.staffInput AND o.isDeleted=0 "
-                + "WHERE u.roleID='US' "
-                + "GROUP BY u.userID, u.fullName "
-                + "ORDER BY revenue DESC";
-        List<UserDTO> list = new ArrayList<>();
-        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
+    private void loadDailyHistory(HttpServletRequest request) {
+        String sql =
+            "SELECT TOP 30"
+            + " CONVERT(NVARCHAR,CAST(createdAt AS DATE),103) AS d,"
+            + " CAST(createdAt AS DATE) AS rawDate,"
+            + " COUNT(*) AS cnt,"
+            + " ISNULL(SUM(amount),0) AS rev,"
+            + " SUM(CASE WHEN shipStatus=N'Đã Chuyển' THEN 1 ELSE 0 END) AS done"
+            + " FROM tblOrders WHERE isDeleted=0"
+            + " GROUP BY CAST(createdAt AS DATE)"
+            + " ORDER BY CAST(createdAt AS DATE) DESC";
+        List<String[]> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                UserDTO u = new UserDTO(
-                        rs.getString("userID"),
-                        rs.getString("fullName"),
-                        rs.getInt("orderCount"),
-                        rs.getDouble("revenue")
-                );
-                list.add(u);
+                list.add(new String[]{
+                    rs.getString("d"), rs.getString("rawDate"),
+                    String.valueOf(rs.getInt("cnt")),
+                    fmt(rs.getDouble("rev")),
+                    String.valueOf(rs.getInt("done"))
+                });
             }
-        } catch (Exception e) {
-            /* silent */ }
+        } catch (Exception e) { log("loadDailyHistory: " + e); }
+        request.setAttribute("DAILY_HISTORY", list);
+    }
+
+    /**
+     * Danh sách đơn ngày chọn — Admin.
+     * [0]=orderID [1]=itemName [2]=amount [3]=senderName [4]=senderPhone
+     * [5]=sendStation [6]=receiverName [7]=receiverPhone [8]=receiveStation
+     * [9]=staffInput [10]=tr [11]=ct [12]=shipStatus [13]=note [14]=createdTime
+     */
+    private void loadOrdersOfDay(HttpServletRequest request, String date) {
+        String sql =
+            "SELECT orderID, itemName, amount, senderName, senderPhone,"
+            + " sendStation, receiverName, receiverPhone, receiveStation,"
+            + " staffInput, tr, ct, shipStatus, note,"
+            + " CONVERT(NVARCHAR,createdAt,108) AS createdTime"
+            + " FROM tblOrders WHERE isDeleted=0 AND CAST(createdAt AS DATE)=?"
+            + " ORDER BY createdAt DESC";
+        List<String[]> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, date);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new String[]{
+                        rs.getString("orderID"), rs.getString("itemName"),
+                        fmt(rs.getDouble("amount")),
+                        nvl(rs.getString("senderName")),   nvl(rs.getString("senderPhone")),
+                        nvl(rs.getString("sendStation")),
+                        nvl(rs.getString("receiverName")), nvl(rs.getString("receiverPhone")),
+                        nvl(rs.getString("receiveStation")),
+                        nvl(rs.getString("staffInput")),
+                        nvl(rs.getString("tr")),           nvl(rs.getString("ct")),
+                        nvl(rs.getString("shipStatus")),   nvl(rs.getString("note")),
+                        nvl(rs.getString("createdTime"))
+                    });
+                }
+            }
+        } catch (Exception e) { log("loadOrdersOfDay: " + e); }
+        request.setAttribute("DAY_ORDERS_LIST", list);
+    }
+
+    // ── Hiệu suất nhân viên trong ngày chọn ─────────────────────
+    private void loadStaffStatsByDay(HttpServletRequest request, String date) {
+        String sql =
+            "SELECT u.userID, u.fullName,"
+            + " COUNT(o.orderID) AS orderCount,"
+            + " ISNULL(SUM(o.amount),0) AS revenue"
+            + " FROM tblUsers u"
+            + " LEFT JOIN tblOrders o ON u.userID=o.staffInput AND o.isDeleted=0"
+            + "   AND CAST(o.createdAt AS DATE)=?"
+            + " WHERE u.roleID='US'"
+            + " GROUP BY u.userID, u.fullName ORDER BY revenue DESC";
+        List<UserDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, date);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new UserDTO(rs.getString("userID"), rs.getString("fullName"),
+                                         rs.getInt("orderCount"), rs.getDouble("revenue")));
+                }
+            }
+        } catch (Exception e) { log("loadStaffStatsByDay: " + e); }
         request.setAttribute("STAFF_LIST", list);
     }
 
-    /**
-     * Thống kê ca làm việc của nhân viên (tính theo ngày hôm nay)
-     */
+    // ── Nhân viên hôm nay ────────────────────────────────────────
     private void loadStaffShift(HttpServletRequest request, String staffID) {
-        String sql = "SELECT COUNT(*) AS totalOrders, ISNULL(SUM(amount),0) AS totalCash "
-                + "FROM tblOrders WHERE staffInput=? AND isDeleted=0 "
-                + "AND CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE)";
-        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql =
+            "SELECT COUNT(*) AS totalOrders, ISNULL(SUM(amount),0) AS totalCash"
+            + " FROM tblOrders WHERE staffInput=? AND isDeleted=0"
+            + " AND CAST(createdAt AS DATE)=CAST(GETDATE() AS DATE)";
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, staffID);
-            try ( ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     request.setAttribute("TOTAL_ORDERS", rs.getInt("totalOrders"));
-                    request.setAttribute("TOTAL_CASH", formatMoney(rs.getDouble("totalCash")));
+                    request.setAttribute("TOTAL_CASH",   fmt(rs.getDouble("totalCash")));
                 }
             }
-        } catch (Exception e) {
-            /* silent */ }
-        request.setAttribute("CANCELLED_ORDERS", 0);
+        } catch (Exception e) { log("loadStaffShift: " + e); }
     }
 
-    /**
-     * Format số tiền có dấu phân cách hàng nghìn
-     */
-    private String formatMoney(double amount) {
-        return String.format("%,.0f", amount);
+    // ── Nhân viên tháng ─────────────────────────────────────────
+    private void loadMonthlyStaffStats(HttpServletRequest request, String staffID) {
+        String sql =
+            "SELECT COUNT(*) AS monthOrders, ISNULL(SUM(amount),0) AS monthRevenue"
+            + " FROM tblOrders WHERE staffInput=? AND isDeleted=0"
+            + " AND MONTH(createdAt)=MONTH(GETDATE()) AND YEAR(createdAt)=YEAR(GETDATE())";
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, staffID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    request.setAttribute("MONTH_ORDERS",  rs.getInt("monthOrders"));
+                    request.setAttribute("MONTH_REVENUE", fmt(rs.getDouble("monthRevenue")));
+                }
+            }
+        } catch (Exception e) { log("loadMonthlyStaffStats: " + e); }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
+    // ── Nhân viên ngày chọn ─────────────────────────────────────
+    private void loadDayStatsForStaff(HttpServletRequest request, String staffID, String date) {
+        String sql =
+            "SELECT COUNT(*) AS dayOrders, ISNULL(SUM(amount),0) AS dayRevenue"
+            + " FROM tblOrders WHERE staffInput=? AND isDeleted=0 AND CAST(createdAt AS DATE)=?";
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, staffID); ps.setString(2, date);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    request.setAttribute("DAY_ORDERS",  rs.getInt("dayOrders"));
+                    request.setAttribute("DAY_REVENUE", fmt(rs.getDouble("dayRevenue")));
+                }
+            }
+        } catch (Exception e) { log("loadDayStatsForStaff: " + e); }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
+    // ── Lịch sử 30 ngày — nhân viên ────────────────────────────
+    private void loadDailyHistoryForStaff(HttpServletRequest request, String staffID) {
+        String sql =
+            "SELECT TOP 30"
+            + " CONVERT(NVARCHAR,CAST(createdAt AS DATE),103) AS d,"
+            + " CAST(createdAt AS DATE) AS rawDate,"
+            + " COUNT(*) AS cnt, ISNULL(SUM(amount),0) AS rev"
+            + " FROM tblOrders WHERE staffInput=? AND isDeleted=0"
+            + " GROUP BY CAST(createdAt AS DATE)"
+            + " ORDER BY CAST(createdAt AS DATE) DESC";
+        List<String[]> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, staffID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new String[]{
+                        rs.getString("d"), rs.getString("rawDate"),
+                        String.valueOf(rs.getInt("cnt")),
+                        fmt(rs.getDouble("rev"))
+                    });
+                }
+            }
+        } catch (Exception e) { log("loadDailyHistoryForStaff: " + e); }
+        request.setAttribute("DAILY_HISTORY", list);
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+    // ── Đơn hàng ngày chọn — nhân viên ─────────────────────────
+    private void loadOrdersOfDayForStaff(HttpServletRequest request, String staffID, String date) {
+        String sql =
+            "SELECT orderID, itemName, amount, senderName, senderPhone,"
+            + " sendStation, receiverName, receiverPhone, receiveStation,"
+            + " staffInput, tr, ct, shipStatus, note,"
+            + " CONVERT(NVARCHAR,createdAt,108) AS createdTime"
+            + " FROM tblOrders WHERE staffInput=? AND isDeleted=0 AND CAST(createdAt AS DATE)=?"
+            + " ORDER BY createdAt DESC";
+        List<String[]> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, staffID); ps.setString(2, date);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new String[]{
+                        rs.getString("orderID"), rs.getString("itemName"),
+                        fmt(rs.getDouble("amount")),
+                        nvl(rs.getString("senderName")),   nvl(rs.getString("senderPhone")),
+                        nvl(rs.getString("sendStation")),
+                        nvl(rs.getString("receiverName")), nvl(rs.getString("receiverPhone")),
+                        nvl(rs.getString("receiveStation")),
+                        nvl(rs.getString("staffInput")),
+                        nvl(rs.getString("tr")),           nvl(rs.getString("ct")),
+                        nvl(rs.getString("shipStatus")),   nvl(rs.getString("note")),
+                        nvl(rs.getString("createdTime"))
+                    });
+                }
+            }
+        } catch (Exception e) { log("loadOrdersOfDayForStaff: " + e); }
+        request.setAttribute("DAY_ORDERS_LIST", list);
+    }
 
+    private String fmt(double v)  { return String.format("%,.0f", v); }
+    private String nvl(String s)  { return s != null ? s : "-"; }
+
+    @Override protected void doGet(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException { processRequest(req, res); }
+    @Override protected void doPost(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException { processRequest(req, res); }
+    @Override public String getServletInfo() { return "ReportController"; }
 }

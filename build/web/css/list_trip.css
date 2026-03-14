@@ -9,46 +9,106 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Handling buttons */
-/*.btn-action {
-    padding: 4px 8px;
-    color: white;
-    font-size: 0.75rem;
-    margin: 2px;
-}
-.btn-blue { background: #3c8dbc; }
-.btn-cyan { background: #00c0ef; }*/
 
-/* Table Layout */
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-th { background: #f9f9f9; }
 
-.route-info { color: #3c8dbc; font-weight: bold; text-align: left; }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    margin-top: 20px;
-}
-
-th {
-    background-color: #3498db;
-    color: white;
-    padding: 15px;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-}
-
-td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    text-align: center;
-}
 
 tr:hover {
     background-color: #f9f9f9; /* Hiệu ứng highlight khi di chuột vào dòng */
 }
+        .filter-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .filter-row:last-child { margin-bottom: 0; }
+        .filter-row input[type="date"],
+        .filter-row input[type="text"],
+        .filter-row select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .filter-row input:focus, .filter-row select:focus {
+            border-color: #3498db;
+        }
+        .filter-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .page-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+        .count-pill {
+            background: rgba(255,255,255,.25);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+        .badge-status {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: .75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-going   { background: #d4efdf; color: #1e8449; }
+        .badge-arrived { background: #fadbd8; color: #922b21; }
+        .badge-other   { background: #eaf2fb; color: #1a5276; }
+
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+        thead th {
+            background: #2980b9;
+            color: #fff;
+            padding: 12px 14px;
+            text-align: center;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+        tbody td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        tbody tr:hover td { background: #f0f7ff; }
+        .trip-id { color: #2980b9; font-weight: 700; }
+        .route-info { color: #2c3e50; font-weight: 600; text-align: left !important; }
+        .btn-list {
+            background: #3498db; color: #fff; border: none;
+            padding: 5px 12px; border-radius: 5px; font-size: .78rem;
+            font-weight: 700; cursor: pointer; transition: background .2s;
+        }
+        .btn-list:hover { background: #2980b9; }
+        .btn-add  { background: #27ae60; color: #fff; }
+        .btn-add:hover { background: #1e8449; filter: none !important; }
+        .no-data { text-align: center; padding: 40px; color: #aaa; }
+        .no-data .icon { font-size: 2.5rem; margin-bottom: 8px; }
+        .alert-success { background:#d4edda;color:#155724;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-weight:600; }
+        .alert-error   { background:#f8d7da;color:#721c24;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-weight:600; }
