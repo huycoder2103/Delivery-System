@@ -9,11 +9,10 @@ import java.util.List;
 public class OrderDAO {
 
     private static final String SELECT_COLS =
-        "SELECT orderID, itemName, amount, senderName, senderPhone, sendStation, " +
-        "receiverName, receiverPhone, receiveStation, staffInput, staffReceive, " +
-        "tr, ct, receiveDate, tripID, note, shipStatus ";
+        "SELECT orderID, itemName, amount, senderName, senderPhone, sendStation, "
+        + "receiverName, receiverPhone, receiveStation, staffInput, staffReceive, "
+        + "tr, ct, receiveDate, tripID, note, shipStatus ";
 
-    // ── Map ResultSet → OrderDTO ─────────────────────────────────────────
     private OrderDTO mapRow(ResultSet rs) throws SQLException {
         OrderDTO o = new OrderDTO();
         o.setOrderID(rs.getString("orderID"));
@@ -46,15 +45,11 @@ public class OrderDAO {
         return queryList(sql, new ArrayList<>());
     }
 
-    /** Lấy đơn hàng trong thùng rác (isDeleted = 1) */
     public List<OrderDTO> getTrashOrders() throws Exception {
         String sql = SELECT_COLS + "FROM tblOrders WHERE isDeleted = 1 ORDER BY createdAt DESC";
         return queryList(sql, new ArrayList<>());
     }
 
-    /**
-     * Lọc đơn — mọi tham số null/rỗng đều bị bỏ qua
-     */
     public List<OrderDTO> getFilteredOrders(String stationFilter,
                                              String dateFilter,
                                              String shipStatusFilter) throws Exception {
@@ -66,8 +61,9 @@ public class OrderDAO {
             sql.append("AND receiveStation = ? ");
             params.add(stationFilter.trim());
         }
+        // MySQL: DATE(createdAt) thay CAST(createdAt AS DATE)
         if (dateFilter != null && !dateFilter.trim().isEmpty()) {
-            sql.append("AND CAST(createdAt AS DATE) = ? ");
+            sql.append("AND DATE(createdAt) = ? ");
             params.add(dateFilter.trim());
         }
         if (shipStatusFilter != null && !shipStatusFilter.trim().isEmpty()) {
@@ -90,9 +86,9 @@ public class OrderDAO {
     }
 
     public List<OrderDTO> searchByPhone(String phone) throws Exception {
-        String sql = SELECT_COLS +
-            "FROM tblOrders WHERE isDeleted = 0 " +
-            "AND (senderPhone LIKE ? OR receiverPhone LIKE ?) ORDER BY createdAt DESC";
+        String sql = SELECT_COLS
+            + "FROM tblOrders WHERE isDeleted = 0 "
+            + "AND (senderPhone LIKE ? OR receiverPhone LIKE ?) ORDER BY createdAt DESC";
         List<Object> params = new ArrayList<>();
         params.add("%" + phone + "%");
         params.add("%" + phone + "%");
@@ -101,13 +97,13 @@ public class OrderDAO {
 
     public List<OrderDTO> getOrdersByTrip(String tripID) throws Exception {
         String sql =
-            "SELECT o.orderID, o.itemName, o.amount, o.senderName, o.senderPhone, " +
-            "o.sendStation, o.receiverName, o.receiverPhone, o.receiveStation, " +
-            "o.staffInput, o.staffReceive, o.tr, o.ct, o.receiveDate, " +
-            "o.tripID, o.note, o.shipStatus " +
-            "FROM tblOrders o " +
-            "INNER JOIN tblOrderTrip ot ON o.orderID = ot.orderID " +
-            "WHERE ot.tripID = ? AND o.isDeleted = 0";
+            "SELECT o.orderID, o.itemName, o.amount, o.senderName, o.senderPhone, "
+            + "o.sendStation, o.receiverName, o.receiverPhone, o.receiveStation, "
+            + "o.staffInput, o.staffReceive, o.tr, o.ct, o.receiveDate, "
+            + "o.tripID, o.note, o.shipStatus "
+            + "FROM tblOrders o "
+            + "INNER JOIN tblOrderTrip ot ON o.orderID = ot.orderID "
+            + "WHERE ot.tripID = ? AND o.isDeleted = 0";
         List<Object> params = new ArrayList<>();
         params.add(tripID);
         return queryList(sql, params);
@@ -117,14 +113,14 @@ public class OrderDAO {
     // THÊM
     // ════════════════════════════════════════════════════════════════════
 
-    /** shipStatus luôn = "Chưa Chuyển" khi tạo mới */
+    // MySQL: bỏ N'' prefix ở giá trị 'Chưa Chuyển'
     public boolean insertOrder(OrderDTO o) throws Exception {
         String sql =
-            "INSERT INTO tblOrders " +
-            "(orderID, itemName, amount, senderName, senderPhone, sendStation, " +
-            "receiverName, receiverPhone, receiveStation, staffInput, tr, ct, " +
-            "receiveDate, note, shipStatus) " +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "INSERT INTO tblOrders "
+            + "(orderID, itemName, amount, senderName, senderPhone, sendStation, "
+            + "receiverName, receiverPhone, receiveStation, staffInput, tr, ct, "
+            + "receiveDate, note, shipStatus) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1,  o.getOrderID());
@@ -150,18 +146,14 @@ public class OrderDAO {
     // CẬP NHẬT
     // ════════════════════════════════════════════════════════════════════
 
-    /**
-     * Cập nhật đầy đủ thông tin đơn hàng khi chỉnh sửa
-     * (itemName, stations, sender, receiver, tr, ct, amount, note)
-     */
     public boolean updateOrder(OrderDTO o) throws Exception {
         String sql =
-            "UPDATE tblOrders SET " +
-            "itemName = ?, amount = ?, " +
-            "senderName = ?, senderPhone = ?, sendStation = ?, " +
-            "receiverName = ?, receiverPhone = ?, receiveStation = ?, " +
-            "tr = ?, ct = ?, note = ? " +
-            "WHERE orderID = ? AND isDeleted = 0";
+            "UPDATE tblOrders SET "
+            + "itemName = ?, amount = ?, "
+            + "senderName = ?, senderPhone = ?, sendStation = ?, "
+            + "receiverName = ?, receiverPhone = ?, receiveStation = ?, "
+            + "tr = ?, ct = ?, note = ? "
+            + "WHERE orderID = ? AND isDeleted = 0";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1,  o.getItemName());
@@ -180,12 +172,10 @@ public class OrderDAO {
         }
     }
 
-    /**
-     * Đổi shipStatus → "Đã Chuyển"
-     */
+    // MySQL: bỏ N'' prefix
     public boolean markAsShipped(String orderID) throws Exception {
-        String sql = "UPDATE tblOrders SET shipStatus = N'Đã Chuyển' " +
-                     "WHERE orderID = ? AND isDeleted = 0";
+        String sql = "UPDATE tblOrders SET shipStatus = 'Đã Chuyển' "
+                   + "WHERE orderID = ? AND isDeleted = 0";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, orderID);
@@ -193,14 +183,11 @@ public class OrderDAO {
         }
     }
 
-    /**
-     * Gán đơn vào chuyến xe, đồng thời đổi shipStatus = "Đã Chuyển"
-     */
+    // MySQL: bỏ N'' prefix
     public boolean assignToTrip(String orderID, String tripID) throws Exception {
         try (Connection c = DBUtils.getConnection()) {
             c.setAutoCommit(false);
             try {
-                // Kiểm tra đã gán chưa
                 try (PreparedStatement ps = c.prepareStatement(
                         "SELECT COUNT(*) FROM tblOrderTrip WHERE orderID = ? AND tripID = ?")) {
                     ps.setString(1, orderID);
@@ -212,17 +199,15 @@ public class OrderDAO {
                         }
                     }
                 }
-                // Insert liên kết
                 try (PreparedStatement ps = c.prepareStatement(
                         "INSERT INTO tblOrderTrip(orderID, tripID) VALUES(?, ?)")) {
                     ps.setString(1, orderID);
                     ps.setString(2, tripID);
                     ps.executeUpdate();
                 }
-                // Update tripID + shipStatus
                 try (PreparedStatement ps = c.prepareStatement(
-                        "UPDATE tblOrders SET tripID = ?, shipStatus = N'Đã Chuyển' " +
-                        "WHERE orderID = ?")) {
+                        "UPDATE tblOrders SET tripID = ?, shipStatus = 'Đã Chuyển' "
+                        + "WHERE orderID = ?")) {
                     ps.setString(1, tripID);
                     ps.setString(2, orderID);
                     ps.executeUpdate();
@@ -240,7 +225,6 @@ public class OrderDAO {
     // XÓA
     // ════════════════════════════════════════════════════════════════════
 
-    /** Xóa mềm: chuyển vào thùng rác */
     public boolean softDelete(String orderID) throws Exception {
         String sql = "UPDATE tblOrders SET isDeleted = 1 WHERE orderID = ?";
         try (Connection c = DBUtils.getConnection();
@@ -250,7 +234,6 @@ public class OrderDAO {
         }
     }
 
-    /** Khôi phục từ thùng rác */
     public boolean restore(String orderID) throws Exception {
         String sql = "UPDATE tblOrders SET isDeleted = 0 WHERE orderID = ?";
         try (Connection c = DBUtils.getConnection();
@@ -260,18 +243,15 @@ public class OrderDAO {
         }
     }
 
-    /** Xóa vĩnh viễn khỏi database */
     public boolean permanentDelete(String orderID) throws Exception {
         try (Connection c = DBUtils.getConnection()) {
             c.setAutoCommit(false);
             try {
-                // Xóa liên kết chuyến xe trước
                 try (PreparedStatement ps = c.prepareStatement(
                         "DELETE FROM tblOrderTrip WHERE orderID = ?")) {
                     ps.setString(1, orderID);
                     ps.executeUpdate();
                 }
-                // Xóa đơn hàng
                 try (PreparedStatement ps = c.prepareStatement(
                         "DELETE FROM tblOrders WHERE orderID = ?")) {
                     ps.setString(1, orderID);

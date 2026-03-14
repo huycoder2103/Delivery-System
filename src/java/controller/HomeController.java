@@ -21,7 +21,6 @@ public class HomeController extends HttpServlet {
 
         String url = "home.jsp";
         try {
-            // Tải bản tin hệ thống (bao gồm id để nút xóa hoạt động)
             List<String[]> newsList = getAnnouncements();
             request.setAttribute("NEWS_LIST", newsList);
 
@@ -40,26 +39,28 @@ public class HomeController extends HttpServlet {
     }
 
     /**
-     * Lấy danh sách thông báo đang hoạt động. FIX: Thêm a.id vào SELECT để nút
-     * xóa trong home.jsp hoạt động. Trả về: [0]=id, [1]=title, [2]=content,
-     * [3]=fullName, [4]=createdDate
+     * MySQL: LIMIT thay TOP, DATE_FORMAT thay CONVERT, bỏ N'' prefix,
+     * isActive = 1 giữ nguyên (MySQL dùng số 0/1 cho boolean)
      */
     private List<String[]> getAnnouncements() {
         List<String[]> list = new ArrayList<>();
-        String sql = "SELECT TOP 5 a.id, a.title, a.content, u.fullName, "
-                + "CONVERT(NVARCHAR, a.createdAt, 103) AS createdDate "
+        String sql = "SELECT a.id, a.title, a.content, u.fullName, "
+                + "DATE_FORMAT(a.createdAt, '%d/%m/%Y') AS createdDate "
                 + "FROM tblAnnouncements a "
                 + "LEFT JOIN tblUsers u ON a.createdBy = u.userID "
                 + "WHERE a.isActive = 1 "
-                + "ORDER BY a.createdAt DESC";
-        try ( Connection conn = DBUtils.getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
+                + "ORDER BY a.createdAt DESC "
+                + "LIMIT 5";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new String[]{
-                    rs.getString("id"), // [0] dùng cho nút xóa
-                    rs.getString("title"), // [1]
-                    rs.getString("content"), // [2]
-                    rs.getString("fullName") != null ? rs.getString("fullName") : "Admin", // [3]
-                    rs.getString("createdDate") // [4]
+                    rs.getString("id"),
+                    rs.getString("title"),
+                    rs.getString("content"),
+                    rs.getString("fullName") != null ? rs.getString("fullName") : "Admin",
+                    rs.getString("createdDate")
                 });
             }
         } catch (Exception e) {
@@ -70,18 +71,12 @@ public class HomeController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+            throws ServletException, IOException { processRequest(request, response); }
 
     @Override
-    public String getServletInfo() {
-        return "HomeController";
-    }
+    public String getServletInfo() { return "HomeController"; }
 }

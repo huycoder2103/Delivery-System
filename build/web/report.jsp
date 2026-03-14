@@ -54,7 +54,7 @@
         <button class="tab-btn active" onclick="switchTab('day',     this)">📅 Theo Ngày</button>
         <button class="tab-btn"        onclick="switchTab('month',   this)">📆 Tháng Này</button>
         <button class="tab-btn"        onclick="switchTab('total',   this)">📊 Tổng Hệ Thống</button>
-        <button class="tab-btn"        onclick="switchTab('history', this)">🗓 Lịch Sử 30 Ngày</button>
+        <!--<button class="tab-btn"        onclick="switchTab('history', this)">🗓 Lịch Sử 30 Ngày</button>-->
     </div>
 
     <%-- ── TAB: THEO NGÀY ── --%>
@@ -79,7 +79,7 @@
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-lbl">Doanh thu</div>
-                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}đ</div>
+                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}k</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-lbl">Đã chuyển</div>
@@ -188,7 +188,7 @@
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-lbl">Doanh thu tháng</div>
-                <div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}đ</div>
+                <div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}k</div>
             </div>
             <div class="kpi-card red">
                 <div class="kpi-lbl">Chờ xử lý</div>
@@ -200,7 +200,7 @@
             <div class="stat-row"><span>Tổng đơn nhận:</span><span class="stat-value text-blue">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</span></div>
             <div class="stat-row"><span>Đã chuyển:</span><span class="stat-value text-green">${MONTH_COMPLETED != null ? MONTH_COMPLETED : 0}</span></div>
             <div class="stat-row"><span>Chờ xử lý:</span><span class="stat-value text-red">${MONTH_PENDING != null ? MONTH_PENDING : 0}</span></div>
-            <div class="stat-row"><span>Tổng doanh thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} VNĐ</span></div>
+            <div class="stat-row"><span>Tổng doanh thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} k</span></div>
         </div>
     </div>
 
@@ -208,7 +208,7 @@
     <div id="tab-total" class="tab-pane">
         <div class="kpi-grid-3">
             <div class="kpi-card"><div class="kpi-lbl">Tổng đơn</div><div class="kpi-val">${TOTAL_ORDERS != null ? TOTAL_ORDERS : 0}</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Tổng doanh thu</div><div class="kpi-val green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0}đ</div></div>
+            <div class="kpi-card green"><div class="kpi-lbl">Tổng doanh thu</div><div class="kpi-val green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0}k</div></div>
             <div class="kpi-card red"><div class="kpi-lbl">Tổng chờ xử lý</div><div class="kpi-val red">${PENDING_ORDERS != null ? PENDING_ORDERS : 0}</div></div>
         </div>
         <div class="report-card">
@@ -217,13 +217,13 @@
             <div class="stat-row"><span>Đã chuyển thành công:</span><span class="stat-value text-green">${COMPLETED_ORDERS != null ? COMPLETED_ORDERS : 0}</span></div>
             <div class="stat-row"><span>Đang chờ xử lý:</span><span class="stat-value text-red">${PENDING_ORDERS != null ? PENDING_ORDERS : 0}</span></div>
             <div class="stat-row"><span>Đơn hàng hôm nay:</span><span class="stat-value text-blue">${TODAY_ORDERS != null ? TODAY_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Doanh thu hôm nay:</span><span class="stat-value text-orange">${TODAY_REVENUE != null ? TODAY_REVENUE : 0} VNĐ</span></div>
-            <div class="stat-row"><span>Tổng doanh thu toàn bộ:</span><span class="stat-value text-green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0} VNĐ</span></div>
+            <div class="stat-row"><span>Doanh thu hôm nay:</span><span class="stat-value text-orange">${TODAY_REVENUE != null ? TODAY_REVENUE : 0} k</span></div>
+            <div class="stat-row"><span>Tổng doanh thu toàn bộ:</span><span class="stat-value text-green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0} k</span></div>
         </div>
     </div>
 
     <%-- ── TAB: LỊCH SỬ 30 NGÀY ── --%>
-    <div id="tab-history" class="tab-pane">
+<!--    <div id="tab-history" class="tab-pane">
         <div class="report-card">
             <h3>🗓 Lịch sử doanh thu 30 ngày gần nhất
                 <span style="float:right;font-size:.76rem;color:#888;font-weight:400;">
@@ -282,7 +282,7 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div>-->
 
     <% } else { %>
     <%-- ════════════ NHÂN VIÊN TABS ════════════ --%>
@@ -314,7 +314,7 @@
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-lbl">Tiền thu ngày này</div>
-                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}đ</div>
+                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}k</div>
             </div>
         </div>
 
@@ -330,7 +330,7 @@
                             <th>Người Gửi / SĐT</th><th>Trạm Gửi</th>
                             <th>Người Nhận / SĐT</th><th>Trạm Nhận</th>
                             <th>TR</th><th>CT</th>
-                            <th>Cước</th><th>Trạng Thái</th><th>Giờ</th>
+                            <th>Trạng Thái</th><th>Giờ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -347,7 +347,7 @@
                                         <td>${o[8]}</td>
                                         <td><c:if test="${o[10] ne '-' and not empty o[10]}"><span class="bs bs-tr">${o[10]}K</span></c:if></td>
                                         <td><c:if test="${o[11] ne '-' and not empty o[11]}"><span class="bs bs-ct">${o[11]}K</span></c:if></td>
-                                        <td style="color:#27ae60;font-weight:700;white-space:nowrap">${o[2]}đ</td>
+                                        
                                         <td>
                                             <c:choose>
                                                 <c:when test="${o[12] eq 'Đã Chuyển'}"><span class="bs bs-ship">✅ Đã Chuyển</span></c:when>
@@ -390,12 +390,12 @@
     <div id="tab-month" class="tab-pane">
         <div class="kpi-grid-2">
             <div class="kpi-card green"><div class="kpi-lbl">Đơn tháng ${CURRENT_MONTH}</div><div class="kpi-val green">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Doanh thu tháng</div><div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}đ</div></div>
+            <div class="kpi-card orange"><div class="kpi-lbl">Doanh thu tháng</div><div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}k</div></div>
         </div>
         <div class="report-card">
             <h3>📆 Kết quả tháng ${CURRENT_MONTH}</h3>
             <div class="stat-row"><span>Tổng đơn tháng này:</span><span class="stat-value text-blue">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Tổng tiền thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} VNĐ</span></div>
+            <div class="stat-row"><span>Tổng tiền thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} k</span></div>
         </div>
     </div>
 

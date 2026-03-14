@@ -22,7 +22,6 @@ public class AdminController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
 
-        // Nếu xóa bảng tin từ home.jsp → redirect về HomeController
         String referer = request.getParameter("referer");
         String forwardTarget = "admin.jsp";
         if ("home".equals(referer)) {
@@ -32,13 +31,10 @@ public class AdminController extends HttpServlet {
         try {
             UserDAO userDAO = new UserDAO();
 
-            // ── Bật/Tắt trạng thái nhân viên ─────────────────────────
             if (request.getParameter("ToggleUser") != null) {
                 String uid = request.getParameter("userID");
                 userDAO.toggleUserStatus(uid);
 
-                // ── XÓA NHÂN VIÊN KHỎI DATABASE (hard delete) ────────────
-                // Yêu cầu mới: xóa hẳn, không chỉ set status=0
             } else if (request.getParameter("DeleteUser") != null) {
                 String uid = request.getParameter("userID");
                 if ("admin".equals(uid)) {
@@ -52,7 +48,6 @@ public class AdminController extends HttpServlet {
                     }
                 }
 
-                // ── Đổi mật khẩu ─────────────────────────────────────────
             } else if (request.getParameter("ChangePassword") != null) {
                 String uid = request.getParameter("cpUserID");
                 String newPass = request.getParameter("cpNewPassword");
@@ -71,7 +66,6 @@ public class AdminController extends HttpServlet {
                     }
                 }
 
-                // ── Thêm bảng tin ─────────────────────────────────────────
             } else if (request.getParameter("SaveAnnouncement") != null) {
                 String title = request.getParameter("annTitle");
                 String content = request.getParameter("annContent");
@@ -86,13 +80,11 @@ public class AdminController extends HttpServlet {
                     request.setAttribute("SUCCESS_MESSAGE", "Đã đăng bảng tin mới!");
                 }
 
-                // ── Xóa bảng tin ─────────────────────────────────────────
             } else if (request.getParameter("DeleteAnnouncement") != null) {
                 String annID = request.getParameter("annID");
                 deleteAnnouncement(annID);
             }
 
-            // Load lại danh sách nhân viên + bảng tin (chỉ khi forward về admin.jsp)
             if ("admin.jsp".equals(forwardTarget)) {
                 request.setAttribute("USER_LIST", userDAO.getAllUsers());
                 request.setAttribute("ANN_LIST", getAllAnnouncements());
@@ -107,15 +99,17 @@ public class AdminController extends HttpServlet {
         }
     }
 
-    // ── Lấy tất cả bảng tin (FIX: dùng a.id thay a.annID) ────────────────
+    // ── MySQL: DATE_FORMAT thay CONVERT, bỏ N'' prefix ──────────────────
     private List<String[]> getAllAnnouncements() {
         List<String[]> list = new ArrayList<>();
-        String sql = "SELECT a.id,a.title,a.content,u.fullName,"
-                + "CONVERT(NVARCHAR,a.createdAt,103) AS createdDate,a.isActive "
+        String sql = "SELECT a.id, a.title, a.content, u.fullName, "
+                + "DATE_FORMAT(a.createdAt, '%d/%m/%Y') AS createdDate, a.isActive "
                 + "FROM tblAnnouncements a "
-                + "LEFT JOIN tblUsers u ON a.createdBy=u.userID "
+                + "LEFT JOIN tblUsers u ON a.createdBy = u.userID "
                 + "ORDER BY a.createdAt DESC";
-        try ( Connection c = DBUtils.getConnection();  PreparedStatement ps = c.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new String[]{
                     rs.getString("id"),
@@ -133,8 +127,9 @@ public class AdminController extends HttpServlet {
     }
 
     private void insertAnnouncement(String title, String content, String staffID) {
-        String sql = "INSERT INTO tblAnnouncements(title,content,createdBy,isActive) VALUES(?,?,?,1)";
-        try ( Connection c = DBUtils.getConnection();  PreparedStatement ps = c.prepareStatement(sql)) {
+        String sql = "INSERT INTO tblAnnouncements(title, content, createdBy, isActive) VALUES(?, ?, ?, 1)";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, title);
             ps.setString(2, content);
             ps.setString(3, staffID);
@@ -144,10 +139,10 @@ public class AdminController extends HttpServlet {
         }
     }
 
-    // FIX: dùng id thay annID
     private void deleteAnnouncement(String annID) {
-        String sql = "DELETE FROM tblAnnouncements WHERE id=?";
-        try ( Connection c = DBUtils.getConnection();  PreparedStatement ps = c.prepareStatement(sql)) {
+        String sql = "DELETE FROM tblAnnouncements WHERE id = ?";
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, annID);
             ps.executeUpdate();
         } catch (Exception e) {
@@ -157,18 +152,12 @@ public class AdminController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException {
-        processRequest(req, res);
-    }
+            throws ServletException, IOException { processRequest(req, res); }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException {
-        processRequest(req, res);
-    }
+            throws ServletException, IOException { processRequest(req, res); }
 
     @Override
-    public String getServletInfo() {
-        return "AdminController";
-    }
+    public String getServletInfo() { return "AdminController"; }
 }
