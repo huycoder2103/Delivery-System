@@ -1,84 +1,78 @@
 <%-- 
-    Document   : navbar
-    Created on : Feb 24, 2026, 6:17:37 PM
-    Author     : HuyNHSE190240
+    navbar.jsp - Thanh điều hướng hiện đại (Sửa: Click để mở Dropdown)
 --%>
-
+<%@page import="dto.UserDTO"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>navbar</title>
-        <link rel="stylesheet" href="includes/navbar.css">
-    </head>
-    <body>
-        <%
-            String fullName = (String) session.getAttribute("FULLNAME");
-            if (fullName == null)
-                fullName = "Nhân Viên";
-        %>
+<link rel="stylesheet" href="includes/navbar.css">
 
-        <div class="navbar">
-            <div class="company-name">
-                <form action="MainController" method="POST" style="display: inline;">
-                    <input type="submit" name="GoHome" value="CÔNG TY" 
-                           style="background: none; border: none; color: white; font: inherit; cursor: pointer; padding: 0;">
-                </form>
-            </div>
+<%
+    UserDTO navUser = (UserDTO) session.getAttribute("LOGIN_USER");
+    String navRole = (String) session.getAttribute("ROLE");
+    
+    String fullName = (navUser != null) ? navUser.getFullName() : "Người dùng";
+    String email = (navUser != null && navUser.getEmail() != null && !navUser.getEmail().isEmpty()) 
+                   ? navUser.getEmail() : "Chưa cập nhật email";
+    String initial = (!fullName.isEmpty()) ? fullName.substring(0, 1).toUpperCase() : "U";
+%>
 
-            <div class="user-menu" onclick="toggleDropdown()">
-                <span class="user-name">👤 <%= fullName%> ▼</span>
-                <div id="userDropdown" class="dropdown-content">
-                    <div class="user-header">
-                        <p><strong><%= fullName%></strong></p>
-                        <small><%= session.getAttribute("EMAIL") != null ? session.getAttribute("EMAIL") : ""%></small>
-                    </div>
-                    <div class="user-footer">
-                        <form action="MainController" method="POST">
-                            <input type="submit" name="Logout" value="Đăng Xuất" class="btn-logout">
-                        </form>
-                    </div>
-                </div>
-            </div>
+<nav class="navbar">
+    <!-- Logo & Brand -->
+    <a href="MainController?GoHome=true" class="nav-brand">
+        <span class="brand-logo">🚚</span>
+        <span class="company-name">Delivery System</span>
+    </a>
+
+    <!-- Menu Links -->
+    <ul class="nav-links">
+        <li><a href="MainController?GoHome=true">Trang chủ</a></li>
+        <li><a href="MainController?ViewGoods=true">Hàng hóa</a></li>
+        <li><a href="MainController?ViewReports=true">Báo cáo</a></li>
+        <% if ("AD".equals(navRole)) { %>
+            <li><a href="MainController?AdminPanel=true" style="color: #1a73e8; font-weight: 800;">Quản trị</a></li>
+        <% } %>
+        <li><a href="about.jsp">Hướng dẫn</a></li>
+    </ul>
+
+    <!-- User Profile Dropdown -->
+    <div class="nav-user-zone" id="userZone">
+        <div class="user-trigger" onclick="toggleUserDropdown(event)">
+            <div class="user-avatar-small"><%= initial %></div>
+            <span class="user-trigger-name"><%= fullName %></span>
+            <span class="arrow-icon">▼</span>
         </div>
 
-        <script>
-            function toggleDropdown() {
-                var d = document.getElementById("userDropdown");
-                d.style.display = (d.style.display === "block") ? "none" : "block";
-            }
+        <!-- Cửa sổ sổ xuống (Dropdown) -->
+        <div class="dropdown-menu" id="userDropdown">
+            <div class="dropdown-header">
+                <span class="d-name text-bold"><%= fullName %></span>
+                <span class="d-email"><%= email %></span>
+                <span class="d-role"><%= navRole != null ? navRole : "ST" %></span>
+            </div>
+            <div class="dropdown-body">
+                <form action="MainController" method="POST" style="margin: 0;">
+                    <button type="submit" name="Logout" class="dropdown-item btn-logout-link">
+                        <span>🚪</span> Đăng xuất hệ thống
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
 
-            // Thêm: Đóng dropdown khi nhấn ra ngoài để giao diện mượt hơn
-            window.onclick = function (event) {
-                if (!event.target.matches('.user-name')) {
-                    var dropdowns = document.getElementsByClassName("dropdown-content");
-                    for (var i = 0; i < dropdowns.length; i++) {
-                        var openDropdown = dropdowns[i];
-                        if (openDropdown.style.display === "block") {
-                            openDropdown.style.display = "none";
-                        }
-                    }
-                }
-            }
+<script>
+    function toggleUserDropdown(event) {
+        // Ngăn chặn sự kiện click lan ra ngoài
+        event.stopPropagation();
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
 
-            // Hàm tự động giãn rộng ô input theo nội dung
-            function autoExpandInput() {
-                const searchInputs = document.querySelectorAll('.inp-search');
-
-                searchInputs.forEach(input => {
-                    input.addEventListener('input', function () {
-                        // Tính toán độ dài: mỗi ký tự tầm 8-10px, tối thiểu 150px
-                        let newWidth = Math.max(150, (this.value.length * 9) + 24);
-                        this.style.width = newWidth + 'px';
-                    });
-                });
-            }
-
-            // Chạy hàm khi trang web tải xong
-            document.addEventListener('DOMContentLoaded', autoExpandInput);
-            
-        </script>
-
-    </body>
-</html>
+    // Đóng dropdown khi click ra ngoài vùng menu
+    window.onclick = function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const trigger = document.getElementById('userZone');
+        if (dropdown && !trigger.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    }
+</script>

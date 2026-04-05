@@ -7,7 +7,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Báo cáo & Giao ca</title>
+    <title>Báo cáo & Giao ca - Delivery System</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/report.css">
     

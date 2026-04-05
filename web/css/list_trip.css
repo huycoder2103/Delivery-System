@@ -1,114 +1,60 @@
-/* 
-    Created on : Feb 15, 2026, 8:29:45 PM
-    Author     : HuyNHSE190240
-*/
+/* web/css/list_trip.css */
 
-body {
-    background-color: #f4f7f6; /* Màu xám xanh rất nhạt, tạo cảm giác sạch sẽ */
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Phong cách chung cho danh sách chuyến xe */
+.action-btns-grid { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 4px; 
+}
+
+.btn-action-trip {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 5px;
+    padding: 6px 12px; 
+    border-radius: 6px; 
+    border: none; 
+    cursor: pointer;
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    color: white; 
+    background: #1a73e8; 
+    transition: all 0.2s;
+    width: 100%;
+}
+
+/* Biến thể màu sắc cho các nút */
+.btn-assign-goods { background: #27ae60 !important; }
+.btn-done-trip { background: #ffc107 !important; }
+
+.btn-action-trip:hover { 
+    transform: translateY(-1px); 
+    filter: brightness(1.1); 
 }
 
 
-
-
-tr:hover {
-    background-color: #f9f9f9; /* Hiệu ứng highlight khi di chuột vào dòng */
+/* Badge trạng thái chuyến xe */
+.badge-status-m {
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: inline-block;
 }
-        .filter-section {
-            background: #fff;
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.07);
-        }
-        .filter-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .filter-row:last-child { margin-bottom: 0; }
-        .filter-row input[type="date"],
-        .filter-row input[type="text"],
-        .filter-row select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color .2s;
-        }
-        .filter-row input:focus, .filter-row select:focus {
-            border-color: #3498db;
-        }
-        .filter-label {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            margin-bottom: 6px;
-        }
-        .page-header {
-            background: linear-gradient(135deg, #2980b9, #3498db);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .page-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-        .count-pill {
-            background: rgba(255,255,255,.25);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: .9rem;
-        }
-        .badge-status {
-            padding: 3px 10px;
-            border-radius: 10px;
-            font-size: .75rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .badge-going   { background: #d4efdf; color: #1e8449; }
-        .badge-arrived { background: #fadbd8; color: #922b21; }
-        .badge-other   { background: #eaf2fb; color: #1a5276; }
 
-        .table-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.07);
-            overflow: hidden;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: .86rem; }
-        thead th {
-            background: #2980b9;
-            color: #fff;
-            padding: 12px 14px;
-            text-align: center;
-            font-size: .78rem;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-        }
-        tbody td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        tbody tr:hover td { background: #f0f7ff; }
-        .trip-id { color: #2980b9; font-weight: 700; }
-        .route-info { color: #2c3e50; font-weight: 600; text-align: left !important; }
-        .btn-list {
-            background: #3498db; color: #fff; border: none;
-            padding: 5px 12px; border-radius: 5px; font-size: .78rem;
-            font-weight: 700; cursor: pointer; transition: background .2s;
-        }
-        .btn-list:hover { background: #2980b9; }
-        .btn-add  { background: #27ae60; color: #fff; }
-        .btn-add:hover { background: #1e8449; filter: none !important; }
-        .no-data { text-align: center; padding: 40px; color: #aaa; }
-        .no-data .icon { font-size: 2.5rem; margin-bottom: 8px; }
-        .alert-success { background:#d4edda;color:#155724;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-weight:600; }
-        .alert-error   { background:#f8d7da;color:#721c24;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-weight:600; }
+.badge-going { background: #e6f4ea; color: #1e8e3e; }
+.badge-arriving { background: #e8f0fe; color: #1a73e8; }
+.badge-arrived { background: #e6f4ea; color: #1e8e3e; }
+
+/* Màu sắc đặc thù cho trang chuyến xe đến (Arrival) */
+.header-arrival { background: linear-gradient(135deg, #1a73e8, #0d47a1); }
+.trip-id-arrival { color: #1a73e8; font-weight: 700; }
+
+/* Căn chỉnh bảng */
+.td-route { font-weight: 600; text-align: left !important; }
+.td-departure { font-weight: 600; color: #27ae60; }
+.td-destination { font-weight: 600; color: #e74c3c; }
+.td-truck { font-weight: 700; }
+.td-time { color: #e67e22; font-weight: 700; }
+.td-created-at { font-size: 0.8rem; color: #888; }

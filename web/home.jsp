@@ -1,109 +1,74 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.List"%>
 <%@page import="dto.UserDTO"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Trang Chủ - Hệ thống Quản lý Vận tải</title>
+    <title>Trang Chủ - Delivery System</title>
     <link rel="stylesheet" href="css/home.css">
-    
+    <link rel="stylesheet" href="css/common_styles.css">
 </head>
 <body>
     <%@include file="includes/navbar.jsp" %>
 
     <%
-        String msg  = (String) request.getAttribute("ERROR_MESSAGE");
+        UserDTO loginUser = (UserDTO) session.getAttribute("LOGIN_USER");
+        String error = (String) request.getAttribute("ERROR_MESSAGE");
         String role = (String) session.getAttribute("ROLE");
-        boolean isAdmin = "AD".equals(role);
-        if (msg != null) {
     %>
-    <div style="color:white;background-color:red;padding:10px;text-align:center;font-weight:bold;">
-        <%= msg %>
-    </div>
-    <% } %>
 
-    <div class="main-container">
-        <div class="page-title">
-            <h1>TRANG CHỦ</h1>
-            <div class="underline"></div>
-        </div>
-
-        <div class="dashboard-grid">
-            <%-- CARD 1: HÀNG HÓA --%>
-            <form action="MainController" method="POST" class="card-item bg-green">
-                <input type="submit" name="ViewGoods" value="" class="card-overlay">
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="number">01</span>
-                        <span class="icon">📦</span>
-                    </div>
-                    <h3>HÀNG HÓA</h3>
-                    <p>Quản lý nhận hàng & vận chuyển</p>
-                </div>
-                <div class="card-link">Truy cập hệ thống ➜</div>
-            </form>
-
-            <%-- CARD 2: QUẢN TRỊ --%>
-            <form action="MainController" method="POST" class="card-item bg-blue">
-                <input type="submit" name="AdminPanel" value="" class="card-overlay">
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="number">02</span>
-                        <span class="icon">⚙️</span>
-                    </div>
-                    <h3>QUẢN TRỊ</h3>
-                    <p>Quản lý nhân sự & phân quyền</p>
-                </div>
-                <div class="card-link">Truy cập hệ thống ➜</div>
-            </form>
-
-            <%-- CARD 3: BÁO CÁO --%>
-            <form action="MainController" method="POST" class="card-item bg-yellow">
-                <input type="submit" name="ViewReports" value="" class="card-overlay">
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="number">03</span>
-                        <span class="icon">📊</span>
-                    </div>
-                    <h3>BÁO CÁO</h3>
-                    <p>Thống kê sản lượng & doanh thu</p>
-                </div>
-                <div class="card-link">Truy cập hệ thống ➜</div>
-            </form>
-        </div>
-
-        <!-- BẢN TIN HỆ THỐNG -->
-        <div class="news-section">
-            <div class="news-header">📢 BẢN TIN HỆ THỐNG</div>
-            <div class="news-container">
-                <%
-                    // news[0]=id, [1]=title, [2]=content, [3]=fullName, [4]=createdDate
-                    List<String[]> newsList = (List<String[]>) request.getAttribute("NEWS_LIST");
-                    if (newsList != null && !newsList.isEmpty()) {
-                        for (String[] news : newsList) {
-                %>
-                <div class="news-entry">
-                    <% if (isAdmin) { %>
-                    <form action="AdminController" method="POST" style="display:inline;"
-                          onsubmit="return confirm('Xác nhận xóa bảng tin này?');">
-                        <input type="hidden" name="annID" value="<%= news[0] %>">
-                        <input type="hidden" name="referer" value="home">
-                        <input type="submit" name="DeleteAnnouncement"
-                               value="✕ Xóa" class="btn-delete-news">
-                    </form>
-                    <% } %>
-                    <h4><%= news[1] %></h4>
-                    <p><%= news[2] %></p>
-                    <small>Người đăng: <%= news[3] %> — <%= news[4] %></small>
-                </div>
-                <%
-                        }
-                    } else {
-                %>
-                <p class="no-data">Hiện chưa có thông báo mới từ ban quản lý.</p>
-                <% } %>
+    <div class="home-container">
+        <% if (error != null) { %>
+            <div class="alert-error" style="text-align:center; border-radius:10px; margin-bottom: 20px;">
+                ❌ <%= error %>
             </div>
+        <% } %>
+
+        <div class="welcome-box">
+            <h1>CHÀO MỪNG QUAY TRỞ LẠI!</h1>
+            <p>Hệ thống quản lý hàng hóa & vận chuyển nội bộ</p>
+            <div class="user-chip">
+                <span><%= loginUser != null ? loginUser.getFullName() : "Nhân viên" %></span>
+                <small>(<%= role %>)</small>
+            </div>
+        </div>
+
+        <div class="menu-grid">
+            <!-- 1. Quản lý hàng hóa -->
+            <form action="MainController" method="POST" class="menu-card" onclick="this.submit();">
+                <input type="hidden" name="ViewGoods" value="true">
+                <div class="card-icon">📦</div>
+                <h3>Quản lý hàng hóa</h3>
+                <p>Nhập đơn hàng, bộ phận hàng, quản lý đơn hàng.</p>
+                <button type="button" class="btn-card-action">Truy cập</button>
+            </form>
+
+            <!-- 2. Báo cáo & Thống kê -->
+            <form action="MainController" method="POST" class="menu-card" onclick="this.submit();">
+                <input type="hidden" name="ViewReports" value="true">
+                <div class="card-icon">📊</div>
+                <h3>Báo cáo & Thống kê</h3>
+                <p>Xem doanh thu, số lượng đơn theo ngày/tháng.</p>
+                <button type="button" class="btn-card-action">Xem báo cáo</button>
+            </form>
+
+            <!-- 3. Hệ thống quản trị -->
+            <% if ("AD".equals(role)) { %>
+            <form action="MainController" method="POST" class="menu-card admin-card" onclick="this.submit();">
+                <input type="hidden" name="AdminPanel" value="true">
+                <div class="card-icon">🛡️</div>
+                <h3>Hệ thống quản trị</h3>
+                <p>Quản lý nhân viên, cấu hình trạm xe, bảo mật.</p>
+                <button type="button" class="btn-card-action">Vào quản trị</button>
+            </form>
+            <% } else { %>
+            <div class="menu-card disabled">
+                <div class="card-icon">🔒</div>
+                <h3>Hệ thống quản trị</h3>
+                <p>Chức năng dành riêng cho Quản trị viên hệ thống.</p>
+                <button type="button" class="btn-card-action" disabled>Bị khóa</button>
+            </div>
+            <% } %>
         </div>
     </div>
 </body>

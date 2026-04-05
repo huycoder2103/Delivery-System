@@ -1,137 +1,96 @@
-/* 
-    Created on : Feb 15, 2026, 8:29:45 PM
-    Author     : HuyNHSE190240
-*/
+/* web/css/goods.css */
+body {
+    background-color: #f0f2f5;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.goods-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
 
-.container-goods {
+/* Header phong cách hiện đại */
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 50px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2);
+}
+
+.page-header h2 {
+    font-size: 2.2rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Grid Menu */
+.goods-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 1000px;
+    gap: 30px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
-/* Kiểu dáng cho từng Card */
-.card-tile {
-    position: relative;
-    border-radius: 15px;
-    color: white;
-    min-height: 220px; /* Tăng nhẹ độ cao để nhìn sang hơn */
+.goods-card {
+    background: white;
+    padding: 35px 25px;
+    border-radius: 18px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    align-items: center;
     cursor: pointer;
+    border: 1px solid transparent;
 }
 
-.card-tile:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-    filter: brightness(1.1);
-    cursor: pointer;
+.goods-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    border-color: #3498db;
 }
 
-
-
-/* Nút submit tàng hình */
-.tile-submit {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    z-index: 10;
-    cursor: pointer;
-}
-
-.card-body {
-    padding: 30px;
-}
-.card-body .icon {
+.card-icon {
     font-size: 3.5rem;
     margin-bottom: 15px;
-    display: block;
-}
-.card-body h2 {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 800;
-}
-.card-body p {
-    margin: 10px 0 0;
-    font-size: 1rem;
-    opacity: 0.9;
 }
 
-.card-footer {
-    background: rgba(0, 0, 0, 0.15);
-    padding: 15px 30px;
-    text-align: right;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-/* Màu sắc Gradient */
-.bg-cyan   {
-    background: linear-gradient(135deg, #00c0ef, #0097bc);
-}
-.bg-blue   {
-    background: linear-gradient(135deg, #3c8dbc, #2d6a8e);
-}
-.bg-green  {
-    background: linear-gradient(135deg, #00a65a, #00733e);
-}
-.bg-yellow {
-    background: linear-gradient(135deg, #f39c12, #c87f0a);
-}
-
-/* Tiêu đề */
-.section-title {
-    text-align: center;
-    padding: 50px 0 30px;
-}
-.section-title span {
-    font-size: 2.2rem;
-    font-weight: 900;
+.goods-card h3 {
+    font-size: 1.3rem;
     color: #2c3e50;
-    position: relative;
-    display: inline-block;
-    padding-bottom: 15px;
-}
-.section-title span::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    width: 50%;
-    height: 5px;
-    background: #3c8dbc;
-    border-radius: 10px;
+    margin: 10px 0;
 }
 
-/* Nút quay lại */
-.btn-back-home {
-    background: #444;
+.goods-card p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.btn-access {
+    background: #3498db;
     color: white;
     border: none;
-    padding: 12px 40px;
+    padding: 10px 30px;
     border-radius: 50px;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.btn-back-home:hover {
-    background: #222;
-    transform: scale(1.05);
+    pointer-events: none;
 }
 
-/* Responsive cho điện thoại (về 1 cột nếu màn hình quá nhỏ) */
+.back-btn-container {
+    text-align: center;
+    margin-top: 40px;
+}
+
 @media (max-width: 600px) {
-    .container-goods {
-        grid-template-columns: 1fr;
-    }
+    .goods-grid { grid-template-columns: 1fr; }
 }

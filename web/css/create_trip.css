@@ -104,3 +104,62 @@ body {
     cursor: pointer;
     color: #333;
 }
+
+.error-msg {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.required-star {
+    color: red;
+}
+
+.back-trip-container {
+    padding: 0 20px 20px;
+}
+
+.btn-back {
+    padding: 9px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+}
+
+/* Đảm bảo input time và textarea có style chuẩn */
+.form-col input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#noteSection {
+    display: none; /* Mặc định ẩn, JS sẽ điều khiển */
+    margin-top: 15px;
+}
+
+#noteSection label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+#noteSection textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    border: 1px solid #3c8dbc;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+}

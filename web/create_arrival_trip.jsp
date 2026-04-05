@@ -20,11 +20,11 @@
     %>
 
     <% if (errMsg != null) { %>
-    <div style="background:#f8d7da;color:#721c24;padding:10px 20px;font-weight:bold;">❌ <%= errMsg %></div>
+    <div class="error-msg">❌ <%= errMsg %></div>
     <% } %>
 
     <div class="arrival-container">
-        <form id="arrivalForm" action="MainController" method="POST">
+        <form id="arrivalForm" action="MainController" method="POST" onsubmit="return validateArrivalStations()">
             <div class="arrival-toolbar">
                 <div class="tab-title">Thêm Chuyến Xe Đến</div>
                 <input type="submit" name="SaveArrivalTrip" value="💾 Lưu Chuyến Xe" class="btn-save">
@@ -39,7 +39,7 @@
                 <div class="form-row">
                     <!-- Biển số xe -->
                     <div class="form-col">
-                        <label>Biển Số Xe <span style="color:red">*</span></label>
+                        <label>Biển Số Xe <span class="required-star">*</span></label>
                         <select name="truckID" required>
                             <option value="">-- Chọn Xe --</option>
                             <%
@@ -56,8 +56,8 @@
 
                     <!-- Trạm đi (xuất phát) -->
                     <div class="form-col">
-                        <label>Trạm Xuất Phát <span style="color:red">*</span></label>
-                        <select name="departure" required>
+                        <label>Trạm Xuất Phát <span class="required-star">*</span></label>
+                        <select name="departure" id="departure" required>
                             <option value="">-- Chọn Trạm Đi --</option>
                             <% if (stationList != null) for (StationDTO s : stationList) { %>
                             <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
@@ -67,8 +67,8 @@
 
                     <!-- Trạm đến -->
                     <div class="form-col">
-                        <label>Trạm Đến <span style="color:red">*</span></label>
-                        <select name="destination" required>
+                        <label>Trạm Đến <span class="required-star">*</span></label>
+                        <select name="destination" id="destination" required>
                             <option value="">-- Chọn Trạm Đến --</option>
                             <% if (stationList != null) for (StationDTO s : stationList) { %>
                             <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
@@ -78,7 +78,7 @@
 
                     <!-- Giờ đi -->
                     <div class="form-col">
-                        <label>Giờ Xuất Phát <span style="color:red">*</span></label>
+                        <label>Giờ Xuất Phát <span class="required-star">*</span></label>
                         <select name="departureTime" required>
                             <option value="">-- Chọn Giờ --</option>
                             <option value="06:00">06:00</option>
@@ -96,6 +96,18 @@
                     </div>
                 </div>
 
+                <script>
+                    function validateArrivalStations() {
+                        var dep = document.getElementById("departure").value;
+                        var dest = document.getElementById("destination").value;
+                        if (dep === dest && dep !== "") {
+                            alert("❌ Trạm xuất phát và trạm đến không được trùng nhau!");
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
+
                 <div class="form-row">
                     <div class="form-col">
                         <label>Tài Xế</label>
@@ -107,8 +119,8 @@
                     </div>
                 </div>
 
-                <div id="noteSection" style="display:none;">
-                    <label style="font-weight:bold;display:block;margin-bottom:8px;">Ghi Chú</label>
+                <div id="noteSection">
+                    <label>Ghi Chú</label>
                     <textarea name="note" placeholder="Nhập ghi chú..."></textarea>
                 </div>
                 <button type="button" id="btnToggle" class="btn-toggle-note" onclick="toggleNote()">
@@ -117,10 +129,9 @@
             </div>
         </form>
 
-        <div style="padding:0 20px 20px;">
+        <div class="back-arrival-container">
             <form action="GoodsController" method="POST">
-                <input type="submit" name="ViewArrivalTripList" value="⬅ Quay lại DS Chuyến Xe Đến"
-                       class="btn-back" style="padding:9px 20px;">
+                <input type="submit" name="ViewArrivalTripList" value="⬅ Quay lại DS Chuyến Xe Đến" class="btn-back">
             </form>
         </div>
     </div>
@@ -129,7 +140,7 @@
         function toggleNote() {
             var s = document.getElementById("noteSection");
             var b = document.getElementById("btnToggle");
-            if (s.style.display === "none") {
+            if (s.style.display === "none" || s.style.display === "") {
                 s.style.display = "block";
                 b.textContent = "🙈 Ẩn Ghi Chú";
             } else {

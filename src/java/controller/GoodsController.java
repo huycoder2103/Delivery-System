@@ -87,17 +87,37 @@ public class GoodsController extends HttpServlet {
 
             } else if (request.getParameter("AssignOrderToTrip") != null) {
                 handleAssignTrip(request);
-                handleListOrder(request);
-                url = "list_order.jsp";
+                String source = request.getParameter("source");
+                if ("trip".equals(source)) {
+                    handlePrepareAssignGoods(request);
+                    url = "assign_goods.jsp";
+                } else {
+                    handleListOrder(request);
+                    url = "list_order.jsp";
+                }
+
+            } else if (request.getParameter("PrepareAssignGoods") != null) {
+                handlePrepareAssignGoods(request);
+                url = "assign_goods.jsp";
 
             } else if (request.getParameter("ViewTripList") != null) {
                 handleListTrip(request);
                 loadStations(request);   // ← Cần cho dropdown lọc trạm
                 url = "list_trip.jsp";
 
+            } else if (request.getParameter("FilterTrip") != null) {
+                handleFilterTrip(request);
+                loadStations(request);
+                url = "list_trip.jsp";
+
             } else if (request.getParameter("ViewArrivalTripList") != null) {
                 handleListArrivalTrip(request);
                 loadStations(request);   // ← Cần cho dropdown lọc trạm
+                url = "list_arrival_trip.jsp";
+
+            } else if (request.getParameter("FilterArrival") != null) {
+                handleFilterArrival(request);
+                loadStations(request);
                 url = "list_arrival_trip.jsp";
 
             } else if (request.getParameter("SearchTripByTruck") != null) {
@@ -117,6 +137,14 @@ public class GoodsController extends HttpServlet {
             } else if (request.getParameter("AddArrivalTrip") != null) {
                 loadTrucksAndStations(request);
                 url = "create_arrival_trip.jsp";
+
+            } else if (request.getParameter("ArrivedTrip") != null) {
+                String tripID = request.getParameter("tripID");
+                tripDAO.updateTripStatus(tripID, "Đã đến");
+                request.setAttribute("SUCCESS_MESSAGE", "Đã xác nhận chuyến xe " + tripID + " đã cập bến!");
+                handleListArrivalTrip(request);
+                loadStations(request);
+                url = "list_arrival_trip.jsp";
 
             } else if (request.getParameter("ListGoods") != null) {
                 handleListGoodsOnTrip(request);
@@ -273,15 +301,29 @@ public class GoodsController extends HttpServlet {
     // CHUYẾN XE
     // ================================================================
     private void handleListTrip(HttpServletRequest request) throws Exception {
-        List<TripDTO> list = tripDAO.getTripsByType("depart");
+        List<TripDTO> list = tripDAO.getAllTrips(); // Lấy tất cả chuyến xe
         List<String[]> rows = buildTripRows(list);
         request.setAttribute("TRIP_LIST", rows);
     }
 
     private void handleListArrivalTrip(HttpServletRequest request) throws Exception {
-        List<TripDTO> list = tripDAO.getTripsByType("arrive");
+        List<TripDTO> list = tripDAO.getAllTrips(); // Đổ cùng dữ liệu tất cả chuyến xe
         List<String[]> rows = buildTripRows(list);
         request.setAttribute("ARRIVAL_LIST", rows);
+    }
+
+    private void handleFilterTrip(HttpServletRequest request) throws Exception {
+        String station = request.getParameter("stationFilter");
+        String date    = request.getParameter("dateFilter");
+        List<TripDTO> list = tripDAO.getFilteredTrips(station, date, "all"); // Lọc trên toàn bộ
+        request.setAttribute("TRIP_LIST", buildTripRows(list));
+    }
+
+    private void handleFilterArrival(HttpServletRequest request) throws Exception {
+        String station = request.getParameter("stationFilter");
+        String date    = request.getParameter("dateFilter");
+        List<TripDTO> list = tripDAO.getFilteredTrips(station, date, "all"); // Đổ cùng kết quả lọc
+        request.setAttribute("ARRIVAL_LIST", buildTripRows(list));
     }
 
     private void handleSearchTripByPlate(HttpServletRequest request, String tripType) throws Exception {
@@ -356,6 +398,27 @@ public class GoodsController extends HttpServlet {
             t.getStaffCreated() != null ? t.getStaffCreated() : "-", // [8] NV tạo
             t.getCreatedAt()    != null ? t.getCreatedAt()    : "-"  // [9] thời gian tạo
         };
+    }
+
+    private void handlePrepareAssignGoods(HttpServletRequest request) throws Exception {
+        String tripID = request.getParameter("tripID");
+        TripDTO trip = tripDAO.getTripByID(tripID);
+        if (trip != null) {
+            request.setAttribute("TRIP_ID", tripID);
+            request.setAttribute("TRIP_ROUTE", trip.getDeparture() + " → " + trip.getDestination());
+            request.setAttribute("TRIP_DEPARTURE", trip.getDeparture());
+            
+            // Tìm các đơn hàng Chưa Chuyển và có cùng trạm gửi với trạm đi của xe
+            List<OrderDTO> allOrders = orderDAO.getAllOrders();
+            List<OrderDTO> pending = new ArrayList<>();
+            for (OrderDTO o : allOrders) {
+                if ((o.getTripID() == null || o.getTripID().isEmpty()) 
+                        && trip.getDeparture().equals(o.getSendStation())) {
+                    pending.add(o);
+                }
+            }
+            request.setAttribute("PENDING_ORDERS", pending);
+        }
     }
 
     private void loadStations(HttpServletRequest request) throws Exception {

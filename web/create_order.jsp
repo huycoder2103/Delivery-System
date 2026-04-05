@@ -4,6 +4,8 @@
     Author     : HuyNHSE190240
 --%>
 
+<%@page import="dto.StationDTO"%>
+<%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -16,14 +18,18 @@
 <body>
      <%@include file="includes/navbar.jsp" %>
 
+    <%
+        List<StationDTO> stationList = (List<StationDTO>) request.getAttribute("STATION_LIST");
+    %>
+
     <div class="order-container">
         <div class="order-header">
             <h2>NHẬP HÀNG GỬI</h2>
         </div>
 
-        <form action="MainController" method="POST">
+        <form action="MainController" method="POST" onsubmit="return validateStations()">
             <div class="order-toolbar">
-                <span ">Thông tin hàng gửi</span>
+                <span>Thông tin hàng gửi</span>
                 
                 <%-- SỬA TẠI ĐÂY: name="SaveOrder" để điều hướng trong Controller --%>
                 <input type="submit" name="SaveOrder" value="Lưu đơn hàng" class="btn-save">
@@ -38,21 +44,47 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Trạm Gửi</label>
-                        <select name="sendStation">
-                            <option value="An Sương">An Sương</option>
-                            <option value="Tây Ninh">Tây Ninh</option>
+                        <select name="sendStation" id="sendStation" required>
+                            <option value="">-- Chọn Trạm Gửi --</option>
+                            <%
+                                if (stationList != null) {
+                                    for (StationDTO s : stationList) {
+                            %>
+                            <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
+                            <%
+                                    }
+                                }
+                            %>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Trạm Nhận</label>
-                        <select name="receiveStation">
+                        <select name="receiveStation" id="receiveStation" required>
                             <option value="">-- Chọn Trạm Nhận --</option>
-                            <option value="Châu Đốc">Châu Đốc</option>
-                            <option value="Long Xuyên">Long Xuyên</option>
-                            <option value="Long Xuyên">Kiên Giang</option>
+                            <%
+                                if (stationList != null) {
+                                    for (StationDTO s : stationList) {
+                            %>
+                            <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
+                            <%
+                                    }
+                                }
+                            %>
                         </select>
                     </div>
                 </div>
+
+                <script>
+                    function validateStations() {
+                        var send = document.getElementById("sendStation").value;
+                        var receive = document.getElementById("receiveStation").value;
+                        if (send === receive && send !== "") {
+                            alert("❌ Trạm gửi và trạm nhận không được trùng nhau!");
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -101,11 +133,10 @@
         </form>
     </div>
 
-    <div style="margin: 20px;">
+    <div class="back-container">
         <%-- THÊM NÚT QUAY LẠI: name="ViewGoods" để Controller dẫn về trang bộ phận hàng --%>
         <form action="MainController" method="POST">
-            <input type="submit" name="ViewGoods" value="⬅ Quay lại" class="btn-back" 
-                   style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <input type="submit" name="ViewGoods" value="⬅ Quay lại" class="btn-back">
         </form>
     </div>
 </body>

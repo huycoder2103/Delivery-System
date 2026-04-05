@@ -1,300 +1,132 @@
-/* 
-    Created on : Feb 15, 2026, 8:29:45 PM
-    Author     : HuyNHSE190240
-*/
-/* Bố cục chính */
+/* web/css/home.css */
+
 body {
-    background-color: #f4f7f6;
+    background-color: #f0f2f5;
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-form {
-    margin: 0;
+
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
-
-/* Container tổng cho phần danh sách */
-.list-container {
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-/* Thanh công cụ (Lọc & Tìm kiếm) */
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    align-items: center;
-    flex-wrap: wrap; /* Tự xuống dòng trên điện thoại */
-}
-
-/* Định dạng các ô nhập liệu và select */
-.filter-bar select,
-.filter-bar input[type="date"],
-.filter-bar .inp-search {
-
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    outline: none;
-}
-/* Thanh tìm kiếm co giãn */
-.filter-bar .inp-search {
-    min-width: 150px; /* Độ dài cơ bản khi chưa nhập gì */
-    width: 150px;     /* Độ dài khởi tạo */
-    max-width: 500px; /* Độ dài tối đa để không làm vỡ giao diện */
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    outline: none;
-    transition: width 0.2s ease, border-color 0.3s; /* Hiệu ứng mượt khi dài ra */
-}
-
-.filter-bar .inp-search:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-}
-
-.filter-bar input, .filter-bar select {
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-
-.btn-filter, .btn-cyan, .btn-action, .btn-back {
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.btn-filter:hover, .btn-cyan:hover, .btn-action:hover, .btn-back:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-.btn-filter {
-    background: #00a65a;
-    color: white;
-    padding: 8px 20px;
-}
-.btn-cyan {
-    background: #3498DB;
-    color: white;
-    padding: 8px 15px;
-}
-.btn-back {
-    background: #444;
-    color: white;
-    padding: 10px 25px;
-}
-.filter-bar .inp-search:focus {
-    border-color: #3498db; /* Đổi màu viền khi nhấn vào cho chuyên nghiệp */
-}
-
-.main-container {
-    margin: 40px auto;
-    padding: 0 20px;
-}
-
-/* Tên trang */
-.page-title {
+/* Welcome Box - Khối màu xanh Gradient */
+.welcome-box {
     text-align: center;
     margin-bottom: 50px;
-}
-.page-title h1 {
-    font-size: 2.5rem;
-    color: #2c3e50;
-    font-weight: 900;
-}
-.underline {
-    width: 80px;
-    height: 5px;
-    background: #3498db;
-    margin: 10px auto;
-    border-radius: 10px;
-}
-
-/* Grid 3 Thẻ */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-}
-.card-item:hover {
-    filter: brightness(1.1);
-    cursor: pointer;
-}
-
-.card-item {
-    position: relative;
-    border-radius: 15px;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
     color: white;
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
+    padding: 60px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(26, 115, 232, 0.3);
 }
 
-.card-item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-
-}
-
-.card-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    z-index: 10;
-    cursor: pointer;
-}
-
-.card-content {
-    padding: 30px;
-}
-.card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-}
-.number {
-    font-size: 3rem;
+.welcome-box h1 {
+    font-size: 2.8rem;
+    margin: 0 0 10px 0;
     font-weight: 900;
-    opacity: 0.2;
-}
-.icon {
-    font-size: 3rem;
-}
-.card-content h3 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-.card-content p {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    letter-spacing: 1px;
 }
 
-.card-link {
-    background: rgba(0,0,0,0.15);
-    padding: 15px;
-    text-align: center;
+.welcome-box p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 25px;
+}
+
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 50px;
+    backdrop-filter: blur(5px);
+}
+
+.user-chip span {
     font-weight: bold;
+    margin-right: 8px;
+}
+
+.user-chip small {
+    opacity: 0.8;
     font-size: 0.85rem;
 }
 
-/* Màu sắc */
-.bg-green  {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
-}
-.bg-blue   {
-    background: linear-gradient(135deg, #2980b9, #3498db);
-}
-.bg-yellow {
-    background: linear-gradient(135deg, #f39c12, #f1c40f);
+/* Menu Grid */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
 }
 
-/* Bản tin */
-.news-section {
-    margin-top: 60px;
+/* Menu Card - Các thẻ trắng */
+.menu-card {
     background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-}
-.news-header {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #2c3e50;
-    border-bottom: 2px solid #f4f7f6;
-    padding-bottom: 10px;
+    padding: 40px 30px;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid transparent;
+    cursor: pointer; /* Cho phép click toàn bộ thẻ */
 }
 
-.news-entry {
-    padding: 15px;
-    border-left: 5px solid #3498db;
-    background: #fafafa;
-    margin-bottom: 10px;
+.menu-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border-color: #1a73e8;
 }
-.news-entry small {
-    display: block;
-    margin-top: 10px;
-    color: #7f8c8d;
-    font-style: italic;
-    border-top: 1px solid #eee;
-    padding-top: 5px;
+
+.card-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
 }
-.news-entry h4 {
+
+.menu-card h3 {
+    font-size: 1.5rem;
     color: #2c3e50;
-    margin-bottom: 5px;
+    margin: 0 0 15px 0;
 }
-.no-data {
-    text-align: center;
-    color: #999;
-    padding: 20px;
+
+.menu-card p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    flex-grow: 1;
 }
-.news-entry {
-    position: relative;
-}
-.btn-delete-news {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #e74c3c;
+
+/* Nút bấm trong card */
+.btn-card-action {
+    background: #1a73e8;
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 0.75rem;
-    cursor: pointer;
+    padding: 12px 35px;
+    border-radius: 50px;
     font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    pointer-events: none; /* Để card nhận sự kiện click thay vì nút */
 }
-.btn-delete-news:hover {
-    background: #c0392b;
+
+/* Disabled State */
+.menu-card.disabled {
+    opacity: 0.7;
+    background: #f8f9fa;
+    cursor: not-allowed;
 }
+
+.menu-card.disabled .card-icon { filter: grayscale(1); }
+.menu-card.disabled .btn-card-action { background: #bdc3c7; }
 
 /* Responsive */
-
 @media (max-width: 768px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr; /* Chuyển từ 3 cột thành 1 cột dọc */
-        padding: 10px;
-        gap: 15px;
-    }
-
-    .main-container {
-        padding: 20px 10px;
-    }
-
-    .page-title h1 {
-        font-size: 24px; /* Thu nhỏ tiêu đề */
-    }
-
-    .card-item {
-        height: auto;
-        min-height: 180px;
-    }
-
-    /* Thu nhỏ thanh navbar trên mobile */
-    .navbar {
-        flex-direction: column;
-        height: auto;
-        padding: 10px;
-    }
+    .welcome-box h1 { font-size: 2rem; }
+    .menu-grid { grid-template-columns: 1fr; }
 }

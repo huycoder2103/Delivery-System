@@ -79,6 +79,13 @@ public class SaveOrderController extends HttpServlet {
                 return;
             }
 
+            if (sendStation != null && sendStation.equals(receiveStation)) {
+                request.setAttribute("ERROR_MESSAGE", "Trạm gửi và trạm nhận không được trùng nhau!");
+                url = "GoodsController?CreateOrder=true";
+                request.getRequestDispatcher(url).forward(request, response);
+                return;
+            }
+
             // Lấy nhân viên đang đăng nhập
             HttpSession session = request.getSession(false);
             String staffID = "NV01";

@@ -3,7 +3,16 @@
     Author     : HuyNHSE190240
 */
 
-
+/* Đồng bộ màu xanh giống trang chuyến xe đi */
+        .header-arrival { background: linear-gradient(135deg, #1a73e8, #0d47a1); }
+        .trip-id-arrival { color: #1a73e8; font-weight: 700; }
+        .badge-arrival { background: #e8f0fe; color: #1a73e8; }
+        .badge-success-m { background: #e6f4ea; color: #1e8e3e; }
+        .btn-arrival { background: #1a73e8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; }
+        .btn-arrival:hover { background: #1557b0; transform: translateY(-1px); }
+        .btn-done { background: #34a853; color: white; }
+        .btn-done:hover { background: #2d8a46; }
+        .action-btns-grid { display: flex; flex-direction: column; gap: 4px; }
 .btn-action {
     padding: 4px 8px;
     border: none;
@@ -12,6 +21,9 @@
     font-size: 0.75rem;
     cursor: pointer;
     margin: 2px;
+}
+.btn-action-trip btn-done-trip{
+    color: red;
 }
 .btn-list {
     background: #3c8dbc;

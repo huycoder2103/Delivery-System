@@ -120,4 +120,32 @@ public class TripDAO {
             return ps.executeUpdate() > 0;
         }
     }
+
+    public List<TripDTO> getFilteredTrips(String station, String date, String type) throws Exception {
+        String sql = SELECT_COLS + "FROM tblTrips WHERE 1=1 ";
+        if (!"all".equals(type)) {
+            sql += " AND tripType = ? ";
+        }
+        if (station != null && !station.isEmpty()) {
+            sql += " AND departure = ? ";
+        }
+        if (date != null && !date.isEmpty()) {
+            sql += " AND DATE(createdAt) = ? ";
+        }
+        sql += " ORDER BY createdAt DESC";
+        
+        List<TripDTO> list = new ArrayList<>();
+        try (Connection c = DBUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            int i = 1;
+            if (!"all".equals(type)) ps.setString(i++, type);
+            if (station != null && !station.isEmpty()) ps.setString(i++, station);
+            if (date != null && !date.isEmpty()) ps.setString(i++, date);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        }
+        return list;
+    }
 }

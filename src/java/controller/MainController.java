@@ -61,6 +61,8 @@ public class MainController extends HttpServlet {
             } else if (request.getParameter("ViewOrderList") != null
                     || request.getParameter("CreateOrder") != null
                     || request.getParameter("FilterOrder") != null
+                    || request.getParameter("FilterTrip") != null
+                    || request.getParameter("FilterArrival") != null
                     || request.getParameter("SearchOrderByPhone") != null
                     || request.getParameter("EditOrder") != null
                     || request.getParameter("UpdateOrder") != null
@@ -77,6 +79,8 @@ public class MainController extends HttpServlet {
                     || request.getParameter("SearchTripByTruck") != null
                     || request.getParameter("SearchArrivalByTruck") != null
                     || request.getParameter("ListGoods") != null
+                    || request.getParameter("PrepareAssignGoods") != null
+                    || request.getParameter("ArrivedTrip") != null
                     || request.getParameter("TransferGoods") != null
                     || request.getParameter("EditTrip") != null) {
                 url = "GoodsController";
