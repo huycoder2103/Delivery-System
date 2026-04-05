@@ -22,25 +22,15 @@ public class StationDAO {
     // Hàm lấy tất cả các trạm
     public List<StationDTO> getAllStations() throws SQLException, ClassNotFoundException {
         List<StationDTO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ptm = null;
-        ResultSet rs = null;
-        try {
-            conn = DBUtils.getConnection();
-            if (conn != null) {
-                String sql = "SELECT stationID, stationName FROM tblStations";
-                ptm = conn.prepareStatement(sql);
-                rs = ptm.executeQuery();
-                while (rs.next()) {
-                    int stationID = rs.getInt("stationID");
-                    String stationName = rs.getString("stationName");
-                    list.add(new StationDTO(stationID, stationName));
-                }
+        String sql = "SELECT stationID, stationName FROM tblStations";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ptm = conn.prepareStatement(sql);
+             ResultSet rs = ptm.executeQuery()) {
+            while (rs.next()) {
+                int stationID = rs.getInt("stationID");
+                String stationName = rs.getString("stationName");
+                list.add(new StationDTO(stationID, stationName));
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (ptm != null) ptm.close();
-            if (conn != null) conn.close();
         }
         return list;
     }

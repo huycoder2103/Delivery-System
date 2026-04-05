@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/list_trip.css">
 </head>
 <body>
-    <%@include file="includes/navbar.jsp" %>
+    <%@include file="../includes/navbar.jsp" %>
 
     <%
         List<StationDTO> stationList = (List<StationDTO>) request.getAttribute("STATION_LIST");
@@ -26,8 +26,25 @@
     <div style="max-width: 1550px; margin: 20px auto; padding: 0 20px;">
         
         <div class="modern-page-header">
-            <h3>🚚 DANH SÁCH CHUYẾN XE ĐI</h3>
-            <span style="font-weight: 700; opacity: 0.9;">Tổng: ${TRIP_LIST != null ? TRIP_LIST.size() : 0} chuyến</span>
+            <div>
+                <h3>🚚 DANH SÁCH CHUYẾN XE ĐI</h3>
+                <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">Tổng: ${TRIP_LIST != null ? TRIP_LIST.size() : 0} chuyến</div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <form action="MainController" method="POST" style="margin:0;">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                    <button type="submit" name="ViewOrderList" class="btn-modern" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                        📦 Quản Lý Đơn Hàng
+                    </button>
+                </form>
+                <form action="MainController" method="POST" style="margin:0;">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                    <button type="submit" name="ViewArrivalTripList" class="btn-modern" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                        📥 Chuyến Xe Đến
+                    </button>
+                </form>
+            </div>
         </div>
 
         <% if (success != null) { %> <div class="alert-success">✅ <%= success %></div> <% } %>
@@ -36,18 +53,29 @@
         <div class="modern-card">
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <form action="GoodsController" method="POST" style="display:flex; gap:10px; flex-wrap: wrap; align-items: center;">
-                    <select name="stationFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
-                        <option value="">-- Lọc Trạm Gửi --</option>
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                    
+                    <select name="departureFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="">-- Từ Trạm (Đi) --</option>
                         <% if (stationList != null) for (StationDTO s : stationList) { %>
                         <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
                         <% } %>
                     </select>
+
+                    <select name="destinationFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="">-- Đến Trạm (Dừng) --</option>
+                        <% if (stationList != null) for (StationDTO s : stationList) { %>
+                        <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
+                        <% } %>
+                    </select>
+
                     <input type="date" name="dateFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
                     <input type="submit" name="FilterTrip" value="🔍 Lọc Dữ Liệu" class="btn-modern btn-primary-modern">
                     <input type="submit" name="AddTrip" value="➕ Thêm Chuyến Mới" class="btn-modern btn-success-modern">
                 </form>
                 
                 <form action="GoodsController" method="POST" style="display:flex; gap:10px; align-items: center;">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                     <input type="text" name="searchTruck" placeholder="Nhập biển số xe cần tìm..." 
                            value="<%= search %>" style="min-width:280px; padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
                     <input type="submit" name="SearchTripByTruck" value="🔎 Tìm Xe" class="btn-modern btn-primary-modern">
@@ -77,8 +105,8 @@
                         <c:forEach var="t" items="${TRIP_LIST}">
                             <tr>
                                 <td><strong style="color: #1a73e8;">${t[0]}</strong></td>
-                                <td class="td-departure">${t[2]}</td>
-                                <td class="td-destination">${t[3]}</td>
+                                <td class="td-departure" style="color: red; font-weight: 500;">${t[2]}</td>
+                                <td class="td-destination" style="color: #219150;font-weight: 500;">${t[3]}</td>
                                 <td class="td-truck">${t[4]}</td>
                                 <td class="td-time">${t[6]}</td>
                                 <td>${t[5]}</td>
@@ -88,7 +116,7 @@
                                             <span class="badge-status-m badge-going">🚛 Đang đi</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge-status-m badge-info">${t[7]}</span>
+                                            <span class="badge-status-m badge-arrived">🏁 Đã cập bến</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -96,17 +124,18 @@
                                 <td class="td-created-at">${t[9]}</td>
                                 <td style="min-width: 130px;">
                                     <div class="action-btns-grid">
-                                        <form action="MainController" method="POST">
-                                            <input type="hidden" name="tripID" value="${t[0]}">
-                                            <button type="submit" name="ListGoods" class="btn-action-trip">📋 Hàng trên xe</button>
-                                        </form>
-                                        
                                         <c:if test="${t[7] == 'Đang đi'}">
                                             <form action="MainController" method="POST">
+                                                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                                 <input type="hidden" name="tripID" value="${t[0]}">
                                                 <button type="submit" name="PrepareAssignGoods" class="btn-action-trip btn-assign-goods">📦 Thêm hàng</button>
                                             </form>
                                         </c:if>
+                                        <form action="MainController" method="POST">
+                                            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                                            <input type="hidden" name="tripID" value="${t[0]}">
+                                            <button type="submit" name="ListGoods" class="btn-action-trip">📋 Xem hàng hóa</button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -123,9 +152,11 @@
 
         <div style="margin-top: 20px;">
             <form action="GoodsController" method="POST">
-                <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Đơn Hàng" class="btn-modern btn-secondary-modern">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Đơn Hàng" class="btn-back">
             </form>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

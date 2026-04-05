@@ -28,6 +28,7 @@
         </div>
 
         <form action="MainController" method="POST" onsubmit="return validateStations()">
+        <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
             <div class="order-toolbar">
                 <span>Thông tin hàng gửi</span>
                 
@@ -136,8 +137,10 @@
     <div class="back-container">
         <%-- THÊM NÚT QUAY LẠI: name="ViewGoods" để Controller dẫn về trang bộ phận hàng --%>
         <form action="MainController" method="POST">
+            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
             <input type="submit" name="ViewGoods" value="⬅ Quay lại" class="btn-back">
         </form>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

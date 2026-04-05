@@ -98,7 +98,15 @@ public class MainController extends HttpServlet {
             } else if (request.getParameter("SaveUser") != null) {
                 url = "CreateUserController";
 
-            // ── 7. Mặc định ──────────────────────────────────────────────
+            // ── 7. Feedback & Hướng dẫn ──────────────────────────────────
+            } else if (request.getParameter("ViewAbout") != null) {
+                url = "AboutController";
+
+            } else if (request.getParameter("SaveFeedback") != null
+                    || request.getParameter("DeleteFeedback") != null) {
+                url = "AboutController";
+
+            // ── 8. Mặc định ──────────────────────────────────────────────
             } else {
                 HttpSession session = request.getSession(false);
                 if (session != null && session.getAttribute("LOGIN_USER") != null) {

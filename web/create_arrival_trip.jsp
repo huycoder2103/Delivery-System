@@ -25,6 +25,7 @@
 
     <div class="arrival-container">
         <form id="arrivalForm" action="MainController" method="POST" onsubmit="return validateArrivalStations()">
+        <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
             <div class="arrival-toolbar">
                 <div class="tab-title">Thêm Chuyến Xe Đến</div>
                 <input type="submit" name="SaveArrivalTrip" value="💾 Lưu Chuyến Xe" class="btn-save">
@@ -131,6 +132,7 @@
 
         <div class="back-arrival-container">
             <form action="GoodsController" method="POST">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="submit" name="ViewArrivalTripList" value="⬅ Quay lại DS Chuyến Xe Đến" class="btn-back">
             </form>
         </div>
@@ -149,5 +151,6 @@
             }
         }
     </script>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

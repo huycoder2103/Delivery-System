@@ -10,20 +10,7 @@
     <title>Danh Sách Đơn Hàng - Delivery System</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/common_styles.css">
-    <style>
-        .action-btns-grid { display: flex; flex-direction: column; gap: 4px; }
-        .btn-action-text { 
-            display: flex; align-items: center; justify-content: center; gap: 5px;
-            padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer;
-            font-size: 0.75rem; font-weight: 700; color: white; width: 100%; transition: all 0.2s;
-        }
-        .btn-s-ship   { background: #1a73e8; }
-        .btn-s-edit   { background: #fbbc04; color: #3c4043; }
-        .btn-s-delete { background: #ea4335; }
-        .btn-action-text:hover { transform: scale(1.02); filter: brightness(1.1); }
-        .btn-disabled { background: #eee !important; color: #aaa !important; cursor: not-allowed !important; }
-        .station-label { font-weight: 700; color: #2c3e50; }
-    </style>
+    <link rel="stylesheet" href="css/list_order.css">
 </head>
 <body>
     <%@include file="includes/navbar.jsp" %>
@@ -44,21 +31,48 @@
     <div style="max-width: 1750px; margin: 20px auto; padding: 0 20px;">
         
         <div class="modern-page-header">
-            <h3>📦 Quản Lý Đơn Hàng</h3>
-            <div style="font-weight: 700; opacity: 0.9;">Tổng: <%= list != null ? list.size() : 0 %> đơn</div>
+            <div>
+                <h3>📦 Quản Lý Đơn Hàng</h3>
+                <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">Tổng: <%= list != null ? list.size() : 0 %> đơn</div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <form action="MainController" method="POST" style="margin:0;">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                    <button type="submit" name="ViewTripList" class="btn-modern" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                        📤 Chuyến Xe Đi
+                    </button>
+                </form>
+                <form action="MainController" method="POST" style="margin:0;">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                    <button type="submit" name="ViewArrivalTripList" class="btn-modern" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                        📥 Chuyến Xe Đến
+                    </button>
+                </form>
+            </div>
         </div>
 
         <% if (success != null) { %> <div class="alert-success">✅ <%= success %></div> <% } %>
         <% if (error != null) { %> <div class="alert-error">❌ <%= error %></div> <% } %>
 
         <div class="modern-card">
-            <form action="MainController" method="POST" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                <select name="stationFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
-                    <option value="">-- Lọc Trạm --</option>
+            <form action="MainController" method="POST">
+                                                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                
+                <select name="sendStationFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
+                    <option value="">-- Từ Trạm (Gửi) --</option>
                     <% if (stationList != null) for (StationDTO s : stationList) { %>
                     <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
                     <% } %>
                 </select>
+
+                <select name="receiveStationFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
+                    <option value="">-- Đến Trạm (Nhận) --</option>
+                    <% if (stationList != null) for (StationDTO s : stationList) { %>
+                    <option value="<%= s.getStationName() %>"><%= s.getStationName() %></option>
+                    <% } %>
+                </select>
+
                 <input type="date" name="dateFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
                 <select name="statusFilter" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
                     <option value="">-- Trạng Thái --</option>
@@ -70,7 +84,8 @@
                 <input type="submit" name="ViewTrashOrder" value="🗑 Thùng rác" class="btn-modern btn-secondary-modern">
             </form>
 
-            <form action="MainController" method="POST" style="display: flex; gap: 10px; align-items: center;">
+            <form action="MainController" method="POST">
+                                                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="text" name="searchPhone" placeholder="Tìm theo SĐT người gửi/nhận..." 
                        value="<%= searchPhone %>" style="width: 300px; padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
                 <input type="submit" name="SearchOrderByPhone" value="🔎 Tìm Kiếm" class="btn-modern btn-primary-modern">
@@ -140,6 +155,7 @@
                             <td style="min-width: 110px;">
                                 <div class="action-btns-grid">
                                     <form action="MainController" method="POST">
+                                                                            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                         <input type="hidden" name="orderID" value="<%= o.getOrderID() %>">
                                         
                                         <% if (o.getTripID() == null || o.getTripID().isEmpty()) { %>
@@ -167,5 +183,6 @@
             </table>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

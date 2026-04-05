@@ -2,8 +2,10 @@ package utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * DBUtils - Sử dụng HikariCP để quản lý Connection Pool.
@@ -14,15 +16,19 @@ public class DBUtils {
     private static HikariDataSource dataSource;
 
     static {
-        try {
-            // 1. Cấu hình thông số kết nối
-            HikariConfig config = new HikariConfig();
+        Properties props = new Properties();
+        try (InputStream is = DBUtils.class.getResourceAsStream("db.properties")) {
+            if (is == null) {
+                throw new RuntimeException("Không tìm thấy tệp db.properties!");
+            }
+            props.load(is);
 
-            // Thông tin Database MySQL trên Aiven Cloud của bạn
-            config.setJdbcUrl("jdbc:mysql://delivery-db-mysql-jayker03212k5-ee32.f.aivencloud.com:19281/defaultdb?useSSL=true");
-            config.setUsername("avnadmin");
-            config.setPassword("AVNS_txLmskApkmP4v1bHS0y");
-            config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+            // 1. Cấu hình thông số kết nối từ tệp properties
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(props.getProperty("db.url"));
+            config.setUsername(props.getProperty("db.username"));
+            config.setPassword(props.getProperty("db.password"));
+            config.setDriverClassName(props.getProperty("db.driver"));
 
             // 2. Cấu hình Pool (Bể chứa kết nối)
             config.setMaximumPoolSize(10);      // Tối đa 10 kết nối đồng thời

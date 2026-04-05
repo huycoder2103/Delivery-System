@@ -68,10 +68,12 @@
 
         <div style="margin-top: 20px; display: flex; gap: 10px;">
             <form action="GoodsController" method="POST">
-                <input type="submit" name="ViewTripList" value="⬅ Quay lại DS Chuyến Xe" class="btn-modern btn-secondary-modern">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                <input type="submit" name="ViewTripList" value="⬅ Quay lại DS Chuyến Xe" class="btn-back">
             </form>
             <button onclick="window.print()" class="btn-modern btn-primary-modern">🖨️ In danh sách</button>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

@@ -105,6 +105,7 @@
                                         <td>
                                             <%-- Bật/Tắt --%>
                                             <form action="AdminController" method="POST" style="display:inline;">
+                                                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                                 <input type="hidden" name="userID" value="${user.userID}">
                                                 <input type="submit" name="ToggleUser"
                                                        value="${user.status ? 'Khóa' : 'Mở khóa'}"
@@ -119,6 +120,7 @@
                                             <c:if test="${user.userID ne 'admin'}">
                                                 <form action="AdminController" method="POST" style="display:inline;"
                                                       onsubmit="return confirm('Xác nhận xóa nhân viên này?');">
+                                                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                                     <input type="hidden" name="userID" value="${user.userID}">
                                                     <input type="submit" name="DeleteUser" value="Xóa" class="btn-action btn-red">
                                                 </form>
@@ -185,6 +187,7 @@
                                         <td>
                                             <form action="AdminController" method="POST" style="display:inline;"
                                                   onsubmit="return confirm('Xác nhận xóa bảng tin này?');">
+                                                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                                 <input type="hidden" name="annID" value="${ann[0]}">
                                                 <input type="submit" name="DeleteAnnouncement"
                                                        value="Xóa" class="btn-action btn-red">
@@ -213,6 +216,7 @@
             <div class="modal-content">
                 <h3>➕ THÊM NHÂN VIÊN MỚI</h3>
                 <form action="MainController" method="POST" onsubmit="return validateAddForm()">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                     <div class="group">
                         <label>Mã Tài Khoản <span style="color:red">*</span></label>
                         <input type="text" name="newUserID" id="newUserID" class="inp" required placeholder="VD: NV05">
@@ -254,6 +258,7 @@
                 <h3>🔑 ĐỔI MẬT KHẨU</h3>
                 <p id="cpUserLabel" style="color:#555;margin-bottom:15px;"></p>
                 <form action="AdminController" method="POST" onsubmit="return validateChangePassForm()">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                     <input type="hidden" name="cpUserID" id="cpUserID">
                     <div class="group">
                         <label>Mật Khẩu Mới <span style="color:red">*</span></label>
@@ -279,6 +284,7 @@
             <div class="modal-content">
                 <h3>📢 THÊM BẢNG TIN MỚI</h3>
                 <form action="AdminController" method="POST">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                     <div class="group">
                         <label>Tiêu Đề <span style="color:red">*</span></label>
                         <input type="text" name="annTitle" class="inp" required placeholder="VD: Thông báo nghỉ lễ...">
@@ -336,11 +342,27 @@
             }
 
             function highlightCell(cell, keyword) {
-                if (!cell)
-                    return;
+                if (!cell) return;
                 const text = cell.textContent;
+                if (!keyword) {
+                    cell.innerHTML = text;
+                    return;
+                }
+                
                 const regex = new RegExp('(' + escapeRegex(keyword) + ')', 'gi');
-                cell.innerHTML = text.replace(regex, '<span class="highlight">$1</span>');
+                const parts = text.split(regex);
+                
+                cell.innerHTML = ''; // Xóa nội dung cũ
+                parts.forEach(part => {
+                    if (part.toLowerCase() === keyword.toLowerCase()) {
+                        const span = document.createElement('span');
+                        span.className = 'highlight';
+                        span.textContent = part;
+                        cell.appendChild(span);
+                    } else {
+                        cell.appendChild(document.createTextNode(part));
+                    }
+                });
             }
 
             function clearHighlight(cell) {
@@ -429,5 +451,6 @@
                     filterStaff(this.value);
             });
         </script>
-    </body>
+        <%@include file="includes/footer.jsp" %>
+</body>
 </html>

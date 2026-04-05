@@ -121,13 +121,16 @@ public class TripDAO {
         }
     }
 
-    public List<TripDTO> getFilteredTrips(String station, String date, String type) throws Exception {
+    public List<TripDTO> getFilteredTrips(String departure, String destination, String date, String type) throws Exception {
         String sql = SELECT_COLS + "FROM tblTrips WHERE 1=1 ";
         if (!"all".equals(type)) {
             sql += " AND tripType = ? ";
         }
-        if (station != null && !station.isEmpty()) {
+        if (departure != null && !departure.isEmpty()) {
             sql += " AND departure = ? ";
+        }
+        if (destination != null && !destination.isEmpty()) {
+            sql += " AND destination = ? ";
         }
         if (date != null && !date.isEmpty()) {
             sql += " AND DATE(createdAt) = ? ";
@@ -139,7 +142,8 @@ public class TripDAO {
              PreparedStatement ps = c.prepareStatement(sql)) {
             int i = 1;
             if (!"all".equals(type)) ps.setString(i++, type);
-            if (station != null && !station.isEmpty()) ps.setString(i++, station);
+            if (departure != null && !departure.isEmpty()) ps.setString(i++, departure);
+            if (destination != null && !destination.isEmpty()) ps.setString(i++, destination);
             if (date != null && !date.isEmpty()) ps.setString(i++, date);
             
             try (ResultSet rs = ps.executeQuery()) {

@@ -178,10 +178,11 @@ public class GoodsController extends HttpServlet {
     }
 
     private void handleFilterOrder(HttpServletRequest request) throws Exception {
-        String station = request.getParameter("stationFilter");
+        String sendStation = request.getParameter("sendStationFilter");
+        String receiveStation = request.getParameter("receiveStationFilter");
         String date    = request.getParameter("dateFilter");
         String status  = request.getParameter("statusFilter");
-        List<OrderDTO> list = orderDAO.getFilteredOrders(station, date, status);
+        List<OrderDTO> list = orderDAO.getFilteredOrders(sendStation, receiveStation, date, status);
         request.setAttribute("ORDER_LIST", list);
         request.setAttribute("TOTAL_COUNT", list.size());
         loadStations(request);
@@ -313,16 +314,18 @@ public class GoodsController extends HttpServlet {
     }
 
     private void handleFilterTrip(HttpServletRequest request) throws Exception {
-        String station = request.getParameter("stationFilter");
+        String departure = request.getParameter("departureFilter");
+        String destination = request.getParameter("destinationFilter");
         String date    = request.getParameter("dateFilter");
-        List<TripDTO> list = tripDAO.getFilteredTrips(station, date, "all"); // Lọc trên toàn bộ
+        List<TripDTO> list = tripDAO.getFilteredTrips(departure, destination, date, "all");
         request.setAttribute("TRIP_LIST", buildTripRows(list));
     }
 
     private void handleFilterArrival(HttpServletRequest request) throws Exception {
-        String station = request.getParameter("stationFilter");
+        String departure = request.getParameter("departureFilter");
+        String destination = request.getParameter("destinationFilter");
         String date    = request.getParameter("dateFilter");
-        List<TripDTO> list = tripDAO.getFilteredTrips(station, date, "all"); // Đổ cùng kết quả lọc
+        List<TripDTO> list = tripDAO.getFilteredTrips(departure, destination, date, "all");
         request.setAttribute("ARRIVAL_LIST", buildTripRows(list));
     }
 

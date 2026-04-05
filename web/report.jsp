@@ -60,6 +60,7 @@
     <%-- ── TAB: THEO NGÀY ── --%>
     <div id="tab-day" class="tab-pane active">
         <form action="ReportController" method="POST" class="date-picker-bar">
+            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
             <label>📅 Chọn ngày:</label>
             <input type="date" name="selectedDate" value="<%= selectedDate %>" max="<%= todayStr %>">
             <button type="submit" class="btn-view-date">Xem báo cáo</button>
@@ -295,6 +296,7 @@
     <%-- ── TAB: THEO NGÀY (nhân viên) ── --%>
     <div id="tab-day" class="tab-pane active">
         <form action="ReportController" method="POST" class="date-picker-bar">
+            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
             <label>📅 Chọn ngày:</label>
             <input type="date" name="selectedDate" value="<%= selectedDate %>" max="<%= todayStr %>">
             <button type="submit" class="btn-view-date">Xem báo cáo</button>
@@ -374,6 +376,7 @@
         <div class="report-card">
             <h3>🔑 Giao ca hôm nay</h3>
             <form action="MainController" method="POST">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="totalOrders" value="${TOTAL_ORDERS}">
                 <label style="font-weight:600;color:#555">Ghi chú bàn giao cho ca sau:</label>
                 <textarea name="shiftNote" class="shift-area"
@@ -448,9 +451,10 @@
     </div>
     <% } %>
 
-    <div style="text-align:center;margin-top:20px;">
+    <div style="text-align:center;margin-top:30px;">
         <form action="MainController" method="POST">
-            <input type="submit" name="GoHome" value="⬅ Quay lại Trang chủ" class="btn-back" style="padding:10px 30px;border-radius:20px;">
+            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+            <input type="submit" name="GoHome" value="⬅ Quay lại Trang chủ" class="btn-home">
         </form>
     </div>
 </div>
@@ -467,10 +471,14 @@
     function goToDay(dateStr) {
         const f = document.createElement('form');
         f.method = 'POST'; f.action = 'ReportController';
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden'; csrf.name = 'csrfToken'; csrf.value = '${sessionScope.CSRF_TOKEN}';
+        f.appendChild(csrf);
         const i = document.createElement('input');
         i.type = 'hidden'; i.name = 'selectedDate'; i.value = dateStr;
         f.appendChild(i); document.body.appendChild(f); f.submit();
     }
 </script>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

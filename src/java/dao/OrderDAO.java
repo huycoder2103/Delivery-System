@@ -50,16 +50,21 @@ public class OrderDAO {
         return queryList(sql, new ArrayList<>());
     }
 
-    public List<OrderDTO> getFilteredOrders(String stationFilter,
+    public List<OrderDTO> getFilteredOrders(String sendStationFilter,
+                                             String receiveStationFilter,
                                              String dateFilter,
                                              String shipStatusFilter) throws Exception {
         StringBuilder sql = new StringBuilder(
             SELECT_COLS + "FROM tblOrders WHERE isDeleted = 0 ");
         List<Object> params = new ArrayList<>();
 
-        if (stationFilter != null && !stationFilter.trim().isEmpty()) {
+        if (sendStationFilter != null && !sendStationFilter.trim().isEmpty()) {
+            sql.append("AND sendStation = ? ");
+            params.add(sendStationFilter.trim());
+        }
+        if (receiveStationFilter != null && !receiveStationFilter.trim().isEmpty()) {
             sql.append("AND receiveStation = ? ");
-            params.add(stationFilter.trim());
+            params.add(receiveStationFilter.trim());
         }
         // MySQL: DATE(createdAt) thay CAST(createdAt AS DATE)
         if (dateFilter != null && !dateFilter.trim().isEmpty()) {

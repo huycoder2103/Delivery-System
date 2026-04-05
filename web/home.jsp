@@ -36,6 +36,7 @@
         <div class="menu-grid">
             <!-- 1. Quản lý hàng hóa -->
             <form action="MainController" method="POST" class="menu-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="ViewGoods" value="true">
                 <div class="card-icon">📦</div>
                 <h3>Quản lý hàng hóa</h3>
@@ -45,6 +46,7 @@
 
             <!-- 2. Báo cáo & Thống kê -->
             <form action="MainController" method="POST" class="menu-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="ViewReports" value="true">
                 <div class="card-icon">📊</div>
                 <h3>Báo cáo & Thống kê</h3>
@@ -55,6 +57,7 @@
             <!-- 3. Hệ thống quản trị -->
             <% if ("AD".equals(role)) { %>
             <form action="MainController" method="POST" class="menu-card admin-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="AdminPanel" value="true">
                 <div class="card-icon">🛡️</div>
                 <h3>Hệ thống quản trị</h3>
@@ -71,5 +74,6 @@
             <% } %>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

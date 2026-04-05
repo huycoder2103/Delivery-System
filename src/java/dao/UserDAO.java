@@ -1,6 +1,8 @@
 package dao;
 
 import dto.UserDTO;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +10,34 @@ import utils.DBUtils;
 
 public class UserDAO {
 
+    /**
+     * Mã hóa mật khẩu sử dụng thuật toán SHA-256.
+     * Giúp bảo vệ mật khẩu nếu database bị lộ.
+     */
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = digest.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encodedhash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Lỗi thuật toán mã hóa mật khẩu!", e);
+        }
+    }
+
     // ── Đăng nhập ─────────────────────────────────────────────────────────
-    public UserDTO checkLogin(String userID, String password) {
+    public UserDTO checkLogin(String userID, String password) throws Exception {
         String sql = "SELECT fullName,roleID,phone,email,status FROM tblUsers "
                    + "WHERE userID=? AND password=? AND status=1";
+        String hashedPassword = hashPassword(password);
         try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, userID);
-            ps.setString(2, password);
+            ps.setString(2, hashedPassword);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new UserDTO(userID, rs.getString("fullName"),
@@ -23,7 +46,7 @@ public class UserDAO {
                             rs.getBoolean("status"));
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        }
         return null;
     }
 
@@ -51,11 +74,12 @@ public class UserDAO {
     public boolean insertUser(UserDTO user) throws Exception {
         String sql = "INSERT INTO tblUsers(userID,fullName,roleID,password,phone,email,status) "
                    + "VALUES(?,?,?,?,?,?,?)";
+        String hashedPassword = hashPassword(user.getPassword());
         try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, user.getUserID());
             ps.setString(2, user.getFullName());
             ps.setString(3, user.getRoleID());
-            ps.setString(4, user.getPassword());
+            ps.setString(4, hashedPassword);
             ps.setString(5, user.getPhone());
             ps.setString(6, user.getEmail());
             ps.setBoolean(7, user.isStatus());
@@ -66,8 +90,9 @@ public class UserDAO {
     // ── Đổi mật khẩu ─────────────────────────────────────────────────────
     public boolean changePassword(String userID, String newPassword) throws Exception {
         String sql = "UPDATE tblUsers SET password=? WHERE userID=?";
+        String hashedPassword = hashPassword(newPassword);
         try (Connection c = DBUtils.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, newPassword);
+            ps.setString(1, hashedPassword);
             ps.setString(2, userID);
             return ps.executeUpdate() > 0;
         }

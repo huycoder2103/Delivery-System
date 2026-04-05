@@ -20,6 +20,7 @@
         <div class="goods-grid">
             <!-- 1. Tạo Đơn Hàng -->
             <form action="MainController" method="POST" class="goods-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="CreateOrder" value="true">
                 <div class="card-icon">✍️</div>
                 <h3>Nhập Hàng Gửi</h3>
@@ -29,6 +30,7 @@
 
             <!-- 2. Danh Sách Đơn Hàng -->
             <form action="MainController" method="POST" class="goods-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="ViewOrderList" value="true">
                 <div class="card-icon">📋</div>
                 <h3>Danh Sách Đơn</h3>
@@ -38,6 +40,7 @@
 
             <!-- 3. Chuyến Xe Đi -->
             <form action="MainController" method="POST" class="goods-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="ViewTripList" value="true">
                 <div class="card-icon">🚛</div>
                 <h3>Chuyến Xe Đi</h3>
@@ -47,6 +50,7 @@
 
             <!-- 4. Chuyến Xe Đến -->
             <form action="MainController" method="POST" class="goods-card" onclick="this.submit();">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="ViewArrivalTripList" value="true">
                 <div class="card-icon">🏁</div>
                 <h3>Chuyến Xe Đến</h3>
@@ -55,11 +59,13 @@
             </form>
         </div>
 
-        <div class="back-btn-container">
+        <div class="back-btn-container" style="text-align: center; margin-top: 30px;">
             <form action="MainController" method="POST">
-                <input type="submit" name="GoHome" value="⬅ Quay lại Trang Chủ" class="btn-back">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                <input type="submit" name="GoHome" value="⬅ Quay lại Trang Chủ" class="btn-home">
             </form>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>

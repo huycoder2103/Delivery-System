@@ -8,14 +8,7 @@
     <title>Thùng Rác - Delivery System</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/common_styles.css">
-    <style>
-        .header-trash { background: linear-gradient(135deg, #34495e, #2c3e50); }
-        .del-text { text-decoration: line-through; color: #95a5a6; }
-        .btn-restore-m { background: #27ae60; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; }
-        .btn-perm-m { background: #e74c3c; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; margin-left: 5px; }
-        .btn-restore-m:hover { background: #219150; }
-        .btn-perm-m:hover { background: #c0392b; }
-    </style>
+    <link rel="stylesheet" href="css/trash_order.css">
 </head>
 <body>
     <%@include file="includes/navbar.jsp" %>
@@ -49,7 +42,7 @@
                         <th>Trạm Gửi</th>
                         <th>Trạm Nhận</th>
                         <th>NV Nhập</th>
-                        <th>Cước Phí</th>
+                        <!--<th>Cước Phí</th>-->
                         <th>Ngày Nhận</th>
                         <th>Thao Tác</th>
                     </tr>
@@ -66,15 +59,17 @@
                         <td><%= o.getSendStation() %></td>
                         <td><%= o.getReceiveStation() %></td>
                         <td><%= o.getStaffInput() %></td>
-                        <td style="color: #e74c3c; font-weight: 700;"><%= String.format("%,.0f", o.getAmount()) %>đ</td>
+                        <!--<td style="color: #e74c3c; font-weight: 700;"><%= String.format("%,.0f", o.getAmount()) %>đ</td>-->
                         <td style="font-size: 0.8rem; color: #888;"><%= o.getReceiveDate() %></td>
                         <td>
                             <form action="GoodsController" method="POST" style="display:inline;">
+                                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                 <input type="hidden" name="orderID" value="<%= o.getOrderID() %>">
                                 <input type="submit" name="RestoreOrder" value="↩ Khôi phục" class="btn-restore-m">
                             </form>
                             <form action="GoodsController" method="POST" style="display:inline;"
                                   onsubmit="return confirm('XÓA VĨNH VIỄN đơn này? Thao tác không thể hoàn tác!');">
+                                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                                 <input type="hidden" name="orderID" value="<%= o.getOrderID() %>">
                                 <input type="submit" name="PermanentDeleteOrder" value="✕ Xóa hẳn" class="btn-perm-m">
                             </form>
@@ -91,9 +86,11 @@
 
         <div style="margin-top: 20px;">
             <form action="GoodsController" method="POST">
-                <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Hàng" class="btn-modern btn-secondary-modern">
+                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
+                <input type="submit" name="ViewOrderList" value="⬅ Quay lại DS Hàng" class="btn-back">
             </form>
         </div>
     </div>
+    <%@include file="includes/footer.jsp" %>
 </body>
 </html>
