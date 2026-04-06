@@ -9,6 +9,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import utils.ValidationUtils;
 
 @WebServlet(name = "CreateUserController", urlPatterns = {"/CreateUserController"})
 public class CreateUserController extends HttpServlet {
@@ -36,11 +37,15 @@ public class CreateUserController extends HttpServlet {
                 request.setAttribute("ERROR_MESSAGE", "Mật khẩu không được để trống!");
             } else if (!password.equals(confirm)) {
                 request.setAttribute("ERROR_MESSAGE", "Xác nhận mật khẩu không khớp!");
+            } else if (phone != null && !phone.trim().isEmpty() && !ValidationUtils.isValidPhone(phone.trim())) {
+                request.setAttribute("ERROR_MESSAGE", "Số điện thoại không đúng định dạng (VD: 0987654321)!");
+            } else if (email != null && !email.trim().isEmpty() && !ValidationUtils.isValidEmail(email.trim())) {
+                request.setAttribute("ERROR_MESSAGE", "Email không đúng định dạng (VD: abc@gmail.com)!");
             } else {
                 UserDAO dao = new UserDAO();
                 UserDTO user = new UserDTO(
                         userID.trim(), fullName.trim(), "US",
-                        password.trim(), phone, email, true
+                        password.trim(), phone.trim(), email.trim(), true
                 );
                 boolean ok = dao.insertUser(user);
                 if (!ok) {

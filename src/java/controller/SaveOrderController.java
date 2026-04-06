@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import utils.ValidationUtils;
 
 @WebServlet(name = "SaveOrderController", urlPatterns = {"/SaveOrderController"})
 public class SaveOrderController extends HttpServlet {
@@ -32,6 +33,35 @@ public class SaveOrderController extends HttpServlet {
             String receiverName = request.getParameter("receiverName");
             String receiverPhone = request.getParameter("receiverPhone");
             String note = request.getParameter("note");
+
+            // Validate bắt buộc
+            if (itemName == null || itemName.trim().isEmpty()) {
+                request.setAttribute("ERROR_MESSAGE", "Tên hàng gửi không được để trống!");
+                url = "GoodsController?CreateOrder=true";
+                request.getRequestDispatcher(url).forward(request, response);
+                return;
+            }
+
+            if (sendStation != null && sendStation.equals(receiveStation)) {
+                request.setAttribute("ERROR_MESSAGE", "Trạm gửi và trạm nhận không được trùng nhau!");
+                url = "GoodsController?CreateOrder=true";
+                request.getRequestDispatcher(url).forward(request, response);
+                return;
+            }
+
+            if (senderPhone != null && !senderPhone.trim().isEmpty() && !ValidationUtils.isValidPhone(senderPhone.trim())) {
+                request.setAttribute("ERROR_MESSAGE", "SĐT người gửi không đúng định dạng!");
+                url = "GoodsController?CreateOrder=true";
+                request.getRequestDispatcher(url).forward(request, response);
+                return;
+            }
+
+            if (receiverPhone != null && !receiverPhone.trim().isEmpty() && !ValidationUtils.isValidPhone(receiverPhone.trim())) {
+                request.setAttribute("ERROR_MESSAGE", "SĐT người nhận không đúng định dạng!");
+                url = "GoodsController?CreateOrder=true";
+                request.getRequestDispatcher(url).forward(request, response);
+                return;
+            }
 
             // TR = tiền đã thanh toán (để trống nếu không nhập)
             String trValue = "";
@@ -71,21 +101,6 @@ public class SaveOrderController extends HttpServlet {
             } catch (NumberFormatException ignored) {
             }
 
-            // Validate bắt buộc
-            if (itemName == null || itemName.trim().isEmpty()) {
-                request.setAttribute("ERROR_MESSAGE", "Tên hàng gửi không được để trống!");
-                url = "GoodsController?CreateOrder=true";
-                request.getRequestDispatcher(url).forward(request, response);
-                return;
-            }
-
-            if (sendStation != null && sendStation.equals(receiveStation)) {
-                request.setAttribute("ERROR_MESSAGE", "Trạm gửi và trạm nhận không được trùng nhau!");
-                url = "GoodsController?CreateOrder=true";
-                request.getRequestDispatcher(url).forward(request, response);
-                return;
-            }
-
             // Lấy nhân viên đang đăng nhập
             HttpSession session = request.getSession(false);
             String staffID = "NV01";
@@ -101,10 +116,10 @@ public class SaveOrderController extends HttpServlet {
                     itemName.trim(),
                     totalAmount,
                     senderName,
-                    senderPhone,
+                    senderPhone != null ? senderPhone.trim() : null,
                     sendStation,
                     receiverName,
-                    receiverPhone,
+                    receiverPhone != null ? receiverPhone.trim() : null,
                     receiveStation,
                     staffID,
                     null,

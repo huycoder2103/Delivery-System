@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Cẩm Nang Toàn Tập - ntXuanSystem</title>
+    <title>Hướng dẫn chi tiết</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/common_styles.css">
     <link rel="stylesheet" href="css/about.css">
@@ -23,7 +23,7 @@
 
     <div class="about-container">
         <div class="about-header">
-            <h1>📘 TỪ ĐIỂN CHỨC NĂNG HỆ THỐNG</h1>
+            <h1>📘 CHỨC NĂNG HỆ THỐNG</h1>
             <p>Hướng dẫn chi tiết ý nghĩa và cách dùng của mọi nút bấm trên giao diện</p>
         </div>
 
