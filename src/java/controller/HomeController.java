@@ -1,5 +1,10 @@
 package controller;
 
+import dao.ShiftDAO;
+import dao.ReportDAO;
+import dto.ShiftDTO;
+import dto.ReportSummaryDTO;
+import dto.UserDTO;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,6 +14,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import utils.DBUtils;
 
 @WebServlet(name = "HomeController", urlPatterns = {"/HomeController"})
@@ -19,8 +25,25 @@ public class HomeController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
 
+        HttpSession session = request.getSession(false);
+        UserDTO loginUser = (session != null) ? (UserDTO) session.getAttribute("LOGIN_USER") : null;
+
         String url = "home.jsp";
         try {
+            if (loginUser != null) {
+                // 1. Kiểm tra và cập nhật ca hiện tại vào session
+                ShiftDAO shiftDAO = new ShiftDAO();
+                ShiftDTO currentShift = shiftDAO.getActiveShift(loginUser.getUserID());
+                session.setAttribute("CURRENT_SHIFT", currentShift);
+
+                // 2. Nếu đang trong ca, lấy báo cáo tóm tắt
+                if (currentShift != null) {
+                    ReportDAO reportDAO = new ReportDAO();
+                    ReportSummaryDTO shiftSummary = reportDAO.getSummaryByShift(currentShift.getShiftID());
+                    request.setAttribute("SHIFT_SUMMARY", shiftSummary);
+                }
+            }
+
             List<String[]> newsList = getAnnouncements();
             request.setAttribute("NEWS_LIST", newsList);
 

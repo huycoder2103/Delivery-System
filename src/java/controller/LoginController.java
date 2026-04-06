@@ -5,7 +5,9 @@
 package controller;
 
 import dao.UserDAO;
+import dao.ShiftDAO;
 import dto.UserDTO;
+import dto.ShiftDTO;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -38,6 +40,12 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("LOGIN_USER", loginUser);
                 session.setAttribute("ROLE", loginUser.getRoleID());
                 session.setAttribute("FULLNAME", loginUser.getFullName());
+
+                // ── LƯU Ý 1: KIỂM TRA CA LÀM VIỆC ──────────────────────────
+                ShiftDAO shiftDAO = new ShiftDAO();
+                ShiftDTO currentShift = shiftDAO.getActiveShift(loginUser.getUserID());
+                // Luôn set giá trị (kể cả null) để xóa trắng ca của người cũ nếu có
+                session.setAttribute("CURRENT_SHIFT", currentShift);
 
                 // Điều hướng dựa trên vai trò (AD = Admin, US = User)
                 if ("AD".equals(loginUser.getRoleID())) {

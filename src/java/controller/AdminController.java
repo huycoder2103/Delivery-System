@@ -1,7 +1,9 @@
 package controller;
 
 import dao.UserDAO;
+import dao.ReportDAO;
 import dto.UserDTO;
+import dto.ReportSummaryDTO;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -30,6 +32,14 @@ public class AdminController extends HttpServlet {
 
         try {
             UserDAO userDAO = new UserDAO();
+            ReportDAO reportDAO = new ReportDAO();
+
+            // Nạp dữ liệu Dashboard
+            String today = java.time.LocalDate.now().toString();
+            request.setAttribute("REVENUE_TODAY", reportDAO.getRevenueToday());
+            request.setAttribute("ACTIVE_STAFF", reportDAO.getActiveStaffCount());
+            request.setAttribute("CHART_DATA", reportDAO.getWeeklyRevenueChart());
+            request.setAttribute("STAFF_PERFORMANCE", reportDAO.getStaffPerformance(today));
 
             if (request.getParameter("ToggleUser") != null) {
                 String uid = request.getParameter("userID");

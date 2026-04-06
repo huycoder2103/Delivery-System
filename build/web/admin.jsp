@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -11,6 +12,62 @@
 
     <body>
         <%@include file="includes/navbar.jsp" %>
+
+        <!-- --- ADMIN DASHBOARD --- -->
+        <div class="admin-container" style="margin-bottom: 20px; background: #fdfdfd;">
+            <div class="admin-header">
+                <h2>BẢNG ĐIỀU KHIỂN HỆ THỐNG</h2>
+            </div>
+            <div class="kpi-row">
+                <div class="kpi-mini blue" style="background: #e7f3ff; border: 1px solid #b3d7ff;">
+                    <div class="v" style="color: #007bff;">
+                        <fmt:formatNumber value="${requestScope.REVENUE_TODAY}" type="number" maxFractionDigits="0" groupingUsed="true"/> K
+                    </div>
+                    <div class="l">Doanh thu hôm nay</div>
+                </div>
+                <div class="kpi-mini green" style="background: #e6fffa; border: 1px solid #b2f5ea;">
+                    <div class="v" style="color: #38b2ac;">${requestScope.ACTIVE_STAFF}</div>
+                    <div class="l">Nhân viên đang trong ca làm</div>
+                </div>
+                <div class="kpi-mini" style="flex: 2; background: white; padding: 10px;">
+                    <canvas id="revenueChart" style="max-height: 120px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [
+                            <c:forEach var="label" items="${CHART_DATA.chartLabels}" varStatus="loop">
+                                '${label}'${!loop.last ? ',' : ''}
+                            </c:forEach>
+                        ],
+                        datasets: [{
+                            label: 'Doanh thu 7 ngày gần nhất',
+                            data: [
+                                <c:forEach var="val" items="${CHART_DATA.chartValues}" varStatus="loop">
+                                    ${val}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ],
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            });
+        </script>
+        <!-- ----------------------- -->
 
         <c:if test="${not empty requestScope.ERROR_MESSAGE}">
             <div style="background:#f8d7da;color:#721c24;padding:10px 20px;text-align:center;font-weight:bold;">
@@ -74,9 +131,9 @@
                             <th>Mã NV</th>
                             <th>Họ Tên</th>
                             <th>SĐT</th>
-                            <th>Email</th>
+                            <th>Trạng Thái Ca</th>
                             <th>Quyền</th>
-                            <th>Trạng Thái</th>
+                            <th>Tài Khoản</th>
                             <th>Thao Tác</th>
                         </tr>
                     </thead>
@@ -84,6 +141,14 @@
                         <c:choose>
                             <c:when test="${not empty requestScope.USER_LIST}">
                                 <c:forEach var="user" items="${requestScope.USER_LIST}" varStatus="st">
+                                    <%-- Tìm trạng thái ca của user này từ list performance --%>
+                                    <c:set var="isInShift" value="false"/>
+                                    <c:forEach var="perf" items="${requestScope.STAFF_PERFORMANCE}">
+                                        <c:if test="${perf.staffID eq user.userID and perf.pendingOrders == 1}">
+                                            <c:set var="isInShift" value="true"/>
+                                        </c:if>
+                                    </c:forEach>
+
                                     <tr class="staff-row"
                                         data-name="${fn:toLowerCase(user.fullName)}"
                                         data-phone="${user.phone != null ? user.phone : ''}">
@@ -91,7 +156,16 @@
                                         <td><strong>${user.userID}</strong></td>
                                         <td class="col-name">${user.fullName}</td>
                                         <td class="col-phone">${not empty user.phone ? user.phone : '-'}</td>
-                                        <td>${not empty user.email ? user.email : '-'}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${isInShift}">
+                                                    <span class="badge bg-success" style="font-size: 0.75rem;">🟢 Đang làm việc</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-light text-muted" style="font-size: 0.75rem; border: 1px solid #ddd;">⚪ Đang nghỉ</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td>
                                             <span class="badge-${'AD' eq user.roleID ? 'admin' : 'user'}">
                                                 ${'AD' eq user.roleID ? 'Admin' : 'Nhân Viên'}
@@ -99,7 +173,7 @@
                                         </td>
                                         <td>
                                             <span class="${user.status ? 'status-active' : 'status-inactive'}">
-                                                ${user.status ? '✅ Hoạt động' : '⛔ Tạm khóa'}
+                                                ${user.status ? '✅ Mở' : '⛔ Khóa'}
                                             </span>
                                         </td>
                                         <td>

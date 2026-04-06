@@ -3,6 +3,7 @@ package controller;
 import dao.OrderDAO;
 import dto.OrderDTO;
 import dto.UserDTO;
+import dto.ShiftDTO;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -104,8 +105,13 @@ public class SaveOrderController extends HttpServlet {
             // Lấy nhân viên đang đăng nhập
             HttpSession session = request.getSession(false);
             String staffID = "NV01";
+            int shiftID = 0;
             if (session != null && session.getAttribute("LOGIN_USER") != null) {
                 staffID = ((UserDTO) session.getAttribute("LOGIN_USER")).getUserID();
+                ShiftDTO currentShift = (ShiftDTO) session.getAttribute("CURRENT_SHIFT");
+                if (currentShift != null) {
+                    shiftID = currentShift.getShiftID();
+                }
             }
 
             String orderID = "DH" + String.format("%05d", System.currentTimeMillis() % 100000L);
@@ -126,7 +132,8 @@ public class SaveOrderController extends HttpServlet {
                     trValue, // TR = tiền đã thanh toán
                     ctValue, // CT = tiền chưa thanh toán
                     dateStr,
-                    note // Ghi chú
+                    note, // Ghi chú
+                    shiftID
             );
 
             OrderDAO dao = new OrderDAO();

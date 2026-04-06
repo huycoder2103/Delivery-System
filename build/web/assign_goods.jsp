@@ -73,6 +73,7 @@
                     <td>
                         <form action="GoodsController" method="POST" style="display:inline;"
                               onsubmit="return confirm('Gán đơn <%= o.getOrderID() %> lên chuyến <%= tripID %>?');">
+                            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                             <input type="hidden" name="orderID" value="<%= o.getOrderID() %>">
                             <input type="hidden" name="tripID"  value="<%= tripID %>">
                             <input type="hidden" name="source"  value="trip">

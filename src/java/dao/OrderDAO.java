@@ -11,7 +11,7 @@ public class OrderDAO {
     private static final String SELECT_COLS =
         "SELECT orderID, itemName, amount, senderName, senderPhone, sendStation, "
         + "receiverName, receiverPhone, receiveStation, staffInput, staffReceive, "
-        + "tr, ct, receiveDate, tripID, note, shipStatus ";
+        + "tr, ct, receiveDate, tripID, note, shipStatus, shiftID ";
 
     private OrderDTO mapRow(ResultSet rs) throws SQLException {
         OrderDTO o = new OrderDTO();
@@ -33,6 +33,7 @@ public class OrderDAO {
         o.setNote(rs.getString("note"));
         String ss = rs.getString("shipStatus");
         o.setShipStatus(ss != null ? ss : "Chưa Chuyển");
+        o.setShiftID(rs.getInt("shiftID"));
         return o;
     }
 
@@ -100,12 +101,19 @@ public class OrderDAO {
         return queryList(sql, params);
     }
 
+    public List<OrderDTO> getOrdersByShiftID(int shiftID) throws Exception {
+        String sql = SELECT_COLS + "FROM tblOrders WHERE shiftID = ? AND isDeleted = 0 ORDER BY createdAt DESC";
+        List<Object> params = new ArrayList<>();
+        params.add(shiftID);
+        return queryList(sql, params);
+    }
+
     public List<OrderDTO> getOrdersByTrip(String tripID) throws Exception {
         String sql =
             "SELECT o.orderID, o.itemName, o.amount, o.senderName, o.senderPhone, "
             + "o.sendStation, o.receiverName, o.receiverPhone, o.receiveStation, "
             + "o.staffInput, o.staffReceive, o.tr, o.ct, o.receiveDate, "
-            + "o.tripID, o.note, o.shipStatus "
+            + "o.tripID, o.note, o.shipStatus, o.shiftID "
             + "FROM tblOrders o "
             + "INNER JOIN tblOrderTrip ot ON o.orderID = ot.orderID "
             + "WHERE ot.tripID = ? AND o.isDeleted = 0";
@@ -124,8 +132,8 @@ public class OrderDAO {
             "INSERT INTO tblOrders "
             + "(orderID, itemName, amount, senderName, senderPhone, sendStation, "
             + "receiverName, receiverPhone, receiveStation, staffInput, tr, ct, "
-            + "receiveDate, note, shipStatus) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "receiveDate, note, shipStatus, shiftID) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection c = DBUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1,  o.getOrderID());
@@ -143,6 +151,7 @@ public class OrderDAO {
             ps.setString(13, o.getReceiveDate());
             ps.setString(14, o.getNote());
             ps.setString(15, "Chưa Chuyển");
+            ps.setInt(16, o.getShiftID());
             return ps.executeUpdate() > 0;
         }
     }

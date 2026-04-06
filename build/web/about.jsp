@@ -4,18 +4,18 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Hướng dẫn chi tiết</title>
+    <title>Hướng dẫn chi tiết - Delivery System</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/common_styles.css">
     <link rel="stylesheet" href="css/about.css">
     <style>
-        /* Bổ sung một số style cho icon nút */
         .btn-ref { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; color: white; margin: 0 2px; }
         .bg-blue { background: #1a73e8; }
         .bg-green { background: #34a853; }
         .bg-yellow { background: #fbbc04; color: #333 !important; }
         .bg-red { background: #ea4335; }
         .bg-gray { background: #5f6368; }
+        .currency-note { background: #fff3cd; padding: 10px; border-radius: 8px; border-left: 5px solid #ffc107; margin-bottom: 20px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -23,29 +23,39 @@
 
     <div class="about-container">
         <div class="about-header">
-            <h1>📘 CHỨC NĂNG HỆ THỐNG</h1>
-            <p>Hướng dẫn chi tiết ý nghĩa và cách dùng của mọi nút bấm trên giao diện</p>
+            <h1>📘 HƯỚNG DẪN SỬ DỤNG HỆ THỐNG</h1>
+            <p>Quy trình quản lý hàng hóa, ca làm việc và hệ thống báo cáo</p>
         </div>
 
-        <!-- 1. ĐIỀU HƯỚNG CHUNG (NAVBAR & HOME) -->
+        <div class="currency-note">
+            ⚠️ LƯU Ý QUAN TRỌNG: Toàn bộ đơn vị tiền tệ (Cước phí, Doanh thu) trên hệ thống hiện được tính bằng đơn vị "K" (Ví dụ: 50 K = 50,000 VNĐ).
+        </div>
+
+        <!-- 1. QUẢN LÝ CA LÀM VIỆC (NEW) -->
         <div class="guide-section">
-            <h2>🏠 Điều Hướng & Trang Chủ</h2>
+            <h2 class="text-primary">⏱️ Quản Lý Ca Làm Việc</h2>
             <div class="feature-grid">
                 <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>🧭 Các nút trên Thanh công cụ (Navbar)</h4>
-                    <div class="card-hint">Hiện diện ở tất cả các trang</div>
+                    <h4>🚀 Quy trình Bắt đầu & Kết thúc ca</h4>
+                    <div class="card-hint">Thực hiện ngay tại Trang Chủ</div>
                     <div class="feature-details">
                         <div class="sub-feature-container">
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header">👤 Avatar/Tên người dùng <span>+</span></div>
+                                <div class="sub-feature-header">🟢 Nút "Bắt đầu ca" <span>+</span></div>
                                 <div class="sub-feature-content">
-                                    Nhấn để mở menu cá nhân. Chứa thông tin Email và vai trò (AD/ST).
+                                    Mỗi nhân viên khi bắt đầu làm việc phải nhấn nút này. Hệ thống sẽ ghi nhận thời gian bắt đầu và tạo một <b>Mã Ca</b> riêng biệt. Mọi đơn hàng bạn nhập trong lúc này sẽ được tính vào doanh thu của ca đó.
                                 </div>
                             </div>
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header">🚪 Nút "Đăng xuất" <span>+</span></div>
+                                <div class="sub-feature-header">🛑 Nút "Kết thúc ca" <span>+</span></div>
                                 <div class="sub-feature-content">
-                                    Kết thúc phiên làm việc an toàn, xóa bộ nhớ tạm (Cache) để bảo vệ dữ liệu trạm.
+                                    Khi hết giờ làm, hãy nhấn nút này để đóng ca. Hệ thống sẽ chốt số liệu doanh thu và số đơn hàng bạn đã xử lý. 
+                                </div>
+                            </div>
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">📊 Thống kê Real-time <span>+</span></div>
+                                <div class="sub-feature-content">
+                                    Ngay trên widget ca làm, bạn sẽ thấy các con số: <b>Đã giao</b>, <b>Đang đi</b> và <b>Doanh thu tạm tính</b> được cập nhật tức thì theo từng đơn hàng bạn xử lý.
                                 </div>
                             </div>
                         </div>
@@ -54,170 +64,93 @@
             </div>
         </div>
 
-        <!-- 2. QUẢN LÝ HÀNG HÓA -->
+        <!-- 2. HỆ THỐNG BÁO CÁO (NEW) -->
         <div class="guide-section">
-            <h2>📦 Nghiệp Vụ Hàng Hóa & Đơn Hàng</h2>
+            <h2 class="text-success">📊 Báo Cáo & Thống Kê</h2>
+            <div class="feature-grid">
+                <div class="feature-card" onclick="toggleCard(this)">
+                    <h4>📈 Công cụ dành cho Nhân Viên</h4>
+                    <div class="feature-details">
+                        <div class="sub-feature-container">
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">📑 Tab "Ca Hiện Tại" <span>+</span></div>
+                                <div class="sub-feature-content">Xem tổng quan chi tiết các con số vận hành của phiên làm việc đang diễn ra.</div>
+                            </div>
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">📜 Tab "Lịch Sử Ca" <span>+</span></div>
+                                <div class="sub-feature-content">Xem lại 20 ca làm việc gần nhất. Nhấn nút <b>"Chi tiết"</b> để xem danh sách từng đơn hàng cụ thể đã làm trong ca đó.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <c:if test="${sessionScope.ROLE eq 'AD'}">
+                <div class="feature-card" onclick="toggleCard(this)">
+                    <h4>🛡️ Công cụ dành cho Quản Trị (Admin)</h4>
+                    <div class="feature-details">
+                        <div class="sub-feature-container">
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">🔍 Bộ lọc ngày <span>+</span></div>
+                                <div class="sub-feature-content">Admin có thể chọn bất kỳ ngày nào để xem lại doanh thu, số đơn và hiệu suất của toàn hệ thống trong ngày đó.</div>
+                            </div>
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">👥 Giám sát nhân viên <span>+</span></div>
+                                <div class="sub-feature-content">Bảng <b>Hiệu suất hôm nay</b> cho biết ai đang online (🟢) và ai đang nghỉ (⚪). Nhấn vào tên nhân viên để soi chi tiết lịch sử làm việc của họ.</div>
+                            </div>
+                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
+                                <div class="sub-feature-header">📈 Biểu đồ Tăng trưởng <span>+</span></div>
+                                <div class="sub-feature-content">Theo dõi xu hướng doanh thu trong 7 ngày gần nhất qua biểu đồ đường trực quan.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </c:if>
+            </div>
+        </div>
+
+        <!-- 3. QUẢN LÝ HÀNG HÓA -->
+        <div class="guide-section">
+            <h2>📦 Nghiệp Vụ Đơn Hàng & Chuyến Xe</h2>
             <div class="feature-grid">
                 <!-- TRANG DANH SÁCH ĐƠN -->
                 <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>📑 Trang Danh Sách Đơn Hàng</h4>
-                    <div class="card-hint">Nơi làm việc nhiều nhất của nhân viên</div>
+                    <h4>📑 Quản lý Đơn Hàng</h4>
                     <div class="feature-details">
                         <div class="sub-feature-container">
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
                                 <div class="sub-feature-header"><span class="btn-ref bg-blue">🔍 Lọc Dữ Liệu</span> <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    Tìm đơn hàng theo tổ hợp: Trạm Gửi + Trạm Nhận + Ngày + Trạng thái.
-                                </div>
+                                <div class="sub-feature-content">Tìm đơn theo Trạm Gửi/Nhận, Ngày hoặc Trạng thái đơn.</div>
                             </div>
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
                                 <div class="sub-feature-header"><span class="btn-ref bg-green">➕ Nhập Hàng Gửi</span> <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    Mở trang tạo đơn mới khi có khách tới gửi hàng.
-                                </div>
+                                <div class="sub-feature-content">Tạo mới đơn hàng khi khách tới gửi. Nhớ kiểm tra SĐT người nhận để tránh lỗi giao hàng.</div>
                             </div>
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-gray">🗑 Thùng rác</span> <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    Xem lại các đơn đã xóa. Bạn có thể khôi phục từ đây.
-                                </div>
-                            </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-blue">🚚 Chuyển</span> (Trong bảng) <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    Gán đơn hàng hiện tại lên một chuyến xe tải đang chuẩn bị đi.
-                                </div>
-                            </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-yellow">✏️ Sửa</span> (Trong bảng) <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    Mở trang chỉnh sửa thông tin hàng, SĐT khách hoặc tiền cước.
-                                </div>
+                                <div class="sub-feature-header">📦 Gán lên xe <span>+</span></div>
+                                <div class="sub-feature-content">Trong trang "Chuyến xe đi", dùng nút này để chất hàng hóa lên xe tải.</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TRANG THÙNG RÁC -->
+                <!-- CHUYẾN XE -->
                 <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>♻️ Trang Thùng Rác</h4>
+                    <h4>🚛 Quản lý Chuyến Xe</h4>
                     <div class="feature-details">
                         <div class="sub-feature-container">
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-green">🔄 Khôi phục</span> <span>+</span></div>
-                                <div class="sub-feature-content">Đưa đơn hàng trở lại danh sách quản lý chính.</div>
+                                <div class="sub-feature-header">📋 Xem hàng hóa <span>+</span></div>
+                                <div class="sub-feature-content">Xem danh sách tất cả món hàng thực tế đang có trên xe tải đó.</div>
                             </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-red">❌ Xóa vĩnh viễn</span> <span>+</span></div>
-                                <div class="sub-feature-content">Xóa sạch dữ liệu khỏi hệ thống, không thể lấy lại.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. QUẢN LÝ CHUYẾN XE -->
-        <div class="guide-section">
-            <h2>🚛 Nghiệp Vụ Chuyến Xe (Logistics)</h2>
-            <div class="feature-grid">
-                <!-- CHUYẾN XE ĐI -->
-                <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>📤 Trang Chuyến Xe Đi (Departure)</h4>
-                    <div class="feature-details">
-                        <div class="sub-feature-container">
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-green">➕ Thêm Chuyến Mới</span> <span>+</span></div>
-                                <div class="sub-feature-content">Đăng ký một chuyến xe tải mới xuất phát từ trạm.</div>
-                            </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header">📋 Hàng trên xe <span>+</span></div>
-                                <div class="sub-feature-content">Xem danh sách các mã đơn hàng đang nằm trên xe này.</div>
-                            </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header">📦 Thêm hàng <span>+</span></div>
-                                <div class="sub-feature-content">Mở danh sách hàng chưa chuyển để chất thêm lên xe.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CHUYẾN XE ĐẾN -->
-                <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>📥 Trang Chuyến Xe Đến (Arrival)</h4>
-                    <div class="feature-details">
-                        <div class="sub-feature-container">
                             <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
                                 <div class="sub-feature-header"><span class="btn-ref bg-green">🏁 Đã đến</span> <span>+</span></div>
-                                <div class="sub-feature-content">
-                                    <b>Nút quan trọng nhất:</b> Xác nhận xe đã về tới trạm vật lý. Hệ thống sẽ tự cập nhật trạng thái "Đã về trạm" cho tất cả đơn hàng trên xe này.
-                                </div>
+                                <div class="sub-feature-content">Xác nhận xe đã về trạm. Hệ thống sẽ tự động chuyển trạng thái đơn hàng sang "Đã Chuyển" (Đã đến trạm nhận).</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- 4. BÁO CÁO -->
-        <div class="guide-section">
-            <h2>📊 Trang Báo Cáo & Thống Kê</h2>
-            <div class="feature-grid">
-                <div class="feature-card" onclick="toggleCard(this)">
-                    <h4>📈 Các công cụ phân tích dữ liệu</h4>
-                    <div class="feature-details">
-                        <div class="sub-feature-container">
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header">📑 Các Tab: Doanh Thu / Nhân Viên / Theo Ngày <span>+</span></div>
-                                <div class="sub-feature-content">Nhấn để chuyển đổi các góc nhìn báo cáo khác nhau.</div>
-                            </div>
-                            <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                <div class="sub-feature-header"><span class="btn-ref bg-blue">💾 Chốt Bàn Giao Ca</span> <span>+</span></div>
-                                <div class="sub-feature-content">Ghi lại tổng kết doanh thu và ghi chú cho nhân viên ca sau.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. QUẢN TRỊ ADMIN (CHỈ ADMIN THẤY) -->
-        <c:set var="userRole" value="${sessionScope.ROLE}" />
-        <c:if test="${userRole eq 'AD'}">
-            <div class="admin-only-section">
-                <div class="admin-badge-top">QUYỀN QUẢN TRỊ VIÊN</div>
-                <h2>🛡️ Bảng Điều Khiển Quản Trị (Admin Panel)</h2>
-                <div class="feature-grid">
-                    <div class="feature-card" onclick="toggleCard(this)">
-                        <h4>⚙️ Các nút quản trị cốt lõi</h4>
-                        <div class="feature-details">
-                            <div class="sub-feature-container">
-                                <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                    <div class="sub-feature-header"><span class="btn-ref bg-green">➕ Thêm Nhân Viên</span> <span>+</span></div>
-                                    <div class="sub-feature-content">Tạo tài khoản mới cho nhân viên mới vào làm.</div>
-                                </div>
-                                <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                    <div class="sub-feature-header"><span class="btn-ref bg-yellow">🔐 Đổi MK</span> <span>+</span></div>
-                                    <div class="sub-feature-content">Cấp lại mật khẩu nhanh khi nhân viên quên (Mã hóa SHA-256).</div>
-                                </div>
-                                <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                    <div class="sub-feature-header"><span class="btn-ref bg-blue">Khóa / Mở Khóa</span> <span>+</span></div>
-                                    <div class="sub-feature-content">Tạm dừng quyền truy cập của nhân viên vi phạm hoặc nghỉ phép.</div>
-                                </div>
-                                <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                    <div class="sub-feature-header"><span class="btn-ref bg-red">Xóa</span> (Nhân viên) <span>+</span></div>
-                                    <div class="sub-feature-content">Xóa vĩnh viễn tài khoản (Không thể xóa chính tài khoản admin).</div>
-                                </div>
-                                <div class="sub-feature-item" onclick="toggleSubFeature(event, this)">
-                                    <div class="sub-feature-header">📝 Lưu bảng tin <span>+</span></div>
-                                    <div class="sub-feature-content">Đăng thông báo quan trọng lên trang chủ của toàn hệ thống.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </c:if>
 
         <!-- NÚT QUAY LẠI TRANG CHỦ -->
         <div style="text-align: center; margin-top: 40px;">
@@ -262,23 +195,16 @@
 
     <script>
         function toggleCard(card) {
-            // Chỉ toggle card cha nếu không phải đang click vào các mục con
             if (event.target.closest('.sub-feature-item')) return;
-            
             const allCards = document.querySelectorAll('.feature-card');
-            allCards.forEach(c => {
-                if (c !== card) c.classList.remove('active');
-            });
+            allCards.forEach(c => { if (c !== card) c.classList.remove('active'); });
             card.classList.toggle('active');
         }
 
         function toggleSubFeature(event, item) {
-            event.stopPropagation(); // Chống nổi bọt sự kiện lên card cha
-            
+            event.stopPropagation();
             const container = item.closest('.sub-feature-container');
             const allItems = container.querySelectorAll('.sub-feature-item');
-            
-            // 1. Reset tất cả các mục khác trong cùng container
             allItems.forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('open');
@@ -286,15 +212,9 @@
                     if (otherIcon) otherIcon.textContent = '+';
                 }
             });
-
-            // 2. Toggle mục hiện tại
             item.classList.toggle('open');
-            
-            // 3. Cập nhật icon của mục hiện tại
             const icon = item.querySelector('.sub-feature-header span:last-child');
-            if (icon) {
-                icon.textContent = item.classList.contains('open') ? '-' : '+';
-            }
+            if (icon) { icon.textContent = item.classList.contains('open') ? '-' : '+'; }
         }
     </script>
     <%@include file="includes/footer.jsp" %>

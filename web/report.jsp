@@ -1,484 +1,228 @@
+<%@page import="dto.ShiftDTO"%>
+<%@page import="dto.ReportSummaryDTO"%>
 <%@page import="java.util.List"%>
 <%@page import="dto.UserDTO"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Báo cáo & Giao ca - Delivery System</title>
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/report.css">
-    
+    <title>Báo Cáo Hệ Thống - Delivery System</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common_styles.css">
+    <style>
+        body { background-color: #f4f7f6; }
+        .report-card { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: 0.3s; }
+        .report-card:hover { transform: translateY(-5px); }
+        .nav-link { color: #495057; font-weight: 600; border: none !important; padding: 12px 25px; }
+        .nav-link.active { color: #0d6efd !important; border-bottom: 3px solid #0d6efd !important; background: none !important; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #333; }
+        .stat-label { font-size: 0.9rem; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; }
+        .staff-link { color: #212529; text-decoration: none; transition: 0.2s; }
+        .staff-link:hover { color: #0d6efd; text-decoration: underline; }
+    </style>
 </head>
 <body>
-<%@include file="includes/navbar.jsp" %>
+    <%@include file="includes/navbar.jsp" %>
 
-<%
-    String role = (String) session.getAttribute("ROLE");
-    if (role == null) role = "US";
-    boolean isAdmin = "AD".equals(role);
-
-    String selectedDate = (String) request.getAttribute("SELECTED_DATE");
-    if (selectedDate == null) selectedDate = java.time.LocalDate.now().toString();
-
-    String todayStr = java.time.LocalDate.now().toString();
-    boolean isToday = todayStr.equals(selectedDate);
-
-    // Format dd/MM/yyyy
-    String displayDate = selectedDate;
-    try {
-        java.time.LocalDate ld = java.time.LocalDate.parse(selectedDate);
-        displayDate = String.format("%02d/%02d/%d", ld.getDayOfMonth(), ld.getMonthValue(), ld.getYear());
-    } catch (Exception ignored) {}
-
-    List<String[]> dailyHistory = (List<String[]>) request.getAttribute("DAILY_HISTORY");
-    double maxRev = 1;
-    if (dailyHistory != null) {
-        for (String[] r : dailyHistory) {
-            try { double v = Double.parseDouble(r[3].replace(",","")); if (v > maxRev) maxRev = v; } catch (Exception ignored) {}
-        }
-    }
-%>
-
-<div class="list-container">
-    <div class="page-title">
-        <h1><%= isAdmin ? "BÁO CÁO TỔNG QUÁT" : "TỔNG KẾT CA LÀM VIỆC" %></h1>
-        <div class="underline"></div>
-    </div>
-
-    <% if (isAdmin) { %>
-    <%-- ════════════ ADMIN TABS ════════════ --%>
-    <div class="report-tabs">
-        <button class="tab-btn active" onclick="switchTab('day',     this)">📅 Theo Ngày</button>
-        <button class="tab-btn"        onclick="switchTab('month',   this)">📆 Tháng Này</button>
-        <button class="tab-btn"        onclick="switchTab('total',   this)">📊 Tổng Hệ Thống</button>
-        <!--<button class="tab-btn"        onclick="switchTab('history', this)">🗓 Lịch Sử 30 Ngày</button>-->
-    </div>
-
-    <%-- ── TAB: THEO NGÀY ── --%>
-    <div id="tab-day" class="tab-pane active">
-        <form action="ReportController" method="POST" class="date-picker-bar">
-            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
-            <label>📅 Chọn ngày:</label>
-            <input type="date" name="selectedDate" value="<%= selectedDate %>" max="<%= todayStr %>">
-            <button type="submit" class="btn-view-date">Xem báo cáo</button>
-            <button type="button" class="btn-today"
-                    onclick="document.querySelector('[name=selectedDate]').value='<%= todayStr %>';this.closest('form').submit()">
-                Hôm nay
-            </button>
-            <span class="selected-date-badge">
-                Đang xem: <strong><%= displayDate %></strong><%= isToday ? " (Hôm nay)" : "" %>
-            </span>
-        </form>
-
-        <div class="kpi-grid-4">
-            <div class="kpi-card green">
-                <div class="kpi-lbl">Tổng đơn ngày này</div>
-                <div class="kpi-val green">${DAY_ORDERS != null ? DAY_ORDERS : 0}</div>
-            </div>
-            <div class="kpi-card orange">
-                <div class="kpi-lbl">Doanh thu</div>
-                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}k</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-lbl">Đã chuyển</div>
-                <div class="kpi-val text-green">${DAY_COMPLETED != null ? DAY_COMPLETED : 0}</div>
-            </div>
-            <div class="kpi-card red">
-                <div class="kpi-lbl">Chưa chuyển</div>
-                <div class="kpi-val red">${DAY_PENDING != null ? DAY_PENDING : 0}</div>
-            </div>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">📊 BÁO CÁO & THỐNG KÊ</h2>
+            <a href="MainController?GoHome=true" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
         </div>
 
-        <%-- Hiệu suất nhân viên ngày chọn --%>
-        <div class="report-card">
-            <h3>👥 Hiệu suất nhân viên — <%= displayDate %></h3>
-            <table class="staff-table">
-                <thead><tr><th>Hạng</th><th>Mã NV</th><th>Họ Tên</th><th style="text-align:center">Số đơn</th><th style="text-align:right">Doanh thu (VNĐ)</th></tr></thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${not empty STAFF_LIST}">
-                            <c:forEach var="s" items="${STAFF_LIST}" varStatus="st">
-                                <tr>
-                                    <td style="text-align:center;font-size:1rem;">
-                                        <c:choose>
-                                            <c:when test="${st.index==0}">🥇</c:when>
-                                            <c:when test="${st.index==1}">🥈</c:when>
-                                            <c:when test="${st.index==2}">🥉</c:when>
-                                            <c:otherwise><span style="color:#ccc">${st.count}</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>${s.userID}</td>
-                                    <td><strong>${s.fullName}</strong></td>
-                                    <td style="text-align:center;font-weight:700;color:#2980b9">${s.orderCount}</td>
-                                    <td style="text-align:right;color:#27ae60;font-weight:700;">
-                                        <fmt:formatNumber value="${s.revenue}" type="number" groupingUsed="true"/>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise><tr><td colspan="5" class="no-data-row">Không có dữ liệu ngày này.</td></tr></c:otherwise>
-                    </c:choose>
-                </tbody>
-            </table>
-        </div>
-
-        <%-- Danh sách đơn hàng ngày chọn --%>
-        <div class="report-card">
-            <h3>📋 Chi tiết đơn hàng — <%= displayDate %>
-                <span style="float:right;font-size:.8rem;color:#888;font-weight:400;">${DAY_ORDERS != null ? DAY_ORDERS : 0} đơn</span>
-            </h3>
-            <div class="day-orders-wrap">
-                <table class="day-table">
-                    <thead>
-                        <tr>
-                            <th>#</th><th>Mã Đơn</th><th>Tên Hàng</th>
-                            <th>Người Gửi / SĐT</th><th>Trạm Gửi</th>
-                            <th>Người Nhận / SĐT</th><th>Trạm Nhận</th>
-                            <th>NV</th><th>TR</th><th>CT</th>
-                            <th>Cước</th><th>Trạng Thái</th><th>Giờ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty DAY_ORDERS_LIST}">
-                                <c:forEach var="o" items="${DAY_ORDERS_LIST}" varStatus="st">
-                                    <tr>
-                                        <td style="color:#ccc">${st.count}</td>
-                                        <td style="color:#1a73e8;font-weight:700;white-space:nowrap">${o[0]}</td>
-                                        <td style="font-weight:600;text-align:left;white-space:nowrap">${o[1]}</td>
-                                        <td style="text-align:left">${o[3]}<br><small style="color:#aaa">${o[4]}</small></td>
-                                        <td>${o[5]}</td>
-                                        <td style="text-align:left">${o[6]}<br><small style="color:#aaa">${o[7]}</small></td>
-                                        <td>${o[8]}</td>
-                                        <td>${o[9]}</td>
-                                        <td><c:if test="${o[10] ne '-' and not empty o[10]}"><span class="bs bs-tr">${o[10]}K</span></c:if></td>
-                                        <td><c:if test="${o[11] ne '-' and not empty o[11]}"><span class="bs bs-ct">${o[11]}K</span></c:if></td>
-                                        <td style="color:#27ae60;font-weight:700;white-space:nowrap">${o[2]}đ</td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${o[12] eq 'Đã Chuyển'}"><span class="bs bs-ship">✅ Đã Chuyển</span></c:when>
-                                                <c:otherwise><span class="bs bs-wait">⏳ Chưa</span></c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td style="color:#888;font-size:.77rem">${o[14]}</td>
-                                    </tr>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <tr><td colspan="13" class="no-data-row">
-                                    <div style="font-size:2rem;margin-bottom:6px">📭</div>
-                                    Không có đơn hàng nào trong ngày này.
-                                </td></tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <%-- ── TAB: THÁNG NÀY ── --%>
-    <div id="tab-month" class="tab-pane">
-        <div class="kpi-grid-3">
-            <div class="kpi-card green">
-                <div class="kpi-lbl">Đơn tháng ${CURRENT_MONTH}</div>
-                <div class="kpi-val green">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</div>
-            </div>
-            <div class="kpi-card orange">
-                <div class="kpi-lbl">Doanh thu tháng</div>
-                <div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}k</div>
-            </div>
-            <div class="kpi-card red">
-                <div class="kpi-lbl">Chờ xử lý</div>
-                <div class="kpi-val red">${MONTH_PENDING != null ? MONTH_PENDING : 0}</div>
-            </div>
-        </div>
-        <div class="report-card">
-            <h3>📆 Chi tiết tháng ${CURRENT_MONTH}</h3>
-            <div class="stat-row"><span>Tổng đơn nhận:</span><span class="stat-value text-blue">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Đã chuyển:</span><span class="stat-value text-green">${MONTH_COMPLETED != null ? MONTH_COMPLETED : 0}</span></div>
-            <div class="stat-row"><span>Chờ xử lý:</span><span class="stat-value text-red">${MONTH_PENDING != null ? MONTH_PENDING : 0}</span></div>
-            <div class="stat-row"><span>Tổng doanh thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} k</span></div>
-        </div>
-    </div>
-
-    <%-- ── TAB: TỔNG HỆ THỐNG ── --%>
-    <div id="tab-total" class="tab-pane">
-        <div class="kpi-grid-3">
-            <div class="kpi-card"><div class="kpi-lbl">Tổng đơn</div><div class="kpi-val">${TOTAL_ORDERS != null ? TOTAL_ORDERS : 0}</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Tổng doanh thu</div><div class="kpi-val green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0}k</div></div>
-            <div class="kpi-card red"><div class="kpi-lbl">Tổng chờ xử lý</div><div class="kpi-val red">${PENDING_ORDERS != null ? PENDING_ORDERS : 0}</div></div>
-        </div>
-        <div class="report-card">
-            <h3>📊 Tổng quan toàn hệ thống</h3>
-            <div class="stat-row"><span>Tổng đơn hàng:</span><span class="stat-value">${TOTAL_ORDERS != null ? TOTAL_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Đã chuyển thành công:</span><span class="stat-value text-green">${COMPLETED_ORDERS != null ? COMPLETED_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Đang chờ xử lý:</span><span class="stat-value text-red">${PENDING_ORDERS != null ? PENDING_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Đơn hàng hôm nay:</span><span class="stat-value text-blue">${TODAY_ORDERS != null ? TODAY_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Doanh thu hôm nay:</span><span class="stat-value text-orange">${TODAY_REVENUE != null ? TODAY_REVENUE : 0} k</span></div>
-            <div class="stat-row"><span>Tổng doanh thu toàn bộ:</span><span class="stat-value text-green">${TOTAL_REVENUE != null ? TOTAL_REVENUE : 0} k</span></div>
-        </div>
-    </div>
-
-    <%-- ── TAB: LỊCH SỬ 30 NGÀY ── --%>
-<!--    <div id="tab-history" class="tab-pane">
-        <div class="report-card">
-            <h3>🗓 Lịch sử doanh thu 30 ngày gần nhất
-                <span style="float:right;font-size:.76rem;color:#888;font-weight:400;">
-                    💡 Nhấn vào dòng bất kỳ để xem chi tiết đơn hàng ngày đó
-                </span>
-            </h3>
-            <div style="overflow-x:auto;">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>#</th><th>Ngày</th>
-                            <th style="text-align:center">Số Đơn</th>
-                            <th>Doanh Thu</th>
-                            <th>Biểu Đồ</th>
-                            <th style="text-align:center">Đã Chuyển</th>
-                            <th>Xem Chi Tiết</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%
-                            if (dailyHistory != null && !dailyHistory.isEmpty()) {
-                                int idx = 1;
-                                for (String[] row : dailyHistory) {
-                                    boolean isTodayRow = todayStr.equals(row[1]);
-                                    boolean isSelRow   = selectedDate.equals(row[1]);
-                                    double  rev = 0;
-                                    try { rev = Double.parseDouble(row[3].replace(",","")); } catch (Exception ig) {}
-                                    int pct = (int)(rev / maxRev * 100);
-                                    String rc = isSelRow ? "row-selected" : (isTodayRow ? "row-today" : "");
-                        %>
-                        <tr class="<%= rc %>" onclick="goToDay('<%= row[1] %>')">
-                            <td style="color:#ccc"><%= idx++ %></td>
-                            <td>
-                                <strong><%= row[0] %></strong>
-                                <% if (isTodayRow) { %><span class="tag-today">Hôm nay</span><% } %>
-                                <% if (isSelRow && !isTodayRow) { %><span class="tag-sel">Đang xem</span><% } %>
-                            </td>
-                            <td class="cnt-cell"><%= row[2] %></td>
-                            <td class="rev-cell"><%= row[3] %>đ</td>
-                            <td>
-                                <div class="bar-wrap"><div class="bar-fill" style="width:<%= pct %>%"></div></div>
-                                <small style="color:#aaa;margin-left:6px"><%= pct %>%</small>
-                            </td>
-                            <td style="text-align:center;color:#27ae60;font-weight:700"><%= row.length > 4 ? row[4] : "-" %></td>
-                            <td>
-                                <button class="btn-detail"
-                                        onclick="event.stopPropagation();goToDay('<%= row[1] %>')">
-                                    📋 Xem
-                                </button>
-                            </td>
-                        </tr>
-                        <% } } else { %>
-                        <tr><td colspan="7" class="no-data-row">Chưa có dữ liệu.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>-->
-
-    <% } else { %>
-    <%-- ════════════ NHÂN VIÊN TABS ════════════ --%>
-    <div class="report-tabs">
-        <button class="tab-btn active" onclick="switchTab('day',     this)">📅 Theo Ngày</button>
-        <button class="tab-btn"        onclick="switchTab('month',   this)">📆 Tháng Này</button>
-        <button class="tab-btn"        onclick="switchTab('history', this)">🗓 Lịch Sử</button>
-    </div>
-
-    <%-- ── TAB: THEO NGÀY (nhân viên) ── --%>
-    <div id="tab-day" class="tab-pane active">
-        <form action="ReportController" method="POST" class="date-picker-bar">
-            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
-            <label>📅 Chọn ngày:</label>
-            <input type="date" name="selectedDate" value="<%= selectedDate %>" max="<%= todayStr %>">
-            <button type="submit" class="btn-view-date">Xem báo cáo</button>
-            <button type="button" class="btn-today"
-                    onclick="document.querySelector('[name=selectedDate]').value='<%= todayStr %>';this.closest('form').submit()">
-                Hôm nay
-            </button>
-            <span class="selected-date-badge">
-                Đang xem: <strong><%= displayDate %></strong><%= isToday ? " (Hôm nay)" : "" %>
-            </span>
-        </form>
-
-        <div class="kpi-grid-2">
-            <div class="kpi-card green">
-                <div class="kpi-lbl">Đơn nhận ngày này</div>
-                <div class="kpi-val green">${DAY_ORDERS != null ? DAY_ORDERS : 0}</div>
-            </div>
-            <div class="kpi-card orange">
-                <div class="kpi-lbl">Tiền thu ngày này</div>
-                <div class="kpi-val orange">${DAY_REVENUE != null ? DAY_REVENUE : 0}k</div>
-            </div>
-        </div>
-
-        <div class="report-card">
-            <h3>📋 Đơn hàng của tôi — <%= displayDate %>
-                <span style="float:right;font-size:.8rem;color:#888;font-weight:400">${DAY_ORDERS != null ? DAY_ORDERS : 0} đơn</span>
-            </h3>
-            <div class="day-orders-wrap">
-                <table class="day-table">
-                    <thead>
-                        <tr>
-                            <th>#</th><th>Mã Đơn</th><th>Tên Hàng</th>
-                            <th>Người Gửi / SĐT</th><th>Trạm Gửi</th>
-                            <th>Người Nhận / SĐT</th><th>Trạm Nhận</th>
-                            <th>TR</th><th>CT</th>
-                            <th>Trạng Thái</th><th>Giờ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty DAY_ORDERS_LIST}">
-                                <c:forEach var="o" items="${DAY_ORDERS_LIST}" varStatus="st">
-                                    <tr>
-                                        <td style="color:#ccc">${st.count}</td>
-                                        <td style="color:#1a73e8;font-weight:700;white-space:nowrap">${o[0]}</td>
-                                        <td style="font-weight:600;text-align:left;white-space:nowrap">${o[1]}</td>
-                                        <td style="text-align:left">${o[3]}<br><small style="color:#aaa">${o[4]}</small></td>
-                                        <td>${o[5]}</td>
-                                        <td style="text-align:left">${o[6]}<br><small style="color:#aaa">${o[7]}</small></td>
-                                        <td>${o[8]}</td>
-                                        <td><c:if test="${o[10] ne '-' and not empty o[10]}"><span class="bs bs-tr">${o[10]}K</span></c:if></td>
-                                        <td><c:if test="${o[11] ne '-' and not empty o[11]}"><span class="bs bs-ct">${o[11]}K</span></c:if></td>
-                                        
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${o[12] eq 'Đã Chuyển'}"><span class="bs bs-ship">✅ Đã Chuyển</span></c:when>
-                                                <c:otherwise><span class="bs bs-wait">⏳ Chưa</span></c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td style="color:#888;font-size:.77rem">${o[14]}</td>
-                                    </tr>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <tr><td colspan="12" class="no-data-row">
-                                    <div style="font-size:2rem;margin-bottom:6px">📭</div>
-                                    Không có đơn hàng nào trong ngày này.
-                                </td></tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <% if (isToday) { %>
-        <div class="report-card">
-            <h3>🔑 Giao ca hôm nay</h3>
-            <form action="MainController" method="POST">
-                <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
-                <input type="hidden" name="totalOrders" value="${TOTAL_ORDERS}">
-                <label style="font-weight:600;color:#555">Ghi chú bàn giao cho ca sau:</label>
-                <textarea name="shiftNote" class="shift-area"
-                          placeholder="VD: Còn 3 đơn chưa chuyển, xe 50A-502.93 đang trên đường..."></textarea>
-                <div style="margin-top:12px;text-align:right">
-                    <input type="submit" name="SubmitShiftReport" value="✅ Xác nhận & Chốt ca" class="btn-cyan">
+        <c:choose>
+            <%-- ========================== GIAO DIỆN ADMIN ========================== --%>
+            <c:when test="${sessionScope.ROLE eq 'AD'}">
+                <!-- Bộ lọc ngày -->
+                <div class="card report-card mb-4 p-3 shadow-sm border-0 bg-white">
+                    <form action="ReportController" method="GET" class="row align-items-end g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-secondary small">CHỌN NGÀY XEM BÁO CÁO</label>
+                            <input type="date" name="reportDate" class="form-control border-primary" value="${REPORT_DATE}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">🔍 XEM BÁO CÁO</button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="badge bg-light text-dark border p-2">📅 Đang xem dữ liệu ngày: <strong>${REPORT_DATE}</strong></span>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-        <% } %>
+
+                <!-- KPI Admin -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card report-card p-3 text-center border-start border-primary border-4 shadow-sm">
+                            <div class="stat-label">Doanh thu (${REPORT_DATE})</div>
+                            <div class="stat-value text-primary"><fmt:formatNumber value="${REVENUE_DATE_VAL}" type="number" groupingUsed="true"/> K</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card report-card p-3 text-center border-start border-info border-4 shadow-sm">
+                            <div class="stat-label">Số đơn (${REPORT_DATE})</div>
+                            <div class="stat-value text-info">${ORDERS_DATE_VAL}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card report-card p-3 text-center border-start border-success border-4 shadow-sm">
+                            <div class="stat-label">Doanh thu tháng này</div>
+                            <div class="stat-value text-success"><fmt:formatNumber value="${REVENUE_MONTH_VAL}" type="number" groupingUsed="true"/> K</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card report-card p-3 text-center border-start border-warning border-4 shadow-sm">
+                            <div class="stat-label">NV đang làm việc</div>
+                            <div class="stat-value text-warning">${ACTIVE_STAFF_COUNT}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <!-- Biểu đồ doanh thu -->
+                    <div class="col-md-8">
+                        <div class="card report-card p-4 h-100">
+                            <h5 class="fw-bold mb-3">Tăng trưởng doanh thu (7 ngày)</h5>
+                            <canvas id="adminRevenueChart" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                    <!-- Hiệu suất nhân viên -->
+                    <div class="col-md-4">
+                        <div class="card report-card p-4 h-100">
+                            <h5 class="fw-bold mb-3">Hiệu suất hôm nay</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr><th>Nhân viên</th><th class="text-end">Đơn</th><th class="text-end">Tiền</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="p" items="${STAFF_PERFORMANCE}">
+                                            <tr class="${SELECTED_STAFF_ID eq p.staffID ? 'table-primary' : ''}">
+                                                <td>
+                                                    <a href="ReportController?targetStaffID=${p.staffID}" class="staff-link fw-bold">
+                                                        ${p.staffName}
+                                                    </a>
+                                                    <small class="d-block ${p.pendingOrders == 1 ? 'text-success' : 'text-muted'}">
+                                                        ${p.pendingOrders == 1 ? '● Đang làm' : '○ Nghỉ'}
+                                                    </small>
+                                                </td>
+                                                <td class="text-end">${p.totalOrders}</td>
+                                                <td class="text-end text-success fw-bold"><fmt:formatNumber value="${p.totalRevenue}" type="number" groupingUsed="true"/> K</td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="small text-muted mt-2"><i>* Nhấn vào tên nhân viên để xem chi tiết ca làm.</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <%-- Chi tiết lịch sử ca khi Admin chọn NV --%>
+                <c:if test="${not empty SELECTED_STAFF_ID}">
+                    <div class="card report-card p-4 mt-4 bg-white border-top border-primary border-5 shadow">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-primary mb-0">📜 LỊCH SỬ LÀM VIỆC: ${SELECTED_STAFF_ID}</h5>
+                            <a href="ReportController" class="btn btn-sm btn-close"></a>
+                        </div>
+                        <%@include file="includes/shift_history_table.jsp" %>
+                    </div>
+                </c:if>
+            </c:when>
+
+            <%-- ========================== GIAO DIỆN NHÂN VIÊN ========================== --%>
+            <c:otherwise>
+                <ul class="nav nav-tabs mb-4" id="staffReportTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link ${empty VIEW_SHIFT_ID ? 'active' : ''}" id="current-tab" data-bs-toggle="tab" data-bs-target="#current" type="button">Ca Hiện Tại</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link ${not empty VIEW_SHIFT_ID ? 'active' : ''}" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">Lịch Sử Ca</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="staffReportTabContent">
+                    <!-- Tab: Ca Hiện Tại -->
+                    <div class="tab-pane fade ${empty VIEW_SHIFT_ID ? 'show active' : ''}" id="current" role="tabpanel">
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.CURRENT_SHIFT}">
+                                <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                    <span>🟢 Bạn đang trong ca làm việc số <strong>#${sessionScope.CURRENT_SHIFT.shiftID}</strong> (Bắt đầu: ${sessionScope.CURRENT_SHIFT.startTime})</span>
+                                    <a href="MainController?EndShift=true&action=end" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận kết ca?')">Kết thúc ca</a>
+                                </div>
+                                <div class="row g-4">
+                                    <div class="col-md-3">
+                                        <div class="card report-card p-4 text-center border-bottom border-success border-3">
+                                            <div class="stat-label">Đã giao thành công</div>
+                                            <div class="stat-value text-success">${SHIFT_SUMMARY.deliveredOrders}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card report-card p-4 text-center border-bottom border-primary border-3">
+                                            <div class="stat-label">Đang đi giao</div>
+                                            <div class="stat-value text-primary">${SHIFT_SUMMARY.deliveringOrders}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card report-card p-4 text-center border-bottom border-warning border-3">
+                                            <div class="stat-label">Chờ xử lý</div>
+                                            <div class="stat-value text-warning">${SHIFT_SUMMARY.pendingOrders}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card report-card p-4 text-center border-bottom border-danger border-3">
+                                            <div class="stat-label">Doanh thu tạm tính</div>
+                                            <div class="stat-value text-danger"><fmt:formatNumber value="${SHIFT_SUMMARY.totalRevenue}" type="number" groupingUsed="true"/> K</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="text-center py-5">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" width="100" class="mb-3 opacity-50">
+                                    <h4 class="text-muted">Bạn chưa bắt đầu ca làm việc nào.</h4>
+                                    <a href="MainController?StartShift=true&action=start" class="btn btn-primary mt-3 px-4 py-2">Bắt đầu ca ngay</a>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <!-- Tab: Lịch Sử Ca -->
+                    <div class="tab-pane fade ${not empty VIEW_SHIFT_ID ? 'show active' : ''}" id="history" role="tabpanel">
+                        <div class="card report-card p-4">
+                            <h5 class="fw-bold mb-3">20 Ca làm việc gần nhất</h5>
+                            <%@include file="includes/shift_history_table.jsp" %>
+                        </div>
+                    </div>
+                </div>
+            </c:otherwise>
+        </c:choose>
     </div>
 
-    <%-- ── TAB: THÁNG NÀY (nhân viên) ── --%>
-    <div id="tab-month" class="tab-pane">
-        <div class="kpi-grid-2">
-            <div class="kpi-card green"><div class="kpi-lbl">Đơn tháng ${CURRENT_MONTH}</div><div class="kpi-val green">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Doanh thu tháng</div><div class="kpi-val orange">${MONTH_REVENUE != null ? MONTH_REVENUE : 0}k</div></div>
-        </div>
-        <div class="report-card">
-            <h3>📆 Kết quả tháng ${CURRENT_MONTH}</h3>
-            <div class="stat-row"><span>Tổng đơn tháng này:</span><span class="stat-value text-blue">${MONTH_ORDERS != null ? MONTH_ORDERS : 0}</span></div>
-            <div class="stat-row"><span>Tổng tiền thu:</span><span class="stat-value text-green">${MONTH_REVENUE != null ? MONTH_REVENUE : 0} k</span></div>
-        </div>
-    </div>
-
-    <%-- ── TAB: LỊCH SỬ (nhân viên) ── --%>
-    <div id="tab-history" class="tab-pane">
-        <div class="report-card">
-            <h3>🗓 Lịch sử làm việc của tôi
-                <span style="float:right;font-size:.76rem;color:#888;font-weight:400">💡 Nhấn dòng để xem chi tiết</span>
-            </h3>
-            <div style="overflow-x:auto;">
-                <table class="history-table">
-                    <thead>
-                        <tr><th>#</th><th>Ngày</th><th style="text-align:center">Số Đơn</th><th>Doanh Thu</th><th>Biểu Đồ</th><th>Xem</th></tr>
-                    </thead>
-                    <tbody>
-                        <%
-                            if (dailyHistory != null && !dailyHistory.isEmpty()) {
-                                int idx2 = 1;
-                                for (String[] row : dailyHistory) {
-                                    boolean isTR = todayStr.equals(row[1]);
-                                    boolean isSR = selectedDate.equals(row[1]);
-                                    double rv2 = 0;
-                                    try { rv2 = Double.parseDouble(row[3].replace(",","")); } catch (Exception ig){}
-                                    int pct2 = (int)(rv2 / maxRev * 100);
-                                    String rc2 = isSR ? "row-selected" : (isTR ? "row-today" : "");
-                        %>
-                        <tr class="<%= rc2 %>" onclick="goToDay('<%= row[1] %>')">
-                            <td style="color:#ccc"><%= idx2++ %></td>
-                            <td>
-                                <strong><%= row[0] %></strong>
-                                <% if (isTR) { %><span class="tag-today">Hôm nay</span><% } %>
-                                <% if (isSR && !isTR) { %><span class="tag-sel">Đang xem</span><% } %>
-                            </td>
-                            <td class="cnt-cell"><%= row[2] %></td>
-                            <td class="rev-cell"><%= row[3] %>đ</td>
-                            <td>
-                                <div class="bar-wrap"><div class="bar-fill" style="width:<%= pct2 %>%"></div></div>
-                            </td>
-                            <td>
-                                <button class="btn-detail" onclick="event.stopPropagation();goToDay('<%= row[1] %>')">📋 Xem</button>
-                            </td>
-                        </tr>
-                        <% } } else { %>
-                        <tr><td colspan="6" class="no-data-row">Chưa có dữ liệu.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <% } %>
-
-    <div style="text-align:center;margin-top:30px;">
-        <form action="MainController" method="POST">
-            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
-            <input type="submit" name="GoHome" value="⬅ Quay lại Trang chủ" class="btn-home">
-        </form>
-    </div>
-</div>
-
-<script>
-    function switchTab(id, btn) {
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        btn.classList.add('active');
-    }
-
-    // Chuyển sang tab "Theo Ngày" và load ngày được chọn
-    function goToDay(dateStr) {
-        const f = document.createElement('form');
-        f.method = 'POST'; f.action = 'ReportController';
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden'; csrf.name = 'csrfToken'; csrf.value = '${sessionScope.CSRF_TOKEN}';
-        f.appendChild(csrf);
-        const i = document.createElement('input');
-        i.type = 'hidden'; i.name = 'selectedDate'; i.value = dateStr;
-        f.appendChild(i); document.body.appendChild(f); f.submit();
-    }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        <c:if test="${sessionScope.ROLE eq 'AD'}">
+        const ctx = document.getElementById('adminRevenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [<c:forEach var="label" items="${CHART_DATA.chartLabels}" varStatus="loop">'${label}'${!loop.last ? ',' : ''}</c:forEach>],
+                datasets: [{
+                    label: 'Doanh thu (K)',
+                    data: [<c:forEach var="val" items="${CHART_DATA.chartValues}" varStatus="loop">${val}${!loop.last ? ',' : ''}</c:forEach>],
+                    borderColor: '#0d6efd', backgroundColor: 'rgba(13, 110, 253, 0.1)', fill: true, tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return value.toLocaleString('vi-VN') + ' K'; } } } }
+            }
+        });
+        </c:if>
+    </script>
     <%@include file="includes/footer.jsp" %>
 </body>
 </html>

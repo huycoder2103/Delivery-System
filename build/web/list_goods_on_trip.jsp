@@ -54,7 +54,7 @@
                         <td><%= o.getReceiverName() %></td>
                         <td><%= o.getReceiverPhone() %></td>
                         <td><span class="badge badge-info"><%= o.getReceiveStation() %></span></td>
-                        <td style="color: #27ae60; font-weight: 700;"><%= String.format("%,.0f", o.getAmount()) %>đ</td>
+                        <td style="color: #27ae60; font-weight: 700;"><%= String.format("%,.0f", o.getAmount()) %>k</td>
                         <td style="font-size: 0.8rem; color: #888; max-width: 200px;"><%= o.getNote() != null ? o.getNote() : "-" %></td>
                     </tr>
                     <% } } else { %>

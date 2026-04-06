@@ -98,7 +98,12 @@ public class MainController extends HttpServlet {
             } else if (request.getParameter("SaveUser") != null) {
                 url = "CreateUserController";
 
-            // ── 7. Feedback & Hướng dẫn ──────────────────────────────────
+            // ── 7. Ca làm việc (Shift) ───────────────────────────────────
+            } else if (request.getParameter("StartShift") != null
+                    || request.getParameter("EndShift") != null) {
+                url = "ShiftController";
+
+            // ── 8. Feedback & Hướng dẫn ──────────────────────────────────
             } else if (request.getParameter("ViewAbout") != null) {
                 url = "AboutController";
 

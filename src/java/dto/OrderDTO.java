@@ -28,6 +28,7 @@ public class OrderDTO implements Serializable {
     private String tripID;
     private String note;
     private String shipStatus;
+    private int shiftID;
 
     public OrderDTO() {
         this.shipStatus = "Chưa Chuyển";
@@ -64,6 +65,17 @@ public class OrderDTO implements Serializable {
              receiverName, receiverPhone, receiveStation, staffInput, staffReceive,
              tr, ct, receiveDate);
         this.note = note;
+    }
+
+    public OrderDTO(String orderID, String itemName, double amount,
+                    String senderName, String senderPhone, String sendStation,
+                    String receiverName, String receiverPhone, String receiveStation,
+                    String staffInput, String staffReceive,
+                    String tr, String ct, String receiveDate, String note, int shiftID) {
+        this(orderID, itemName, amount, senderName, senderPhone, sendStation,
+             receiverName, receiverPhone, receiveStation, staffInput, staffReceive,
+             tr, ct, receiveDate, note);
+        this.shiftID = shiftID;
     }
 
     public String getOrderID()                  { return orderID; }
@@ -119,4 +131,7 @@ public class OrderDTO implements Serializable {
     /** "Chưa Chuyển" hoặc "Đã Chuyển" */
     public String getShipStatus()               { return shipStatus; }
     public void   setShipStatus(String v)       { this.shipStatus = (v != null ? v : "Chưa Chuyển"); }
+
+    public int    getShiftID()                  { return shiftID; }
+    public void   setShiftID(int v)             { this.shiftID = v; }
 }
